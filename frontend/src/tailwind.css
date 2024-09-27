@@ -47,12 +47,18 @@
     @apply font-bold text-6xl text-primary-foreground;
   }
   h2 {
-    @apply font-bold text-2xl text-primary-foreground;
+    @apply font-bold text-4xl text-primary-foreground;
   }
   h3 {
-    @apply text-primary-foreground;
+    @apply text-lg text-primary-foreground;
+  }
+  h4 {
+    @apply text-muted-foreground;
   }
   p {
-    @apply text-muted-foreground;
+    @apply text-sm text-muted-foreground;
+  }
+  .lucide {
+    @apply text-primary-foreground;
   }
 }

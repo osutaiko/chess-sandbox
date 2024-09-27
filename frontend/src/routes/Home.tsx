@@ -10,7 +10,7 @@ const Home = () => {
   const [gameLink, setGameLink] = useState("");
 
   const extractGameIdFromLink = (link: string) => {
-    const regex = /chess\.com\/game\/(live|daily)\/(\d+)/;
+    const regex = /chess\.com\/.*?(live|daily)\/(\d+)/;
     const match = link.match(regex);
     if (match) {
       return {
@@ -40,7 +40,7 @@ const Home = () => {
   };
 
   return (
-    <div className="flex flex-grow flex-col gap-16 items-center justify-center w-full h-full">
+    <div className="flex flex-col gap-16 self-center items-center w-full h-full">
       <div className="flex flex-col gap-6">
         <h1 className="text-center">Pawnpulse</h1>
         <p className="text-center">Discover your unique chess playstyle in a single click</p>
@@ -48,11 +48,11 @@ const Home = () => {
       <div className="flex flex-col gap-6 w-1/2">
         <div className="flex flex-col gap-2">
           <h3>Enter your Chess.com username:</h3>
-          <div className="flex flex-row gap-1">
+          <div className="flex flex-row gap-2">
             <Input
               placeholder={defaultUsername}
               value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ""))}
+              onChange={(e) => setUsername(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   onUsernameSubmit();
@@ -64,7 +64,7 @@ const Home = () => {
         </div>
         <div className="flex flex-col gap-2">
           <h3>... or a game link for review:</h3>
-          <div className="flex flex-row gap-1">
+          <div className="flex flex-row gap-2">
             <Input
               placeholder={defaultGameLink}
               value={gameLink}
