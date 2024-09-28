@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Timer, Zap, TrainFront, Sun } from "lucide-react";
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp * 1000);
@@ -7,9 +8,16 @@ const formatDate = (timestamp) => {
 };
 
 const UserRatingCard = ({ title, data, isSelected, onClick }) => {
+  const timeControlIcons = {
+    Rapid: <Timer />,
+    Blitz: <Zap />,
+    Bullet: <TrainFront />,
+    Daily: <Sun />,
+  };
+
   if (title === "All") {
     return (
-      <Card onClick={onClick} className={`select-none cursor-pointer ${isSelected ? "bg-secondary" : ""}`}>
+      <Card onClick={onClick} className={`hover:bg-secondary select-none cursor-pointer ${isSelected ? "bg-secondary" : ""}`}>
         <CardHeader className="flex flex-col justify-center h-full">
           <CardTitle>All</CardTitle>
         </CardHeader>
@@ -20,10 +28,13 @@ const UserRatingCard = ({ title, data, isSelected, onClick }) => {
   return (
     <Card
       onClick={onClick}
-      className={`w-full select-none cursor-pointer ${isSelected ? "bg-secondary" : ""}`}
+      className={`hover:bg-secondary w-full select-none cursor-pointer ${isSelected ? "bg-secondary" : ""}`}
     >
       <CardHeader className="flex flex-row justify-center">
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="flex flex-row gap-2">
+          {timeControlIcons[title]}
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-2">
         {data ? (

@@ -9,6 +9,7 @@ import "./index.css";
 import Layout from "./components/Layout";
 import Home from "./routes/Home";
 import User from "./routes/User";
+import Game from "./routes/Game";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/user/:username",
         element: <User />,
+      },
+      {
+        path: "/game/:type/:gameId",
+        element: <Game />,
       },
     ],
   },

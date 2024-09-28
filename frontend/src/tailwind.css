@@ -58,7 +58,8 @@
   p {
     @apply text-sm text-muted-foreground;
   }
-  .lucide {
-    @apply text-primary-foreground;
-  }
+}
+
+.lucide {
+  @apply text-primary-foreground;
 }

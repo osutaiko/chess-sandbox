@@ -15,7 +15,7 @@ app.get("/api/user/:username/basic", async (req, res) => {
       const statsData = await statsResponse.json();
       res.json({ ...profileData, ...statsData });
     } else {
-      res.status(500).json({ error: "User doesn't exist" })
+      res.status(404).json({ error: "User doesn't exist" })
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch user data" });

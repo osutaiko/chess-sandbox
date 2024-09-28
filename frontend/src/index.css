@@ -727,10 +727,6 @@ p {
   justify-content: space-between;
 }
 
-.gap-1 {
-  gap: 0.25rem;
-}
-
 .gap-12 {
   gap: 3rem;
 }
@@ -993,6 +989,10 @@ p {
   font-weight: normal;
 
   font-style: normal;
+}
+
+.lucide {
+  color: hsl(var(--primary-foreground));
 }
 
 .file\:border-0::file-selector-button {

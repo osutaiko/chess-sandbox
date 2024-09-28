@@ -8,12 +8,12 @@ const Layout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {location.pathname === "/" ?
-        <header className="fixed top-0 right-0 p-6">
+        <header className="fixed top-0 right-0 p-8">
           <Link to="https://github.com/osutaiko/pawn-pulse">
             <Github />
           </Link>
         </header> :   
-        <header className="flex flex-col px-6 py-4 items-center">
+        <header className="flex flex-col p-8 items-center">
           <div className="flex flex-row justify-between items-center w-full max-w-screen-xl">
             <Link to="/" className="flex flex-row gap-2">
               <Activity />
@@ -25,7 +25,7 @@ const Layout = () => {
           </div>
         </header>
       }
-      <main className="flex flex-grow flex-col px-6 py-28 items-center">
+      <main className="flex flex-grow flex-col px-8 py-28 items-center">
         <div className="flex flex-grow w-full max-w-screen-xl">
           <Outlet />
         </div>
