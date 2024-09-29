@@ -608,7 +608,7 @@ h3 {
 }
 
 h4 {
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--primary-foreground));
 }
 
 p {
@@ -657,6 +657,10 @@ p {
   height: 7rem;
 }
 
+.h-5 {
+  height: 1.25rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -675,6 +679,10 @@ p {
 
 .w-1\/2 {
   width: 50%;
+}
+
+.w-1\/4 {
+  width: 25%;
 }
 
 .w-10 {
@@ -739,8 +747,16 @@ p {
   gap: 0.5rem;
 }
 
+.gap-3 {
+  gap: 0.75rem;
+}
+
 .gap-4 {
   gap: 1rem;
+}
+
+.gap-5 {
+  gap: 1.25rem;
 }
 
 .gap-6 {
@@ -819,12 +835,25 @@ p {
   background-color: hsl(var(--primary));
 }
 
+.bg-red-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 202 202 / var(--tw-bg-opacity));
+}
+
 .bg-secondary {
   background-color: hsl(var(--secondary));
 }
 
+.p-1 {
+  padding: 0.25rem;
+}
+
 .p-6 {
   padding: 1.5rem;
+}
+
+.p-8 {
+  padding: 2rem;
 }
 
 .px-2\.5 {
@@ -842,11 +871,6 @@ p {
   padding-right: 1rem;
 }
 
-.px-6 {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
 .px-8 {
   padding-left: 2rem;
   padding-right: 2rem;
@@ -857,19 +881,14 @@ p {
   padding-bottom: 0.125rem;
 }
 
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-}
-
-.py-28 {
-  padding-top: 7rem;
-  padding-bottom: 7rem;
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 
 .pt-0 {
@@ -1042,6 +1061,10 @@ p {
 
 .hover\:bg-primary\/90:hover {
   background-color: hsl(var(--primary) / 0.9);
+}
+
+.hover\:bg-secondary:hover {
+  background-color: hsl(var(--secondary));
 }
 
 .hover\:bg-secondary\/80:hover {

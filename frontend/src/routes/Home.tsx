@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 
 const Home = () => {
   const defaultUsername = "MagnusCarlsen";
-  const defaultGameLink = "https://www.chess.com/game/live/121025418733?username=hikaru";
+  const defaultGameLink = "https://www.chess.com/game/live/6347929590?username=turbofisto";
   const [username, setUsername] = useState("");
   const [gameLink, setGameLink] = useState("");
 
   const extractGameIdFromLink = (link: string) => {
-    const regex = /chess\.com\/.*?(live|daily)\/(\d+)/;
+    const regex = /chess\.com\/.*?(live|daily|computer)\/(\d+)/;
     const match = link.match(regex);
     if (match) {
       return {
@@ -33,6 +33,9 @@ const Home = () => {
   const onGameLinkSubmit = () => {
     const gameInfo = extractGameIdFromLink(gameLink || defaultGameLink);
     if (gameInfo) {
+      if (gameInfo.type === "computer") {
+        alert("Games with computers are not supported.");
+      }
       window.location.href = `/game/${gameInfo.type}/${gameInfo.id}`;
     } else {
       alert("Please enter a valid Chess.com game link.");

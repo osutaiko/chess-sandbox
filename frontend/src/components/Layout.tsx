@@ -14,7 +14,7 @@ const Layout = () => {
           </Link>
         </header> :   
         <header className="flex flex-col p-8 items-center">
-          <div className="flex flex-row justify-between items-center w-full max-w-screen-xl">
+          <div className="flex flex-row justify-between items-center w-full max-w-screen-2xl">
             <Link to="/" className="flex flex-row gap-2">
               <Activity />
               <h3>Pawnpulse</h3>
@@ -25,8 +25,8 @@ const Layout = () => {
           </div>
         </header>
       }
-      <main className="flex flex-grow flex-col px-8 py-28 items-center">
-        <div className="flex flex-grow w-full max-w-screen-xl">
+      <main className="flex flex-grow flex-col px-8 items-center">
+        <div className="flex flex-grow w-full max-w-screen-2xl">
           <Outlet />
         </div>
       </main>

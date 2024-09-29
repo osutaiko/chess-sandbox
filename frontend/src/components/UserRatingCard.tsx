@@ -1,13 +1,9 @@
+import { formatDate } from "@/lib/utils";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Timer, Zap, TrainFront, Sun } from "lucide-react";
 
-const formatDate = (timestamp) => {
-  const date = new Date(timestamp * 1000);
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
-};
-
-const UserRatingCard = ({ title, data, isSelected, onClick }) => {
+const UserRatingCard = ({ title, user, isSelected, onClick }) => {
   const timeControlIcons = {
     Rapid: <Timer />,
     Blitz: <Zap />,
@@ -37,13 +33,13 @@ const UserRatingCard = ({ title, data, isSelected, onClick }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-2">
-        {data ? (
+        {user ? (
           <>
-            <h2>{data.last.rating}</h2>
-            <p>Highest: {data.best.rating} ({formatDate(data.best.date)})</p>
+            <h2>{user.last.rating}</h2>
+            <p>Highest: {user.best.rating} ({formatDate(user.best.date, false)})</p>
             <div className="flex flex-col items-center">
-              <h3>{data.record.win}W - <span className="text-muted-foreground">{data.record.draw}D</span> - {data.record.loss}L</h3>
-              <p>({data.record.win + data.record.draw + data.record.loss} games)</p>
+              <h3>{user.record.win}W - <span className="text-muted-foreground">{user.record.draw}D</span> - {user.record.loss}L</h3>
+              <p>({user.record.win + user.record.draw + user.record.loss} games)</p>
             </div>
           </>
         ) : (

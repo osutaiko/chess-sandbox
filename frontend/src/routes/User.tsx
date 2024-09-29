@@ -6,7 +6,7 @@ import UserRatingCard from "@/components/UserRatingCard";
 import { Badge } from "@/components/ui/badge";
 
 import ChessComAvatarFallback from "/src/assets/images/chess-com-avatar-fallback.png";
-import InternationalFlagIcon from "/src/assets/images/international-flag.jpg"
+import InternationalFlagIcon from "/src/assets/images/international-flag.jpg";
 
 const User = () => {
   const { username } = useParams();
@@ -59,7 +59,7 @@ const User = () => {
   }
 
   return (
-    <div className="flex flex-col gap-12 w-full">
+    <div className="flex flex-col gap-8 w-full">
       <div className="flex flex-row gap-6">
         <img
           alt={`Avatar of ${username}`}
@@ -87,7 +87,7 @@ const User = () => {
           <UserRatingCard
             key={title}
             title={title}
-            data={user[`chess_${title.toLowerCase()}`]}
+            user={user[`chess_${title.toLowerCase()}`]}
             isSelected={selectedCard === title}
             onClick={() => setSelectedCard(title)}
           />
