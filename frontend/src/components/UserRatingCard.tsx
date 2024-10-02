@@ -46,8 +46,10 @@ const UserRatingCard = ({ title, user, isSelected, onClick }) => {
           <>
             <h2>-</h2>
             <p>Highest: -</p>
-            <h3>0W - 0D - 0L</h3>
-            <p>(0 games)</p>
+            <div className="flex flex-col items-center">
+              <h3>0W - 0D - 0L</h3>
+              <p>(0 games)</p>
+            </div>
           </>
         )}
       </CardContent>

@@ -27,5 +27,5 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src", "public/stockfish-16.1-lite-single.js"]
 }

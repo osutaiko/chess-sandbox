@@ -9,6 +9,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'GeistMono';
+  src: url("/src/assets/fonts/GeistMono-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 @layer base {
   :root {
     --background: 325 27% 10%;
@@ -50,14 +57,23 @@
     @apply font-bold text-4xl text-primary-foreground;
   }
   h3 {
-    @apply text-lg text-primary-foreground;
+    @apply text-primary-foreground;
   }
   h4 {
-    @apply text-primary-foreground;
+    @apply text-sm text-primary-foreground;
   }
   p {
     @apply text-sm text-muted-foreground;
   }
+  small {
+    font-size: 0.625rem;
+    line-height: 0.75rem;
+    @apply text-muted-foreground;
+  }
+}
+
+.code, pre, .font-mono {
+  font-family: 'Geist-Mono', monospace;
 }
 
 .lucide {

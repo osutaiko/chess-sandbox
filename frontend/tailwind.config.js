@@ -53,6 +53,7 @@ module.exports = {
       },
       fontFamily: {
         geist: ['Geist', 'sans-serif'],
+        mono: ['GeistMono', 'monospace'],
       },
       keyframes: {
         "accordion-down": {

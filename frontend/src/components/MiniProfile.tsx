@@ -1,8 +1,12 @@
-import ChessComAvatarFallback from "/src/assets/images/chess-com-avatar-fallback.png";
+import { Chess } from "chess.js";
 
 import { Badge } from "@/components/ui/badge";
 
-const MiniProfile = ({ user, color }) => {
+import ChessComAvatarFallback from "/src/assets/images/chess-com-avatar-fallback.png";
+
+const MiniProfile = ({ user, ratingChange, fen }) => {
+  const chess = new Chess(fen);
+
   return (
     <div className="flex flex-row gap-3">
       <img
@@ -13,9 +17,10 @@ const MiniProfile = ({ user, color }) => {
       <div className="flex flex-col">
         <div className="flex flex-row gap-2 items-center">
           {user.chessTitle && <Badge className="h-5 p-1 rounded-sm">{user.chessTitle}</Badge>}
-          <h4>{user.username}</h4>
-          <p>({user.rating})</p>
+          <h3>{user.username}</h3>
+          <p>({ratingChange >= 0 ? `+${ratingChange}` : ratingChange} → {user.rating})</p>
         </div>
+        <div className="flex flex-row"></div>
       </div>
     </div>
   );

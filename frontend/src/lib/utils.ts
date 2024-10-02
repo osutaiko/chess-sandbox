@@ -18,7 +18,7 @@ export function formatTime(time, padMinutes = false) {
   const tenths = Math.round(time % 10);
 
   if (padMinutes) {
-    return `${minutes}:${(seconds < 10) ? "0" : ""}${seconds}${time < 100 ? `.${tenths}` : ""}`;
+    return `${minutes}:${(seconds < 10) ? "0" : ""}${seconds}${time < 600 ? `.${tenths}` : ""}`;
   }
   return `${minutes ? `${minutes}:` : ""}${(minutes && seconds < 10) ? "0" : ""}${seconds}.${tenths}`;
 }
@@ -41,4 +41,27 @@ export function tcnToAlgebraics(tcn) {
   let chess = new Chess();
   moveList.forEach((move) => chess.move(move));
   return chess.pgn().replace(/\d+\.\s*/g, '').split(' ');
+}
+
+export function formatEval(cp, mateIn) {
+  if (cp !== null) {
+    return `${cp >= 0 ? "+" : ""}${(cp / 100).toFixed(2)}`;
+  }
+  if (mateIn !== null) {
+    return `${mateIn > 0 ? "+" : "-"}M${Math.abs(mateIn)}`;
+  }
+}
+
+export function evalToWhiteWinProb(cp, mateIn) {
+  if (cp !== null) {
+    return 1 / (1 + Math.exp(-0.0029 * cp));
+  }
+  if (mateIn !== null) {
+    if (mateIn > 0) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+  return -1;
 }
