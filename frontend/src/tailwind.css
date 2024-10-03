@@ -38,6 +38,10 @@
     --input: 325 27% 50%;
     --ring: 325 69% 53%;
     --radius: 0.5rem;
+
+    --inaccuracy: 50 100% 40%;
+    --mistake: 28 80% 50%;
+    --blunder: 0 50% 50%;
   }
 }
 
@@ -54,7 +58,7 @@
     @apply font-bold text-6xl text-primary-foreground;
   }
   h2 {
-    @apply font-bold text-4xl text-primary-foreground;
+    @apply font-bold text-2xl text-primary-foreground;
   }
   h3 {
     @apply text-primary-foreground;

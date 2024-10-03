@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"; 
 
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,7 +17,7 @@ import {
 
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, FlipVertical, Pencil, Share } from "lucide-react";
 
-const GameNavigationInterface = ({ game, moves, moveTimestamps, currentPly, setCurrentPly, isDailyGame, handlePlyNavigation, handleFlipBoardOrientation }) => {
+const GameNavigationInterface = ({ game, moves, moveAnalyses, moveTimestamps, currentPly, setCurrentPly, isDailyGame, handlePlyNavigation, handleFlipBoardOrientation, reportStatus }) => {
   const currentMoveRef = useRef(null);
 
   useEffect(() => {
@@ -53,33 +53,58 @@ const GameNavigationInterface = ({ game, moves, moveTimestamps, currentPly, setC
       <ScrollArea className="flex-grow py-2">
         <div className="grid gap-0.5 px-4 overflow-y-auto">
           {moves.map((move, index) => {
-            if (index % 2 === 0) {
+            const isWhiteMove = index % 2 === 0;
+            const moveNumber = Math.floor(index / 2) + 1;
+
+            if (isWhiteMove) {
+              const nextMove = moves[index + 1]; // Black's move
+              const whiteMoveTime = index > 0 ? formatTime(moveTimestamps[index - 2] - moveTimestamps[index], false) : formatTime(game.baseTime1 - moveTimestamps[0], false);
+              const blackMoveTime = nextMove ? (index > 0 ? formatTime(moveTimestamps[index - 1] - moveTimestamps[index + 1], false) : formatTime(game.baseTime1 - moveTimestamps[1], false)) : "";
+
               return (
                 <div key={index} className="select-none grid grid-cols-[40px_1fr_1fr_0.5fr] gap-1 items-center">
-                  <p>{Math.floor(index / 2) + 1}.</p>
+                  <p>{moveNumber}.</p>
+
+                  {/* White's move */}
                   <h4
                     ref={currentPly === index + 1 ? currentMoveRef : null}
-                    onClick={() => setCurrentPly(index + 1)} className={`hover:bg-accent cursor-pointer px-2 py-1 ${currentPly === index + 1 ? "bg-accent" : ""}`}
+                    onClick={() => setCurrentPly(index + 1)}
+                    className={`hover:bg-accent cursor-pointer px-2 py-1 ${currentPly === index + 1 ? "bg-accent" : ""}`}
                   >
-                    {move}
+                    {move}{" "}
+                    {reportStatus === "complete" && 
+                      <span className={`font-semibold ${getMoveCategoryTextColor(moveAnalyses[index].moveCategory)}`}>
+                        {getMoveCategorySuffix(moveAnalyses[index].moveCategory)}
+                      </span>
+                    }
                   </h4>
-                  {moves[index + 1] ?
+
+                  {/* Black's move */}
+                  {nextMove ? (
                     <h4
                       onClick={() => setCurrentPly(index + 2)}
                       className={`hover:bg-accent cursor-pointer px-2 py-1 ${currentPly === index + 2 ? "bg-accent" : ""}`}
                     >
-                      {moves[index + 1]}
-                    </h4> :
+                      {nextMove}{" "}
+                      {reportStatus === "complete" && 
+                        <span className={`font-semibold ${getMoveCategoryTextColor(moveAnalyses[index + 1].moveCategory)}`}>
+                          {getMoveCategorySuffix(moveAnalyses[index + 1].moveCategory)}
+                        </span>
+                      }
+                    </h4>
+                  ) : (
                     <h4 />
-                  }
+                  )}
+
+                  {/* Timestamps */}
                   <div className="flex flex-col">
-                    <small className="text-end">{index > 0 ? formatTime(moveTimestamps[index - 2] - moveTimestamps[index], false) : formatTime(game.baseTime1 - moveTimestamps[0], false)}</small>
-                    <small className="text-end">{index > 0 ? formatTime(moveTimestamps[index - 1] - moveTimestamps[index + 1], false) : formatTime(game.baseTime1 - moveTimestamps[1], false)}</small>
+                    <small className="text-end">{whiteMoveTime}</small>
+                    {nextMove && <small className="text-end">{blackMoveTime}</small>}
                   </div>
                 </div>
               );
             }
-            // Only render first move of each pair
+
             return null;
           })}
         </div>

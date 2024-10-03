@@ -7,7 +7,7 @@ import { tcnToAlgebraics } from "@/lib/utils";
 
 import GameNavigationInterface from "@/components/GameNavigationInterface";
 import AnalysisInterface from "@/components/AnalysisInterface";
-import GameReviewInterface from "@/components/GameReviewInterface";
+import GameReportInterface from "@/components/GameReportInterface";
 import MiniProfile from "@/components/MiniProfile";
 import ChessClock from "@/components/ChessClock";
 
@@ -23,9 +23,11 @@ const Game = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [moves, setMoves] = useState([]);
+  const [moveAnalyses, setMoveAnalyses] = useState(null);
   const [boardOrientation, setBoardOrientation] = useState("white");
   const [currentPly, setCurrentPly] = useState(0);
   const [fen, setFen] = useState(DEFAULT_POSITION);
+  const [reportStatus, setReportStatus] = useState("idle");
 
   const chessRef = useRef(new Chess());
   const chessboardContainerRef = useRef(null);
@@ -193,12 +195,14 @@ const Game = () => {
       <GameNavigationInterface
         game={game.game}
         moves={moves}
+        moveAnalyses={moveAnalyses}
         moveTimestamps={moveTimestamps}
         currentPly={currentPly}
         setCurrentPly={setCurrentPly}
         isDailyGame={isDailyGame}
         handlePlyNavigation={handlePlyNavigation}
         handleFlipBoardOrientation={handleFlipBoardOrientation}
+        reportStatus={reportStatus}
       />
       <div ref={chessboardContainerRef} className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
         <Card className="flex flex-row items-center justify-between p-2">
@@ -212,14 +216,14 @@ const Game = () => {
         <Card className="flex flex-row items-center justify-between p-2">
           <MiniProfile user={game.players.bottom} ratingChange={game.game.ratingChangeWhite} fen={fen} />
           <ChessClock
-            timeLeft={currentPly < 1 ? game.game.baseTime1 : moveTimestamps[Math.floor((currentPly-1) / 2) * 2]}
+            timeLeft={currentPly < 1 ? game.game.baseTime1 : moveTimestamps[Math.floor((currentPly - 1) / 2) * 2]}
             isToMove={currentPly > 0 && currentPly % 2 === 1}
           />
         </Card>
       </div>
       <div className="flex flex-col gap-4 w-1/3">
         <AnalysisInterface fen={fen} currentPly={currentPly} />
-        <GameReviewInterface moves={moves} />
+        <GameReportInterface moves={moves} currentPly={currentPly} setCurrentPly={setCurrentPly} moveAnalyses={moveAnalyses} setMoveAnalyses={setMoveAnalyses} reportStatus={reportStatus} setReportStatus={setReportStatus} />
       </div>
     </div>
   );

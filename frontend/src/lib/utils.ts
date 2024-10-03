@@ -52,9 +52,9 @@ export function formatEval(cp, mateIn) {
   }
 }
 
-export function evalToWhiteWinProb(cp, mateIn) {
+export function evalToWhiteWinProb({cp, mateIn}) {
   if (cp !== null) {
-    return 1 / (1 + Math.exp(-0.0029 * cp));
+    return 1 / (1 + Math.exp(-0.005 * cp));
   }
   if (mateIn !== null) {
     if (mateIn > 0) {
@@ -63,5 +63,50 @@ export function evalToWhiteWinProb(cp, mateIn) {
       return 0;
     }
   }
-  return -1;
+  return 0.5;
+}
+
+export const getMoveCategoryBgColor = (moveCategory) => {
+  switch (moveCategory) {
+    case "brilliant":
+      return "bg-brilliant";
+    case "blunder":
+      return "bg-blunder";
+    case "mistake":
+      return "bg-mistake";
+    case "inaccuracy":
+      return "bg-inaccuracy";
+    default:
+      return "";
+  }
+}
+
+export const getMoveCategoryTextColor = (moveCategory) => {
+  switch (moveCategory) {
+    case "brilliant":
+      return "text-brilliant";
+    case "blunder":
+      return "text-blunder";
+    case "mistake":
+      return "text-mistake";
+    case "inaccuracy":
+      return "text-inaccuracy";
+    default:
+      return "";
+  }
+}
+
+export const getMoveCategorySuffix = (moveCategory) => {
+  switch (moveCategory) {
+    case "brilliant":
+      return "!!";
+    case "blunder":
+      return "??";
+    case "mistake":
+      return "?";
+    case "inaccuracy":
+      return "?!";
+    default:
+      return "";
+  }
 }

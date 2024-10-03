@@ -84,11 +84,11 @@ const AnalysisInterface = ({ fen, currentPly }) => {
           });
 
           return (
-            <div key={index} className="grid grid-cols-[60px_40px_1fr] gap-3 items-center h-5">
-              <Badge className={`font-mono text-sm p-0 rounded-md block text-center ${(result.scoreCp || result.scoreMate) >= 0 ? "bg-white text-black" : "bg-black text-white"}`}>
+            <div key={index} className="grid grid-cols-[60px_60px_1fr] gap-3 items-center h-5">
+              <Badge className={`font-mono text-sm p-0 block text-center ${(result.scoreCp || result.scoreMate) >= 0 ? "bg-white text-black" : "bg-black text-white"}`}>
                 {formatEval(result.scoreCp, result.scoreMate)}
               </Badge>
-              <h4>{formattedContinuation[0] || "-"}</h4> 
+              <Badge className="block text-center" variant="secondary">{formattedContinuation[0] || "-"}</Badge>
               <p className="whitespace-nowrap overflow-hidden text-ellipsis">{formattedContinuation.slice(1).join(" ") || "-"}</p>
             </div>
           );
