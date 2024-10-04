@@ -16,6 +16,9 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
   const [reportProgress, setReportProgress] = useState(0);
   // "idle", "running", "complete", ("error")
 
+  const [whiteReport, setWhiteReport] = useState({ accuracy: 0, averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
+  const [blackReport, setBlackReport] = useState({ accuracy: 0, averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
+
   const runGameReport = () => {
     setReportStatus("running");
     const engineWorker = new Worker("/stockfish-16.1-lite-single.js");
@@ -71,9 +74,9 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
       let moveCategory, description;
 
       description = "PLACEHOLDER";
-      if (winProbLoss > 0.25) {
+      if (winProbLoss > 0.2) {
         moveCategory = "blunder";
-      } else if (winProbLoss > 0.125) {
+      } else if (winProbLoss > 0.12) {
         moveCategory = "mistake";
       } else if (winProbLoss > 0.05) {
         moveCategory = "inaccuracy";
@@ -86,12 +89,85 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
   
     const analyzeAllMoves = async () => {
       let chess = new Chess(DEFAULT_POSITION);
+
+      let whiteMoveCount = 0;
+      let blackMoveCount = 0;
+      let whiteTotalWinProbLoss = 0;
+      let blackTotalWinProbLoss = 0;
+      let whiteTotalCpLoss = 0;
+      let blackTotalCpLoss = 0;
+
+      let whiteInaccuracyCount = 0;
+      let blackInaccuracyCount = 0;
+      let whiteMistakeCount = 0;
+      let blackMistakeCount = 0;
+      let whiteBlunderCount = 0;
+      let blackBlunderCount = 0;
+
       for (let i = 0; i < moves.length; i++) {
         const analysis = await getMoveAnalysis(chess.fen(), moves[i]);
         setMoveAnalyses((prev) => [...(prev || []), analysis]);
+
+        let cpDiff = 0;
+        if (analysis.evalBeforeMove.cp === null && analysis.evalAfterMove.afterCp === null) {
+    
+          if (analysis.evalBeforeMove.mateIn !== null) {
+            cpDiff = 1000;
+          }
+        } else {
+          cpDiff = analysis.evalBeforeMove.cp - analysis.evalAfterMove.cp;
+        }
+
+        if (i % 2 === 0) {
+          whiteMoveCount++;
+          whiteTotalWinProbLoss += Math.min(analysis.winProbLoss / 0.1, 1);
+          whiteTotalCpLoss += Math.min(Math.max(cpDiff, 0), 1000);
+
+          switch (analysis.moveCategory) {
+            case "inaccuracy":
+              whiteInaccuracyCount++; break;
+            case "mistake":
+              whiteMistakeCount++; break;
+            case "blunder":
+              whiteBlunderCount++; break;
+          }  
+        } else {
+          blackMoveCount++;
+          blackTotalWinProbLoss += Math.min(analysis.winProbLoss / 0.1, 1);
+          blackTotalCpLoss += Math.min(Math.max(-cpDiff, 0), 1000);
+
+          switch (analysis.moveCategory) {
+            case "inaccuracy":
+              blackInaccuracyCount++; break;
+            case "mistake":
+              blackMistakeCount++; break;
+            case "blunder":
+              blackBlunderCount++; break;
+          }
+        }
+
         setReportProgress(i / moves.length * 100);
         chess.move(moves[i]);
       }
+
+      setWhiteReport({
+        accuracy: (1 - whiteTotalWinProbLoss / whiteMoveCount) * 100,
+        averageCpLoss: Math.max(whiteTotalCpLoss / whiteMoveCount, 0),
+        moveCount: whiteMoveCount,
+        inaccuracyCount: whiteInaccuracyCount,
+        mistakeCount: whiteMistakeCount,
+        blunderCount: whiteBlunderCount,
+      });
+
+      setBlackReport({
+        accuracy: (1 - blackTotalWinProbLoss / blackMoveCount) * 100,
+        averageCpLoss: Math.max(blackTotalCpLoss / blackMoveCount, 0),
+        moveCount: blackMoveCount,
+        inaccuracyCount: blackInaccuracyCount,
+        mistakeCount: blackMistakeCount,
+        blunderCount: blackBlunderCount,
+      });
+
       setReportStatus("complete");
       setCurrentPly(0);
     };
@@ -123,7 +199,7 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
                 step={1}
               />
             </div>
-            <Button onClick={() => runGameReport()} className="w-full">
+            <Button onClick={() => runGameReport()} className="w-min">
               Request Game Report
             </Button>
           </>
@@ -143,8 +219,26 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
                 <h2>: {moveAnalyses[currentPly - 1].moveCategory}</h2>
               </div>
             }
-            
-            <h3>Game Accuracy: ASDF</h3>
+            <div className="grid grid-cols-2">
+              <div className="flex flex-col gap-0.5">
+                <h3>White</h3>
+                <p>Accuracy: {whiteReport.accuracy.toFixed(2)}%</p>
+                <p>ACL: {whiteReport.averageCpLoss.toFixed(2)}</p>
+                <p>Move Count: {whiteReport.moveCount}</p>
+                <p>Inaccuracies: {whiteReport.inaccuracyCount}</p>
+                <p>Mistakes: {whiteReport.mistakeCount}</p>
+                <p>Blunders: {whiteReport.blunderCount}</p>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <h3>Black</h3>
+                <p>Accuracy: {blackReport.accuracy.toFixed(2)}%</p>
+                <p>ACL: {blackReport.averageCpLoss.toFixed(2)}</p>
+                <p>Move Count: {blackReport.moveCount}</p>
+                <p>Inaccuracies: {blackReport.inaccuracyCount}</p>
+                <p>Mistakes: {blackReport.mistakeCount}</p>
+                <p>Blunders: {blackReport.blunderCount}</p>
+              </div>
+            </div>
           </>
         }
       </div>

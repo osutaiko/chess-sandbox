@@ -84,7 +84,7 @@ const AnalysisInterface = ({ fen, currentPly }) => {
           });
 
           return (
-            <div key={index} className="grid grid-cols-[60px_60px_1fr] gap-3 items-center h-5">
+            <div key={index} className="grid grid-cols-[60px_70px_1fr] gap-3 items-center h-5">
               <Badge className={`font-mono text-sm p-0 block text-center ${(result.scoreCp || result.scoreMate) >= 0 ? "bg-white text-black" : "bg-black text-white"}`}>
                 {formatEval(result.scoreCp, result.scoreMate)}
               </Badge>

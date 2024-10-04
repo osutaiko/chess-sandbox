@@ -58,8 +58,8 @@ const GameNavigationInterface = ({ game, moves, moveAnalyses, moveTimestamps, cu
 
             if (isWhiteMove) {
               const nextMove = moves[index + 1]; // Black's move
-              const whiteMoveTime = index > 0 ? formatTime(moveTimestamps[index - 2] - moveTimestamps[index], false) : formatTime(game.baseTime1 - moveTimestamps[0], false);
-              const blackMoveTime = nextMove ? (index > 0 ? formatTime(moveTimestamps[index - 1] - moveTimestamps[index + 1], false) : formatTime(game.baseTime1 - moveTimestamps[1], false)) : "";
+              const whiteMoveTime = index > 0 ? formatTime(moveTimestamps[index - 2] - moveTimestamps[index] + (!isDailyGame ? game.timeIncrement1 : 0), false) : formatTime(game.baseTime1 - moveTimestamps[0] + (!isDailyGame ? game.timeIncrement1 : 0), false);
+              const blackMoveTime = nextMove ? (index > 0 ? formatTime(moveTimestamps[index - 1] - moveTimestamps[index + 1] + (!isDailyGame ? game.timeIncrement1 : 0), false) : formatTime(game.baseTime1 - moveTimestamps[1] + (!isDailyGame ? game.timeIncrement1 : 0), false)) : "";
 
               return (
                 <div key={index} className="select-none grid grid-cols-[40px_1fr_1fr_0.5fr] gap-1 items-center">
