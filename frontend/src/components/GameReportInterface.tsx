@@ -11,11 +11,9 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 
-const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, setMoveAnalyses, reportStatus, setReportStatus }) => {
+const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, setMoveAnalyses, reportStatus, setReportStatus }) => {
   const [reportDepth, setReportDepth] = useState(12);
   const [reportProgress, setReportProgress] = useState(0);
-  // "idle", "running", "complete", ("error")
-
   const [whiteReport, setWhiteReport] = useState({ accuracy: 0, averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
   const [blackReport, setBlackReport] = useState({ accuracy: 0, averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
 
@@ -104,8 +102,8 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
       let whiteBlunderCount = 0;
       let blackBlunderCount = 0;
 
-      for (let i = 0; i < moves.length; i++) {
-        const analysis = await getMoveAnalysis(chess.fen(), moves[i]);
+      for (let i = 0; i < game.moves.length; i++) {
+        const analysis = await getMoveAnalysis(chess.fen(), game.moves[i]);
         setMoveAnalyses((prev) => [...(prev || []), analysis]);
 
         let cpDiff = 0;
@@ -146,8 +144,8 @@ const GameReportInterface = ({ moves, currentPly, setCurrentPly, moveAnalyses, s
           }
         }
 
-        setReportProgress(i / moves.length * 100);
-        chess.move(moves[i]);
+        setReportProgress(i / game.moves.length * 100);
+        chess.move(game.moves[i]);
       }
 
       setWhiteReport({

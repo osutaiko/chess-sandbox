@@ -18,7 +18,7 @@ const MiniProfile = ({ user, ratingChange, fen }) => {
         <div className="flex flex-row gap-2 items-center">
           {user.chessTitle && <Badge className="h-5 p-1 rounded-sm">{user.chessTitle}</Badge>}
           <h3>{user.username}</h3>
-          <p>({ratingChange >= 0 ? `+${ratingChange}` : ratingChange} → {user.rating})</p>
+          <p>({ratingChange >= 0 ? `+${ratingChange}` : ratingChange} → {user.ratingAfter})</p>
         </div>
         <div className="flex flex-row"></div>
       </div>

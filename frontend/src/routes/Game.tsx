@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import { Chessboard } from "react-chessboard";
-
-import { tcnToAlgebraics } from "@/lib/utils";
 
 import GameNavigationInterface from "@/components/GameNavigationInterface";
 import AnalysisInterface from "@/components/AnalysisInterface";
@@ -17,12 +15,13 @@ import moveSoundFile from "@/assets/sounds/chess-move.mp3";
 import captureSoundFile from "@/assets/sounds/chess-capture.mp3";
 
 const Game = () => {
-  const { type, gameId } = useParams();
+  const [searchParams] = useSearchParams();
+  const gameUrl = searchParams.get("url");
+
   const [boardWidth, setBoardWidth] = useState(400);
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [moves, setMoves] = useState([]);
   const [moveAnalyses, setMoveAnalyses] = useState(null);
   const [boardOrientation, setBoardOrientation] = useState("white");
   const [currentPly, setCurrentPly] = useState(0);
@@ -34,6 +33,12 @@ const Game = () => {
 
   const moveSound = new Audio(moveSoundFile);
   const captureSound = new Audio(captureSoundFile);
+
+  useEffect(() => {
+    if (gameUrl) {
+      fetchGame();
+    }
+  }, [gameUrl]);
 
   const playMoveSound = (move) => {
     const audio = move.includes("x") ? captureSound : moveSound;
@@ -64,7 +69,7 @@ const Game = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:3000/api/game/${type}/${gameId}`);
+      const response = await fetch(`http://localhost:3000/api/game?url=${encodeURIComponent(gameUrl)}`);
       
       if (!response.ok) {
         throw new Error(response.status === 404 ? 'Game not found' : 'An error occurred');
@@ -72,8 +77,6 @@ const Game = () => {
 
       const data = await response.json();
       setGame(data);
-      const gameMoves = tcnToAlgebraics(data.game.moveList);
-      setMoves(gameMoves);
     } catch (e) {
       setError(e.message);
       setGame(null);
@@ -87,19 +90,12 @@ const Game = () => {
     chess.reset();
 
     for (let i = 0; i < currentPly; i++) {
-      chess.move(moves[i]);
+      chess.move(game.moves[i]);
     }
 
     setFen(chess.fen());
-    if (currentPly > 0) playMoveSound(moves[currentPly - 1]);
-  }, [currentPly, moves]);
-
-  // Hook on load
-  useEffect(() => {
-    if (type && gameId) {
-      fetchGame();
-    }
-  }, [type, gameId]);
+    if (currentPly > 0) playMoveSound(game.moves[currentPly - 1]);
+  }, [currentPly]);
 
   const handleFlipBoardOrientation = () => {
     setBoardOrientation((prevOrientation) => 
@@ -113,20 +109,19 @@ const Game = () => {
         if (currentPly > 0) setCurrentPly(currentPly - 1);
         break;
       case 'right':
-        if (currentPly < moves.length) setCurrentPly(currentPly + 1);
+        if (currentPly < game.moves.length) setCurrentPly(currentPly + 1);
         break;
       case 'start':
         setCurrentPly(0);
         break;
       case 'end':
-        setCurrentPly(moves.length);
+        setCurrentPly(game.moves.length);
         break;
       default:
         break;
     }
   }
 
-  // Keypress handler for arrow keys
   useEffect(() => {
     const chessboardElement = chessboardContainerRef.current;
 
@@ -167,7 +162,7 @@ const Game = () => {
         chessboardElement.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [moves, currentPly]);
+  }, [game, currentPly]);
 
   if (loading) {
     return <h4>Loading...</h4>;
@@ -181,49 +176,45 @@ const Game = () => {
     return <h2>No game data available</h2>;
   }
 
-  const isDailyGame = game.game.hasOwnProperty("daysPerTurn");
-  let moveTimestamps = [];
-  // Checks for daily game
-  if (isDailyGame) {
-    moveTimestamps = game.game.timestamps;
-  } else {
-    moveTimestamps = game.game.moveTimestamps.split(',').map(Number);
-  }
-
   return (
     <div className="flex flex-row gap-5 w-full h-[85vh]">
       <GameNavigationInterface
-        game={game.game}
-        moves={moves}
+        game={game}
         moveAnalyses={moveAnalyses}
-        moveTimestamps={moveTimestamps}
         currentPly={currentPly}
         setCurrentPly={setCurrentPly}
-        isDailyGame={isDailyGame}
         handlePlyNavigation={handlePlyNavigation}
         handleFlipBoardOrientation={handleFlipBoardOrientation}
         reportStatus={reportStatus}
       />
       <div ref={chessboardContainerRef} className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
         <Card className="flex flex-row items-center justify-between p-2">
-          <MiniProfile user={game.players.top} ratingChange={game.game.ratingChangeBlack} fen={fen} />
+          <MiniProfile user={game.players.black} ratingChange={game.players.black.ratingChange} fen={fen} />
           <ChessClock
-            timeLeft={currentPly < 2 ? game.game.baseTime1 : moveTimestamps[Math.floor((currentPly) / 2) * 2 - 1]}
+            timeLeft={currentPly < 2 ? game.timeControl.base : game.timestamps[Math.floor((currentPly) / 2) * 2 - 1]}
             isToMove={currentPly > 0 && currentPly % 2 === 0}
           />
         </Card>
         <Chessboard position={fen} animationDuration={150} boardOrientation={boardOrientation} boardWidth={boardWidth} />
         <Card className="flex flex-row items-center justify-between p-2">
-          <MiniProfile user={game.players.bottom} ratingChange={game.game.ratingChangeWhite} fen={fen} />
+          <MiniProfile user={game.players.white} ratingChange={game.players.white.ratingChange} fen={fen} />
           <ChessClock
-            timeLeft={currentPly < 1 ? game.game.baseTime1 : moveTimestamps[Math.floor((currentPly - 1) / 2) * 2]}
+            timeLeft={currentPly < 1 ? game.timeControl.base : game.timestamps[Math.floor((currentPly - 1) / 2) * 2]}
             isToMove={currentPly > 0 && currentPly % 2 === 1}
           />
         </Card>
       </div>
       <div className="flex flex-col gap-4 w-1/3">
         <AnalysisInterface fen={fen} currentPly={currentPly} />
-        <GameReportInterface moves={moves} currentPly={currentPly} setCurrentPly={setCurrentPly} moveAnalyses={moveAnalyses} setMoveAnalyses={setMoveAnalyses} reportStatus={reportStatus} setReportStatus={setReportStatus} />
+        <GameReportInterface
+          game={game}
+          currentPly={currentPly}
+          setCurrentPly={setCurrentPly}
+          moveAnalyses={moveAnalyses}
+          setMoveAnalyses={setMoveAnalyses}
+          reportStatus={reportStatus}
+          setReportStatus={setReportStatus}
+        />
       </div>
     </div>
   );

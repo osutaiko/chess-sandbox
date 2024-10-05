@@ -9,37 +9,13 @@ const Home = () => {
   const [username, setUsername] = useState("");
   const [gameLink, setGameLink] = useState("");
 
-  const extractGameIdFromLink = (link: string) => {
-    const regex = /chess\.com\/.*?(live|daily|computer)\/(\d+)/;
-    const match = link.match(regex);
-    if (match) {
-      return {
-        // live or daily
-        type: match[1],
-        id: match[2],
-      };
-    }
-    return null;
-  };
-
   const onUsernameSubmit = () => {
-    if (username) {
-      window.location.href = `/user/${username}`;
-    } else {
-      window.location.href = `/user/${defaultUsername}`;
-    }
+    window.location.href = `/user/${username || defaultUsername}`;
   };
 
   const onGameLinkSubmit = () => {
-    const gameInfo = extractGameIdFromLink(gameLink || defaultGameLink);
-    if (gameInfo) {
-      if (gameInfo.type === "computer") {
-        alert("Games with computers are not supported.");
-      }
-      window.location.href = `/game/${gameInfo.type}/${gameInfo.id}`;
-    } else {
-      alert("Please enter a valid Chess.com game link.");
-    }
+    const encodedLink = encodeURIComponent(gameLink || defaultGameLink);
+    window.location.href = `/game/?url=${encodedLink}`;
   };
 
   return (

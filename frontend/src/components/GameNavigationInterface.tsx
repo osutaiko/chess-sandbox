@@ -17,7 +17,7 @@ import {
 
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, FlipVertical, Pencil, Share } from "lucide-react";
 
-const GameNavigationInterface = ({ game, moves, moveAnalyses, moveTimestamps, currentPly, setCurrentPly, isDailyGame, handlePlyNavigation, handleFlipBoardOrientation, reportStatus }) => {
+const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly, handlePlyNavigation, handleFlipBoardOrientation, reportStatus }) => {
   const currentMoveRef = useRef(null);
 
   useEffect(() => {
@@ -26,40 +26,33 @@ const GameNavigationInterface = ({ game, moves, moveAnalyses, moveTimestamps, cu
     }
   }, [currentPly]);
 
+  const timeControlCategory = game.timeControl.base < 180 ? "Bullet" :
+    game.timeControl.base < 600 ? "Blitz" : "Rapid";
+    
   let timeControlString = "";
-  if (isDailyGame) {
-    timeControlString = `$0+{game.daysPerTurn} days Daily`;
-  } else {
-    const base = game.baseTime1;
-    const inc = game.timeIncrement1;
+  const baseString = game.timeControl.base < 60 ? `${game.timeControl.base} sec` : `${game.timeControl.base / 60}`;
+  const incString = game.timeControl.increment.toString();
 
-    const category = base < 1800 ? "Bullet" :
-      base < 6000 ? "Blitz" : "Rapid";
-
-    const baseString = base < 600 ? `${base / 10} sec` : `${base / 600}`;
-    const incString = (inc / 10).toString();
-
-    timeControlString = `${baseString}+${incString} ${category}`;
-  }
+  timeControlString = `${timeControlCategory} ${baseString}+${incString}`;
 
   return (
     <Card className="w-1/4 flex flex-col h-full">
       <div className="p-4">
-        <h3>{game.isRated ? "Rated" : "Unrated"} {timeControlString}</h3>
-        <p>{!isDailyGame ? formatDate(game.endTime, true) : 0}</p>
+        <h3>{timeControlString}</h3>
+        <p>{formatDate(game.endTime, true)}</p>
         <p>{game.resultMessage}</p>
       </div>
       <Separator />
       <ScrollArea className="flex-grow py-2">
         <div className="grid gap-0.5 px-4 overflow-y-auto">
-          {moves.map((move, index) => {
+          {game.moves.map((move, index) => {
             const isWhiteMove = index % 2 === 0;
             const moveNumber = Math.floor(index / 2) + 1;
 
             if (isWhiteMove) {
-              const nextMove = moves[index + 1]; // Black's move
-              const whiteMoveTime = index > 0 ? formatTime(moveTimestamps[index - 2] - moveTimestamps[index] + (!isDailyGame ? game.timeIncrement1 : 0), false) : formatTime(game.baseTime1 - moveTimestamps[0] + (!isDailyGame ? game.timeIncrement1 : 0), false);
-              const blackMoveTime = nextMove ? (index > 0 ? formatTime(moveTimestamps[index - 1] - moveTimestamps[index + 1] + (!isDailyGame ? game.timeIncrement1 : 0), false) : formatTime(game.baseTime1 - moveTimestamps[1] + (!isDailyGame ? game.timeIncrement1 : 0), false)) : "";
+              const nextMove = game.moves[index + 1]; // Black's move
+              const whiteMoveTime = index > 0 ? formatTime(game.timestamps[index - 2] - game.timestamps[index] + game.timeControl.increment, false) : formatTime(game.timeControl.base - game.timestamps[0] + game.timeControl.increment, false);
+              const blackMoveTime = nextMove ? (index > 0 ? formatTime(game.timestamps[index - 1] - game.timestamps[index + 1] + game.timeControl.increment, false) : formatTime(game.timeControl.base - game.timestamps[1] + game.timeControl.increment, false)) : " ";
 
               return (
                 <div key={index} className="select-none grid grid-cols-[40px_1fr_1fr_0.5fr] gap-1 items-center">
