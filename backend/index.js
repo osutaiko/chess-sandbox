@@ -36,7 +36,7 @@ app.get("/api/game", async (req, res) => {
       }
     }
 
-    const chessComRegex = /^https:\/\/(www\.)?chess\.com\/game\/(live|daily|computer)\/(\d+)/;
+    const chessComRegex = /^https:\/\/(www\.)?chess\.com\/(?:analysis\/)?game\/(live|daily)\/(\d+)/;
     const lichessRegex = /^https:\/\/(www\.)?lichess\.org\/(\w{8}|\w{12})$/;
 
     const chessComMatch = url.match(chessComRegex);

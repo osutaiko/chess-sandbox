@@ -34,8 +34,8 @@ const GameAnalysisInterface = ({ fen, currentPly }) => {
 
           const depth = parseInt(match[1]);
           const multipv = parseInt(match[2]);
-          const scoreCp = match[3] ? parseInt(chess.turn() === "w" ? match[3] : -match[3]) : null;
-          const scoreMate = match[4] ? parseInt(chess.turn() === "w" ? match[4] : -match[4]) : null;
+          const cp = match[3] ? parseInt(chess.turn() === "w" ? match[3] : -match[3]) : null;
+          const mateIn = match[4] ? parseInt(chess.turn() === "w" ? match[4] : -match[4]) : null;
           const continuation = match[5].split(" ").map((move) => tempChess.move(move).san);
           
           if (depth >= minDepth) {
@@ -44,8 +44,8 @@ const GameAnalysisInterface = ({ fen, currentPly }) => {
               return [...updatedResults, {
                 depth,
                 multipv,
-                scoreCp,
-                scoreMate,
+                cp,
+                mateIn,
                 continuation,
               }];
             });
@@ -76,7 +76,7 @@ const GameAnalysisInterface = ({ fen, currentPly }) => {
       <Separator />
       <div className="flex flex-col p-4 gap-2">
         {Array.from({ length: multiPV }, (_, index) => {
-          const result = engineResults[index] || { scoreCp: null, scoreMate: null, continuation: [] };
+          const result = engineResults[index] || { cp: null, mateIn: null, continuation: [] };
           const isWhitesTurn = currentPly % 2 === 0;
 
           const formattedContinuation = result.continuation.map((move, i) => {
@@ -85,8 +85,8 @@ const GameAnalysisInterface = ({ fen, currentPly }) => {
 
           return (
             <div key={index} className="grid grid-cols-[60px_70px_1fr] gap-3 items-center h-5">
-              <Badge className={`font-mono text-sm p-0 block text-center ${(result.scoreCp || result.scoreMate) >= 0 ? "bg-white text-black" : "bg-black text-white"}`}>
-                {formatEval(result.scoreCp, result.scoreMate)}
+              <Badge className={`font-mono text-sm p-0 block text-center ${(result.cp || result.mateIn) >= 0 ? "bg-white text-black" : "bg-black text-white"}`}>
+                {formatEval(result)}
               </Badge>
               <Badge className="block text-center" variant="secondary">{formattedContinuation[0] || "-"}</Badge>
               <p className="whitespace-nowrap overflow-hidden text-ellipsis">{formattedContinuation.slice(1).join(" ") || "-"}</p>

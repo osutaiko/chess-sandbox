@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"; 
 
-import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix, formatDailyTime, formatEval } from "@/lib/utils";
+import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix, formatDailyTime } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -48,8 +48,8 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
         <p>Result: {game.resultMessage || game.result}</p>
       </div>
       <Separator />
-      <ScrollArea className="flex-grow py-2">
-        <div className="grid gap-0.5 px-4 overflow-y-auto">
+      <ScrollArea className="py-2">
+        <div className="flex flex-col gap-0.5 px-4">
           {game.moves.map((move, index) => {
             const isWhiteMove = index % 2 === 0;
             const moveNumber = Math.floor(index / 2) + 1;

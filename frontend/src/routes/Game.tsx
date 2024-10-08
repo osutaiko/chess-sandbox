@@ -228,7 +228,7 @@ const Game = () => {
           }
         </Card>
       </div>
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-4 w-full h-full">
         <GameAnalysisInterface fen={fen} currentPly={currentPly} />
         <GameReportInterface
           game={game}
