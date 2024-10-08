@@ -6,7 +6,7 @@ const ChessClock = ({ timeLeft, isToMove }) => {
   return (
     <Card className={`flex flex-row items-center px-3 py-2 justify-between w-36 ${isToMove ? "bg-accent" : ""}`}>
       <Timer />
-      <h3 className="text-2xl">{formatTime(timeLeft, true)}</h3>
+      <h3 className="font-mono text-2xl">{formatTime(timeLeft, true)}</h3>
     </Card>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"; 
 
-import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix, formatDailyTime } from "@/lib/utils";
+import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix, formatDailyTime, formatEval } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -41,7 +41,7 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
   }
 
   return (
-    <Card className="w-min flex flex-col h-full">
+    <Card className="w-[350px] flex flex-col h-full">
       <div className="p-4">
         <h3>{game.event}{timeControlString ? ` - ${timeControlString}` : ""}</h3>
         <p>Date: {game.date}</p>
@@ -69,7 +69,7 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
               }
 
               return (
-                <div key={index} className={`select-none grid ${game.timeControl && game.timestamps ? "grid-cols-[40px_1fr_1fr_0.5fr]" : "grid-cols-[40px_1fr_1fr]"} gap-1 items-center`}>
+                <div key={index} className={`grid ${game.timeControl && game.timestamps ? "grid-cols-[40px_1fr_1fr_0.5fr]" : "grid-cols-[40px_1fr_1fr]"} gap-1 items-center`}>
                   <p>{moveNumber}.</p>
 
                   {/* White's move */}
@@ -79,7 +79,7 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
                     className={`hover:bg-accent cursor-pointer px-2 py-1 ${currentPly === index + 1 ? "bg-accent" : ""}`}
                   >
                     {move}{" "}
-                    {reportStatus === "complete" && 
+                    {reportStatus === "complete" &&
                       <span className={`font-semibold ${getMoveCategoryTextColor(moveAnalyses[index].moveCategory)}`}>
                         {getMoveCategorySuffix(moveAnalyses[index].moveCategory)}
                       </span>

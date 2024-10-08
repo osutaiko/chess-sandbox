@@ -182,39 +182,50 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
     };
   };
 
+  const clearGameReport = () => {
+    setMoveAnalyses(null);
+    setReportStatus("idle");
+    setReportProgress(0);
+  }
+
   const CustomDot = (props) => {
     const { cx, cy, index, currentPly } = props;
     if (index === currentPly - 1) {
       return (
-        <circle cx={cx} cy={cy} r={3} stroke="hsl(var(--primary))" strokeWidth={3} />
+        <circle cx={cx} cy={cy} r={4} stroke="hsl(var(--primary))" strokeWidth={3} />
       );
     }
     return null;
   };
 
   return (
-    <Card className="h-full">
-      <div className="p-4">
+    <Card className="w-full h-full">
+      <div className="flex flex-row justify-between items-center p-4">
         <h3>Game Report</h3>
+        {reportStatus === "idle" && 
+          <Button size="sm" onClick={() => runGameReport()} className="-my-2">
+            Request
+          </Button>
+        }
+        {reportStatus === "complete" && 
+          <Button size="sm" onClick={() => clearGameReport()} className="-my-2">
+            Clear
+          </Button>
+        }
       </div>
       <Separator />
       <div className="flex flex-col p-4 gap-5">
         {reportStatus === "idle" && (
-          <>
-            <div className="grid grid-cols-[1fr_2fr] gap-4">
-              <h4>Engine Depth: {reportDepth}</h4>
-              <Slider
-                value={[reportDepth]}
-                onValueChange={(value) => setReportDepth(value[0])}
-                min={10}
-                max={16}
-                step={1}
-              />
-            </div>
-            <Button onClick={() => runGameReport()} className="w-min">
-              Request Game Report
-            </Button>
-          </>
+          <div className="grid grid-cols-[1fr_2fr] gap-4">
+            <h4>Engine Depth: {reportDepth}</h4>
+            <Slider
+              value={[reportDepth]}
+              onValueChange={(value) => setReportDepth(value[0])}
+              min={8}
+              max={16}
+              step={1}
+            />
+          </div>
         )}
         {reportStatus === "running" && (
           <>
@@ -242,17 +253,25 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
             >
               <LineChart
                 accessibilityLayer
-                data={moveAnalyses?.map((analysis, index) => ({
-                  moveNumber: Math.floor((index + 2) / 2), // Represent full moves
+                data={moveAnalyses.map((analysis, index) => ({
+                  plyNumber: index + 1,
                   winProb: evalToWhiteWinProb(analysis.evalAfterMove) * 100,
                 }))}
                 margin={{ left: 12, right: 12 }}
+                onClick={(state) => {
+                  if (state && state.activePayload) {
+                    setCurrentPly(state.activePayload[0].payload.plyNumber);
+                  }
+                }}
               >
                 <CartesianGrid stroke="hsl(var(--accent))" vertical={false} />
                 <XAxis
-                  dataKey="moveNumber"
-                  tickMargin={8}
-                  ticks={[1, ...Array.from({ length: Math.floor(game.moves.length / 10) }, (_, i) => (i + 1) * 10), Math.floor(game.moves.length / 2)]}
+                  dataKey="plyNumber"
+                  ticks={[1, ...Array.from(
+                    { length: Math.ceil((moveAnalyses.length + 2) / 10) }, 
+                    (_, i) => i * 10 - 1
+                  )]}
+                  tickFormatter={(value) => `${Math.floor((value + 1) / 2)}`}
                 />
                 <YAxis
                   domain={[-5, 105]}
@@ -260,18 +279,12 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                   label={{ value: "White win%", angle: -90, position: "insideLeft" }}
                   tickFormatter={(value) => `${value}%`}
                 />
-                
                 <Line
                   dataKey="winProb"
                   stroke="hsl(var(--primary))"
                   strokeWidth={3}
                   dot={<CustomDot currentPly={currentPly} />}
                   type="linear"
-                />
-
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent hideLabel />}
                 />
               </LineChart>
             </ChartContainer>

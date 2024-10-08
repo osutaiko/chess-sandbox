@@ -4,7 +4,7 @@ import { Chess, DEFAULT_POSITION } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
 import GameNavigationInterface from "@/components/GameNavigationInterface";
-import AnalysisInterface from "@/components/AnalysisInterface";
+import GameAnalysisInterface from "@/components/GameAnalysisInterface";
 import GameReportInterface from "@/components/GameReportInterface";
 import MiniProfile from "@/components/MiniProfile";
 import ChessClock from "@/components/ChessClock";
@@ -32,8 +32,8 @@ const Game = () => {
   const chessRef = useRef(new Chess());
   const chessboardContainerRef = useRef(null);
 
-  const moveSound = new Audio(moveSoundFile);
-  const captureSound = new Audio(captureSoundFile);
+  const moveSound = useRef(null);
+  const captureSound = useRef(null);
 
   const fetchGame = async () => {
     setLoading(true);
@@ -66,10 +66,22 @@ const Game = () => {
     }
   }, [urlParam, pgnParam]);
 
+  useEffect(() => {
+    moveSound.current = new Audio(moveSoundFile);
+    captureSound.current = new Audio(captureSoundFile);
+  
+    return () => {
+      moveSound.current = null;
+      captureSound.current = null;
+    };
+  }, []);
+
   const playMoveSound = (move) => {
-    const audio = move.includes("x") ? captureSound : moveSound;
-    audio.currentTime = 0;
-    audio.play();
+    const audio = move.includes("x") ? captureSound.current : moveSound.current;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play();
+    }
   };
 
   const calculateBoardWidth = () => {
@@ -183,7 +195,7 @@ const Game = () => {
   }
 
   return (
-    <div className="flex flex-row gap-5 w-full h-[85vh]">
+    <div className="flex flex-row select-none gap-5 w-full h-[85vh]">
       <GameNavigationInterface
         game={game}
         moveAnalyses={moveAnalyses}
@@ -193,9 +205,9 @@ const Game = () => {
         handleFlipBoardOrientation={handleFlipBoardOrientation}
         reportStatus={reportStatus}
       />
-      <div ref={chessboardContainerRef} className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
+      <div className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
         <Card className="flex flex-row items-center justify-between p-2">
-          <MiniProfile player={game.players.black} ratingChange={game.players.black.ratingChange} fen={fen} />
+          <MiniProfile player={game.players.black} color="black" fen={fen} />
           {game.isLiveGame && game.timeControl &&
             <ChessClock
               timeLeft={currentPly < 2 ? game.timeControl.base : game.timestamps[Math.floor((currentPly) / 2) * 2 - 1]}
@@ -203,9 +215,11 @@ const Game = () => {
             />
           }
         </Card>
-        <Chessboard position={fen} animationDuration={150} boardOrientation={boardOrientation} boardWidth={boardWidth} arePiecesDraggable={false} />
+        <div ref={chessboardContainerRef} className="rounded-md overflow-hidden">
+          <Chessboard position={fen} animationDuration={150} boardOrientation={boardOrientation} boardWidth={boardWidth} arePiecesDraggable={false} />
+        </div>
         <Card className="flex flex-row items-center justify-between p-2">
-          <MiniProfile player={game.players.white} ratingChange={game.players.white.ratingChange} fen={fen} />
+          <MiniProfile player={game.players.white} color="white" fen={fen} />
           {game.isLiveGame && 
             <ChessClock
               timeLeft={currentPly < 1 ? game.timeControl.base : game.timestamps[Math.floor((currentPly - 1) / 2) * 2]}
@@ -214,8 +228,8 @@ const Game = () => {
           }
         </Card>
       </div>
-      <div className="flex flex-col gap-4 w-1/3">
-        <AnalysisInterface fen={fen} currentPly={currentPly} />
+      <div className="flex flex-col gap-4 w-full">
+        <GameAnalysisInterface fen={fen} currentPly={currentPly} />
         <GameReportInterface
           game={game}
           currentPly={currentPly}

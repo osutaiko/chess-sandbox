@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { formatEval } from "@/lib/utils";
 
-const AnalysisInterface = ({ fen, currentPly }) => {
+const GameAnalysisInterface = ({ fen, currentPly }) => {
   const [minDepth, setMinDepth] = useState(8);
   const [maxDepth, setMaxDepth] = useState(20);
   const [multiPV, setMultiPV] = useState(3);
@@ -68,7 +68,7 @@ const AnalysisInterface = ({ fen, currentPly }) => {
   }, [fen, maxDepth, multiPV]);
 
   return (
-    <Card className="select-none w-full">
+    <Card className="w-full">
       <div className="flex flex-row p-4 justify-between items-center">
         <h3>Analysis</h3>
         <p>Depth: {currentDepth}</p>
@@ -98,4 +98,4 @@ const AnalysisInterface = ({ fen, currentPly }) => {
   );
 };
 
-export default AnalysisInterface;
+export default GameAnalysisInterface;

@@ -60,7 +60,7 @@ const Home = () => {
       <div className="flex flex-col gap-6 w-1/2">
         <div className="flex flex-col gap-2">
           <h3>Enter your Chess.com username:</h3>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-1">
             <Input
               placeholder={defaultUsername}
               value={username}
@@ -76,7 +76,7 @@ const Home = () => {
         </div>
         <div className="flex flex-col gap-2">
           <h3>... or a game link for review:</h3>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-1">
             <Input
               placeholder={defaultGameLink}
               value={gameLink}
@@ -87,9 +87,10 @@ const Home = () => {
                 }
               }}
             />
-            <Button onClick={onGameLinkSubmit}>Go</Button>
             <Dialog>
-              <DialogTrigger asChild><Button>Import PGN</Button></DialogTrigger>
+              <DialogTrigger asChild>
+                <Button variant="secondary">Import PGN</Button>
+              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Import PGN</DialogTitle>
@@ -114,6 +115,7 @@ const Home = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <Button onClick={onGameLinkSubmit}>Go</Button>
           </div>
         </div>
       </div>
