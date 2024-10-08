@@ -6,9 +6,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-import { formatEval } from "@/lib/utils";
+import { formatEval, getMoveCategoryBgColor, capitalizeString } from "@/lib/utils";
 
-const GameAnalysisInterface = ({ fen, currentPly }) => {
+const GameAnalysisInterface = ({ fen, currentPly, reportStatus, moveAnalyses }) => {
   const [minDepth, setMinDepth] = useState(8);
   const [maxDepth, setMaxDepth] = useState(20);
   const [multiPV, setMultiPV] = useState(3);
@@ -70,7 +70,15 @@ const GameAnalysisInterface = ({ fen, currentPly }) => {
   return (
     <Card className="w-full">
       <div className="flex flex-row p-4 justify-between items-center">
-        <h3>Analysis</h3>
+        {currentPly > 0 && reportStatus === "complete" ?
+          <div className="flex flex-row gap-2 items-center">
+            <Badge className={`text-xl rounded-md -my-2 ${getMoveCategoryBgColor(moveAnalyses[currentPly - 1].moveCategory)}`} variant="secondary">
+              {moveAnalyses[currentPly - 1].move}
+            </Badge>
+            <h3>: {capitalizeString(moveAnalyses[currentPly - 1].moveCategory)}</h3>
+          </div> : 
+          <h3>Analysis</h3>
+        }
         <p>Depth: {currentDepth}</p>
       </div>
       <Separator />

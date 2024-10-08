@@ -41,6 +41,11 @@ export function formatEval({cp, mateIn}) {
   }
 };
 
+export const capitalizeString = (string) => {
+  if (!string) return "";
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 export function evalToWhiteWinProb({cp, mateIn}) {
   if (cp !== null) {
     return 1 / (1 + Math.exp(-0.005 * cp));
@@ -102,19 +107,19 @@ export const getMoveCategorySuffix = (moveCategory) => {
 
 export const createWinProbLossBuckets = (step) => {
   const buckets = [{
-    range: "0%",
+    range: "0",
     white: 0,
     black: 0,
   }];
   for (let i = 0; i < 0.2 - step; i += step) {
     buckets.push({
-      range: `${Math.round(i * 100)}%-${Math.round((i + step) * 100)}%`,
+      range: `${Math.round(i * 100)}-${Math.round((i + step) * 100)}`,
       white: 0,
       black: 0,
     });
   }
   buckets.push({
-    range: ">20%",
+    range: ">20",
     white: 0,
     black: 0,
   })

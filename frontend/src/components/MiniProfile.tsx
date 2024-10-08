@@ -2,7 +2,7 @@ import { Chess } from "chess.js";
 
 import { Badge } from "@/components/ui/badge";
 
-import { CircleGauge } from "lucide-react";
+import { SquareChevronUp } from "lucide-react";
 
 import ChessComAvatarFallback from "/src/assets/images/chess-com-avatar-fallback.png";
 
@@ -51,8 +51,8 @@ const MiniProfile = ({ player, color, fen }) => {
           <h3>{player.name}</h3>
           <p>({player.ratingChange ? `${player.ratingChange >= 0 ? "+" : ""}${player.ratingChange} → ` : ""}{player.ratingAfter})</p>
         </div>
-        <div className="flex flex-row items-center gap-2">
-          <CircleGauge size={18} />
+        <div className="flex flex-row items-center gap-1">
+          <SquareChevronUp size={18} />
           <p className={materialDifference > 0 ? "text-green-600" :
             materialDifference < 0 ? "text-red-600" : ""}
           >

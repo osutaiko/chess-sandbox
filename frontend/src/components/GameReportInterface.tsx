@@ -1,24 +1,32 @@
 import { useState } from "react";
 
 import { Chess, DEFAULT_POSITION } from "chess.js";
-import { evalToWhiteWinProb, getMoveCategoryBgColor, createWinProbLossBuckets } from "@/lib/utils";
+import { evalToWhiteWinProb, createWinProbLossBuckets } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { CartesianGrid, Line, LineChart, Bar, BarChart, XAxis, YAxis, ReferenceArea } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 
-const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, setMoveAnalyses, reportStatus, setReportStatus }) => {
+const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, setReportStatus, moveAnalyses, setMoveAnalyses }) => {
   const [reportDepth, setReportDepth] = useState(12);
   const [reportProgress, setReportProgress] = useState(0);
-  const [whiteReport, setWhiteReport] = useState({ averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
-  const [blackReport, setBlackReport] = useState({ averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
+  const [whiteReport, setWhiteReport] = useState({ averageCpLoss: 0, moveCount: 0, counts: { best: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0 } });
+  const [blackReport, setBlackReport] = useState({ averageCpLoss: 0, moveCount: 0, counts: { best: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0 } });
 
   const INACCURACY_THRESHOLD = 0.06;
   const MISTAKE_THRESHOLD = 0.12;
@@ -73,8 +81,9 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
         evalAfterMove = await getEval(chess.fen(), reportDepth - 1);
       }
 
-      const winProbLoss = chess.turn() === "w" ? evalToWhiteWinProb(evalAfterMove) - evalToWhiteWinProb(evalBeforeMove) :
-        evalToWhiteWinProb(evalBeforeMove) - evalToWhiteWinProb(evalAfterMove);
+      const winProbLoss = chess.turn() === "w" ?
+        Math.max(evalToWhiteWinProb(evalAfterMove) - evalToWhiteWinProb(evalBeforeMove), 0) :
+        Math.max(evalToWhiteWinProb(evalBeforeMove) - evalToWhiteWinProb(evalAfterMove), 0);
 
       let moveCategory, description;
 
@@ -85,8 +94,10 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
         moveCategory = "mistake";
       } else if (winProbLoss > INACCURACY_THRESHOLD) {
         moveCategory = "inaccuracy";
-      } else {
+      } else if (winProbLoss > 0.001) {
         moveCategory = "good";
+      } else {
+        moveCategory = "best";
       }
 
       return { move, evalBeforeMove, evalAfterMove, winProbLoss, moveCategory, description };
@@ -100,12 +111,16 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
       let whiteTotalCpLoss = 0;
       let blackTotalCpLoss = 0;
 
-      let whiteInaccuracyCount = 0;
-      let blackInaccuracyCount = 0;
-      let whiteMistakeCount = 0;
-      let blackMistakeCount = 0;
-      let whiteBlunderCount = 0;
-      let blackBlunderCount = 0;
+      const moveCategoryCounts = {
+        best: 0,
+        good: 0,
+        inaccuracy: 0,
+        mistake: 0,
+        blunder: 0,
+    };
+    
+    const whiteCounts = { ...moveCategoryCounts };
+    const blackCounts = { ...moveCategoryCounts };
 
       for (let i = 0; i < game.moves.length; i++) {
         const analysis = await getMoveAnalysis(chess.fen(), game.moves[i]);
@@ -124,26 +139,14 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
         if (i % 2 === 0) {
           whiteMoveCount++;
           whiteTotalCpLoss += Math.min(Math.max(cpDiff, 0), 1000);
-
-          switch (analysis.moveCategory) {
-            case "inaccuracy":
-              whiteInaccuracyCount++; break;
-            case "mistake":
-              whiteMistakeCount++; break;
-            case "blunder":
-              whiteBlunderCount++; break;
-          }  
+          if (analysis.moveCategory in whiteCounts) {
+            whiteCounts[analysis.moveCategory]++;
+          }
         } else {
           blackMoveCount++;
           blackTotalCpLoss += Math.min(Math.max(-cpDiff, 0), 1000);
-
-          switch (analysis.moveCategory) {
-            case "inaccuracy":
-              blackInaccuracyCount++; break;
-            case "mistake":
-              blackMistakeCount++; break;
-            case "blunder":
-              blackBlunderCount++; break;
+          if (analysis.moveCategory in blackCounts) {
+            blackCounts[analysis.moveCategory]++;
           }
         }
 
@@ -154,17 +157,13 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
       setWhiteReport({
         averageCpLoss: Math.max(whiteTotalCpLoss / whiteMoveCount, 0),
         moveCount: whiteMoveCount,
-        inaccuracyCount: whiteInaccuracyCount,
-        mistakeCount: whiteMistakeCount,
-        blunderCount: whiteBlunderCount,
+        counts: whiteCounts,
       });
 
       setBlackReport({
         averageCpLoss: Math.max(blackTotalCpLoss / blackMoveCount, 0),
         moveCount: blackMoveCount,
-        inaccuracyCount: blackInaccuracyCount,
-        mistakeCount: blackMistakeCount,
-        blunderCount: blackBlunderCount,
+        counts: blackCounts,
       });
 
       setReportStatus("complete");
@@ -196,7 +195,7 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
   };
 
   return (
-    <Card className="w-full h-full">
+    <Card className="flex flex-col w-full flex-grow overflow-auto">
       <div className="flex flex-row justify-between items-center p-4">
         <h3>Game Report</h3>
         {reportStatus === "idle" && 
@@ -211,54 +210,63 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
         }
       </div>
       <Separator />
-      <ScrollArea className="py-2 h-full">
-        <div className="flex flex-col px-4 py-2 gap-5 h-full">
+      <ScrollArea className="h-full">
+        <div className="flex flex-col px-4 gap-5">
           {reportStatus === "idle" && (
-            <div className="grid grid-cols-[1fr_2fr] gap-4">
+            <div className="grid grid-cols-[150px_1fr] gap-4 mt-4">
               <h4>Engine Depth: {reportDepth}</h4>
               <Slider
                 value={[reportDepth]}
                 onValueChange={(value) => setReportDepth(value[0])}
-                min={8}
-                max={16}
+                min={10}
+                max={20}
                 step={1}
               />
             </div>
           )}
           {reportStatus === "running" && (
             <>
-              <Progress value={reportProgress} />
+              <Progress value={reportProgress} className="mt-6" />
             </>
           )}
           {reportStatus === "complete" &&
             <>
-              {currentPly > 0 && 
-                <div className="flex flex-row gap-2 items-center">
-                  <Badge className={`text-2xl px-3 py-1 rounded-md ${getMoveCategoryBgColor(moveAnalyses[currentPly - 1].moveCategory)}`} variant="secondary">
-                    {moveAnalyses[currentPly - 1].move}
-                  </Badge>
-                  <h2>: {moveAnalyses[currentPly - 1].moveCategory}</h2>
-                </div>
-              }
-
-              <div className="grid grid-cols-2">
-                <div className="flex flex-col gap-0.5">
-                  <h3>White</h3>
-                  <p>ACPL: {whiteReport.averageCpLoss.toFixed(2)}</p>
-                  <p>Move count: {whiteReport.moveCount}</p>
-                  <p>Inaccuracies: {whiteReport.inaccuracyCount}</p>
-                  <p>Mistakes: {whiteReport.mistakeCount}</p>
-                  <p>Blunders: {whiteReport.blunderCount}</p>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <h3>Black</h3>
-                  <p>ACPL: {blackReport.averageCpLoss.toFixed(2)}</p>
-                  <p>Move count: {blackReport.moveCount}</p>
-                  <p>Inaccuracies: {blackReport.inaccuracyCount}</p>
-                  <p>Mistakes: {blackReport.mistakeCount}</p>
-                  <p>Blunders: {blackReport.blunderCount}</p>
-                </div>
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left">Category</TableHead>
+                    <TableHead className="text-center">White</TableHead>
+                    <TableHead className="text-center">Black</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-left font-medium">Best</TableCell>
+                    <TableCell>{whiteReport.counts.best}</TableCell>
+                    <TableCell>{blackReport.counts.best}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="text-left font-medium">Good</TableCell>
+                    <TableCell>{whiteReport.counts.good}</TableCell>
+                    <TableCell>{blackReport.counts.good}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="text-left font-medium">Inaccuracies (<span className="font-semibold text-inaccuracy">?!</span>)</TableCell>
+                    <TableCell>{whiteReport.counts.inaccuracy}</TableCell>
+                    <TableCell>{blackReport.counts.inaccuracy}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="text-left font-medium">Mistakes (<span className="font-semibold text-mistake">?</span>)</TableCell>
+                    <TableCell>{whiteReport.counts.mistake}</TableCell>
+                    <TableCell>{blackReport.counts.mistake}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="text-left font-medium">Blunders (<span className="font-semibold text-blunder">??</span>)</TableCell>
+                    <TableCell>{whiteReport.counts.blunder}</TableCell>
+                    <TableCell>{blackReport.counts.blunder}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
 
               <ChartContainer
                 config={{
@@ -283,6 +291,7 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                   <CartesianGrid stroke="hsl(var(--accent))" vertical={false} />
                   <XAxis
                     dataKey="plyNumber"
+                    label={{ value: "Move number", position: "insideBottom", dy: 10 }}
                     ticks={[1, ...Array.from(
                       { length: Math.ceil((moveAnalyses.length + 2) / 10) }, 
                       (_, i) => i * 10 - 1
@@ -290,9 +299,10 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                     tickFormatter={(value) => `${Math.floor((value + 1) / 2)}`}
                   />
                   <YAxis
+                    width={60}
+                    label={{ value: "White win probability", angle: -90, position: "insideBottomLeft" }}
                     domain={[-5, 105]}
                     ticks={[0, 25, 50, 75, 100]}
-                    label={{ value: "White win%", angle: -90, position: "insideLeft" }}
                     tickFormatter={(value) => `${value}%`}
                   />
                   <Line
@@ -328,7 +338,7 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                           ? Math.min(Math.max(evalToWhiteWinProb(analysis.evalBeforeMove) - evalToWhiteWinProb(analysis.evalAfterMove), 0), 1)
                           : Math.min(Math.max(evalToWhiteWinProb(analysis.evalAfterMove) - evalToWhiteWinProb(analysis.evalBeforeMove), 0), 1);
 
-                        const bucketIndex = Math.min(Math.floor(winProbLoss / 0.02), buckets.length - 1);
+                        const bucketIndex = winProbLoss < 0.001 ? 0 : Math.min(Math.floor(winProbLoss / 0.02) + 1, buckets.length - 1);
                         if (isWhite) {
                           buckets[bucketIndex].white++;
                         } else {
@@ -343,21 +353,41 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                       }));
                     })()
                   }
+                  barGap={0}
                 >
                   <CartesianGrid stroke="hsl(var(--accent))" vertical={false} />
                   <XAxis
                     dataKey="range"
+                    label={{ value: "Win probability loss (%p)", position: "insideBottom", dy: 10 }}
                   />
                   <YAxis
-                    label={{ value: "Move Count", angle: -90, position: "insideLeft" }}
+                    width={40}
+                    label={{ value: "Move Count", angle: -90, position: "insideBottomLeft" }}
                   />
                   <Bar dataKey="white" fill="#fff" />
                   <Bar dataKey="black" fill="#666" />
-                  <ReferenceArea x1="6%-8%" x2="10%-12%" fill="yellow" fillOpacity={0.3} />
-                  <ReferenceArea x1="12%-14%" x2="18%-20%" fill="orange" fillOpacity={0.3} />
-                  <ReferenceArea x1=">20%" x2={undefined} fill="red" fillOpacity={0.3} />
+                  <ReferenceArea x1="6-8" x2="10-12" fill="yellow" fillOpacity={0.15} />
+                  <ReferenceArea x1="12-14" x2="18-20" fill="orange" fillOpacity={0.15} />
+                  <ReferenceArea x1=">20" x2={undefined} fill="red" fillOpacity={0.15} />
                 </BarChart>
               </ChartContainer>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left">Metric</TableHead>
+                    <TableHead className="text-center">White</TableHead>
+                    <TableHead className="text-center">Black</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-left font-medium">ACPL</TableCell>
+                    <TableCell>{whiteReport.averageCpLoss.toFixed(2)}</TableCell>
+                    <TableCell>{blackReport.averageCpLoss.toFixed(2)}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </>
           }
         </div>

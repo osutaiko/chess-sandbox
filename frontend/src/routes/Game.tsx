@@ -229,15 +229,20 @@ const Game = () => {
         </Card>
       </div>
       <div className="flex flex-col gap-4 w-full h-full">
-        <GameAnalysisInterface fen={fen} currentPly={currentPly} />
+        <GameAnalysisInterface
+          fen={fen}
+          currentPly={currentPly}
+          reportStatus={reportStatus}
+          moveAnalyses={moveAnalyses}
+        />
         <GameReportInterface
           game={game}
           currentPly={currentPly}
           setCurrentPly={setCurrentPly}
-          moveAnalyses={moveAnalyses}
-          setMoveAnalyses={setMoveAnalyses}
           reportStatus={reportStatus}
           setReportStatus={setReportStatus}
+          moveAnalyses={moveAnalyses}
+          setMoveAnalyses={setMoveAnalyses}
         />
       </div>
     </div>
