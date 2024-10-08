@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"; 
 
-import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix } from "@/lib/utils";
+import { formatDate, formatTime, getMoveCategoryTextColor, getMoveCategorySuffix, formatDailyTime } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,20 +26,25 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
     }
   }, [currentPly]);
 
-  const timeControlCategory = game.timeControl.base < 180 ? "Bullet" :
-    game.timeControl.base < 600 ? "Blitz" : "Rapid";
-    
-  let timeControlString = "";
-  const baseString = game.timeControl.base < 60 ? `${game.timeControl.base} sec` : `${game.timeControl.base / 60}`;
-  const incString = game.timeControl.increment.toString();
-
-  timeControlString = `${timeControlCategory} ${baseString}+${incString}`;
+  let timeControlString = game.event;
+  if (game.timeControl) {
+    if (game.isLiveGame) {
+      const timeControlCategory = game.timeControl.base < 180 ? "Bullet" :
+        game.timeControl.base < 600 ? "Blitz" : "Rapid";
+  
+      const baseString = game.timeControl.base < 60 ? `${game.timeControl.base} sec` : `${game.timeControl.base / 60}`;
+      const incString = game.timeControl.increment.toString();
+      timeControlString = `${timeControlCategory}: ${baseString}+${incString}`;
+    } else {
+      timeControlString = `Daily: ${game.timeControl.daysPerTurn} day${game.timeControl.daysPerTurn === 1 ? "" : "s"}/move`
+    }
+  }
 
   return (
     <Card className="w-1/4 flex flex-col h-full">
       <div className="p-4">
         <h3>{timeControlString}</h3>
-        <p>{formatDate(game.endTime, true)}</p>
+        <p>Date: {game.date}</p>
         <p>{game.resultMessage}</p>
       </div>
       <Separator />
@@ -51,8 +56,17 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
 
             if (isWhiteMove) {
               const nextMove = game.moves[index + 1]; // Black's move
-              const whiteMoveTime = index > 0 ? formatTime(game.timestamps[index - 2] - game.timestamps[index] + game.timeControl.increment, false) : formatTime(game.timeControl.base - game.timestamps[0] + game.timeControl.increment, false);
-              const blackMoveTime = nextMove ? (index > 0 ? formatTime(game.timestamps[index - 1] - game.timestamps[index + 1] + game.timeControl.increment, false) : formatTime(game.timeControl.base - game.timestamps[1] + game.timeControl.increment, false)) : " ";
+              let whiteMoveTime = "";
+              let blackMoveTime = "";
+              if (game.timestamps && game.timeControl){
+                if (game.isLiveGame) {
+                  whiteMoveTime = index > 0 ? formatTime(game.timestamps[index - 2] - game.timestamps[index] + game.timeControl.increment, false) : formatTime(game.timeControl.base - game.timestamps[0] + game.timeControl.increment, false);
+                  blackMoveTime = nextMove ? (index > 0 ? formatTime(game.timestamps[index - 1] - game.timestamps[index + 1] + game.timeControl.increment, false) : formatTime(game.timeControl.base - game.timestamps[1] + game.timeControl.increment, false)) : " ";
+                } else {
+                  whiteMoveTime = formatDailyTime(game.timeControl.daysPerTurn * 86400 - game.timestamps[index]);
+                  blackMoveTime = formatDailyTime(game.timeControl.daysPerTurn * 86400 - game.timestamps[index + 1]);
+                }
+              }
 
               return (
                 <div key={index} className="select-none grid grid-cols-[40px_1fr_1fr_0.5fr] gap-1 items-center">
@@ -90,10 +104,12 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
                   )}
 
                   {/* Timestamps */}
-                  <div className="flex flex-col">
-                    <small className="text-end">{whiteMoveTime}</small>
-                    {nextMove && <small className="text-end">{blackMoveTime}</small>}
-                  </div>
+                  {game.timestamps && game.timeControl &&
+                    <div className="flex flex-col">
+                      <small className="text-end">{whiteMoveTime}</small>
+                      {nextMove && <small className="text-end">{blackMoveTime}</small>}
+                    </div>
+                  }
                 </div>
               );
             }

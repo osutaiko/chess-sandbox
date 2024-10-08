@@ -24,24 +24,34 @@ app.get("/api/user/:username/basic", async (req, res) => {
 });
 
 app.get("/api/game", async (req, res) => {
-  const { url } = req.query;
+  const { url, pgn } = req.query;
+  if (!(url || pgn)) {
+    res.status(500).json({ error: "No game data provided" });
+  }
 
-  const getGameInfo = (link) => {
+  const getGameSource = (url, pgn) => {
+    if (pgn) {
+      return {
+        from: "PGN",
+      }
+    }
+
     const chessComRegex = /^https:\/\/(www\.)?chess\.com\/game\/(live|daily|computer)\/(\d+)/;
     const lichessRegex = /^https:\/\/(www\.)?lichess\.org\/(\w{8}|\w{12})$/;
 
-    const chessComMatch = link.match(chessComRegex);
-    const lichessMatch = link.match(lichessRegex);
+    const chessComMatch = url.match(chessComRegex);
+    const lichessMatch = url.match(lichessRegex);
 
     if (chessComMatch) {
       return {
-        platform: "Chess.com",
+        from: "Chess.com",
         type: chessComMatch[2], // live, daily, or computer
         gameId: chessComMatch[3], // Game ID
       };
-    } else if (lichessMatch) {
+    }
+    if (lichessMatch) {
       return {
-        platform: "Lichess",
+        from: "Lichess",
         gameId: lichessMatch[2], // Lichess game ID
       };
     }
@@ -49,9 +59,9 @@ app.get("/api/game", async (req, res) => {
     return null;
   };
 
-  const gameInfo = getGameInfo(url);
+  const gameSource = getGameSource(url, pgn);
 
-  if (!gameInfo) {
+  if (!gameSource) {
     return res.status(400).json({ error: "Unsupported or invalid game URL" });
   }
 
@@ -84,54 +94,100 @@ app.get("/api/game", async (req, res) => {
   };
 
   try {
-    if (gameInfo.platform === "Chess.com") {
+    if (gameSource.from === "Chess.com") {
       const fetch = (await import('node-fetch')).default;
-      const response = await fetch(`https://www.chess.com/callback/${gameInfo.type}/game/${gameInfo.gameId}`);
+      const response = await fetch(`https://www.chess.com/callback/${gameSource.type}/game/${gameSource.gameId}`);
       if (response.ok) {
-        const data = await response.json();console.log(data)
+        const data = await response.json();
         let chess = new Chess();
 
         applyMoves(chess, data.game.moveList);
 
-        const timestamps = data.game.hasOwnProperty("moveTimestamps") ? data.game.moveTimestamps.split(",").map(ts => parseFloat(ts) / 10) : null;
+        const isLiveGame = data.game.isLiveGame;
+        
+        const timestamps = isLiveGame ?
+          data.game.moveTimestamps.split(",").map((ts) => parseFloat(ts) / 10) :
+          data.game.timestamps.map((ts) => Math.floor(ts / 10));
 
-        const players = {
-          white: {
-            username: data.game.pgnHeaders.White,
-            avatarUrl: data.players.bottom.avatarUrl,
-            countryId: data.players.bottom.countryId,
-            ratingAfter: parseInt(data.players.bottom.rating),
-            ratingChange: parseInt(data.game.ratingChangeWhite),
-          },
-          black: {
-            username: data.game.pgnHeaders.Black,
-            avatarUrl: data.players.top.avatarUrl,
-            countryId: data.players.top.countryId,
-            ratingAfter: parseInt(data.players.top.rating),
-            ratingChange: parseInt(data.game.ratingChangeBlack),
-          },
-        };
-
-        const timeControl = {
-          base: parseInt(data.game.pgnHeaders.TimeControl.split("+")[0]),
-          increment: parseInt(data.game.pgnHeaders.TimeControl.split("+")[1] || 0),
+        const timeControl = isLiveGame ? {
+          base: Math.round(data.game.baseTime1 / 10),
+          increment: Math.round(data.game.timeIncrement1 / 10),
+        } : {
+          daysPerTurn: data.game.daysPerTurn,
         };
 
         res.json({
-          platform: "Chess.com",
-          moves: chess.history(),
-          players,
-          timestamps,
-          endTime: data.game.endTime,
+          from: "Chess.com",
+          event: data.game.pgnHeaders.Event || "New Chess.com Game",
+          site: data.game.pgnHeaders.Site || "Chess.com",
+          date: new Date(data.game.endTime * 1000).toLocaleDateString('en-CA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          }).replace(/-/g, '.'),
+          round: data.game.pgnHeaders.Round || "?",
+          players: {
+            white: {
+              name: data.game.pgnHeaders.White,
+              avatarUrl: data.players.bottom.avatarUrl,
+              countryId: data.players.bottom.countryId,
+              ratingAfter: parseInt(data.players.bottom.rating),
+              ratingChange: parseInt(data.game.ratingChangeWhite),
+            },
+            black: {
+              name: data.game.pgnHeaders.Black,
+              avatarUrl: data.players.top.avatarUrl,
+              countryId: data.players.top.countryId,
+              ratingAfter: parseInt(data.players.top.rating),
+              ratingChange: parseInt(data.game.ratingChangeBlack),
+            },
+          },
+          result: data.game.pgnHeaders.Result,
           resultMessage: data.game.resultMessage,
+          moves: chess.history(),
+          isLiveGame,
+          timestamps,
           timeControl,
         });
       } else {
         res.status(404).json({ error: "Game not found" });
       }
-    } else if (gameInfo.platform === "Lichess") {
+    } else if (gameSource.from === "Lichess") {
       // unimplemented
       res.status(404).json({ error: "Game not found" });
+    } else if (gameSource.from === "PGN") {
+      let chess = new Chess();
+      chess.loadPgn(pgn);
+
+      res.json({
+        from: "PGN",
+        event: chess.header().Event || "New PGN Game",
+        site: chess.header().Site || "?",
+        date: chess.header().Date || "????.??.??",
+        round: chess.header().Round || "?",
+        players: {
+          white: {
+            name: chess.header().White || "?",
+            avatarUrl: null,
+            countryId: null,
+            ratingAfter: parseInt(chess.header().WhiteElo || 0),
+            ratingChange: 0,
+          },
+          black: {
+            name: chess.header().Black || "?",
+            avatarUrl: null,
+            countryId: null,
+            ratingAfter: parseInt(chess.header().BlackElo || 0),
+            ratingChange: 0,
+          },
+        },
+        result: "*",
+        resultMessage: chess.header().Termination || null,
+        moves: chess.history(),
+        isLiveGame: null,
+        timestamps: null,
+        timeControl: null,
+      });
     }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch game data" });

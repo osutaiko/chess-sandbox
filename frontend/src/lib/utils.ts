@@ -5,10 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(timestamp, includeTime = false) {
+export function formatDate(timestamp) {
   const date = new Date(timestamp * 1000);
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options) + (includeTime ? `, ${date.toLocaleTimeString('en-US')}` : '');
+  return date.toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/-/g, '.');
 };
 
 export function formatTime(time, padMinutes = false) {
@@ -16,9 +19,17 @@ export function formatTime(time, padMinutes = false) {
   const seconds = time % 60;
 
   if (padMinutes) {
-    return `${minutes}:${(seconds < 10) ? "0" : ""}${seconds.toFixed(time < 60 ? 1 : 0)}`;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds.toFixed(time < 60 ? 1 : 0)}`;
   }
-  return `${minutes ? `${minutes}:` : ""}${(minutes && seconds < 10) ? "0" : ""}${seconds.toFixed(time < 60 ? 1 : 0)}`;
+  return `${minutes ? `${minutes}:` : ""}${(minutes && seconds < 10) ? "0" : ""}${seconds.toFixed(1)}`;
+}
+
+export function formatDailyTime(time) {
+  const days = Math.floor(time / 86400);
+  const hours = Math.floor((time - days) / 3600);
+  const minutes = Math.round((time % 3600) / 60);
+
+  return `${days > 0 ? `${days}d` : ""} ${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
 }
 
 export function formatEval(cp, mateIn) {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
@@ -16,7 +16,8 @@ import captureSoundFile from "@/assets/sounds/chess-capture.mp3";
 
 const Game = () => {
   const [searchParams] = useSearchParams();
-  const gameUrl = searchParams.get("url");
+  const urlParam = searchParams.get("url");
+  const pgnParam = searchParams.get("pgn");
 
   const [boardWidth, setBoardWidth] = useState(400);
   const [game, setGame] = useState(null);
@@ -34,11 +35,36 @@ const Game = () => {
   const moveSound = new Audio(moveSoundFile);
   const captureSound = new Audio(captureSoundFile);
 
+  const fetchGame = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let response;
+      if (urlParam) {
+        response = await fetch(`http://localhost:3000/api/game?url=${encodeURIComponent(urlParam)}`);
+      } else if (pgnParam) {
+        response = await fetch(`http://localhost:3000/api/game?pgn=${encodeURIComponent(pgnParam)}`);
+      }
+      
+      if (!response.ok) {
+        throw new Error(response.status === 404 ? 'Game not found' : 'An error occurred');
+      }
+
+      const data = await response.json();
+      setGame(data);
+    } catch (e) {
+      setError(e.message);
+      setGame(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (gameUrl) {
+    if (urlParam || pgnParam) {
       fetchGame();
     }
-  }, [gameUrl]);
+  }, [urlParam, pgnParam]);
 
   const playMoveSound = (move) => {
     const audio = move.includes("x") ? captureSound : moveSound;
@@ -64,26 +90,6 @@ const Game = () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
-  const fetchGame = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`http://localhost:3000/api/game?url=${encodeURIComponent(gameUrl)}`);
-      
-      if (!response.ok) {
-        throw new Error(response.status === 404 ? 'Game not found' : 'An error occurred');
-      }
-
-      const data = await response.json();
-      setGame(data);
-    } catch (e) {
-      setError(e.message);
-      setGame(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const chess = chessRef.current;
@@ -190,18 +196,22 @@ const Game = () => {
       <div ref={chessboardContainerRef} className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
         <Card className="flex flex-row items-center justify-between p-2">
           <MiniProfile user={game.players.black} ratingChange={game.players.black.ratingChange} fen={fen} />
-          <ChessClock
-            timeLeft={currentPly < 2 ? game.timeControl.base : game.timestamps[Math.floor((currentPly) / 2) * 2 - 1]}
-            isToMove={currentPly > 0 && currentPly % 2 === 0}
-          />
+          {game.isLiveGame && game.timeControl &&
+            <ChessClock
+              timeLeft={currentPly < 2 ? game.timeControl.base : game.timestamps[Math.floor((currentPly) / 2) * 2 - 1]}
+              isToMove={currentPly > 0 && currentPly % 2 === 0}
+            />
+          }
         </Card>
         <Chessboard position={fen} animationDuration={150} boardOrientation={boardOrientation} boardWidth={boardWidth} />
         <Card className="flex flex-row items-center justify-between p-2">
           <MiniProfile user={game.players.white} ratingChange={game.players.white.ratingChange} fen={fen} />
-          <ChessClock
-            timeLeft={currentPly < 1 ? game.timeControl.base : game.timestamps[Math.floor((currentPly - 1) / 2) * 2]}
-            isToMove={currentPly > 0 && currentPly % 2 === 1}
-          />
+          {game.isLiveGame && game.timeControl &&
+            <ChessClock
+              timeLeft={currentPly < 1 ? game.timeControl.base : game.timestamps[Math.floor((currentPly - 1) / 2) * 2]}
+              isToMove={currentPly > 0 && currentPly % 2 === 1}
+            />
+          }
         </Card>
       </div>
       <div className="flex flex-col gap-4 w-1/3">

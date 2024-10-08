@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import { evalToWhiteWinProb, getMoveCategoryBgColor } from "@/lib/utils";
 
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,11 +10,18 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 
+import { CartesianGrid, Line, LineChart, Area, AreaChart, XAxis, YAxis } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
 const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, setMoveAnalyses, reportStatus, setReportStatus }) => {
   const [reportDepth, setReportDepth] = useState(12);
   const [reportProgress, setReportProgress] = useState(0);
-  const [whiteReport, setWhiteReport] = useState({ accuracy: 0, averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
-  const [blackReport, setBlackReport] = useState({ accuracy: 0, averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
+  const [whiteReport, setWhiteReport] = useState({ averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
+  const [blackReport, setBlackReport] = useState({ averageCpLoss: 0, moveCount: 0, inaccuracyCount: 0, mistakeCount: 0, blunderCount: 0 });
 
   const runGameReport = () => {
     setReportStatus("running");
@@ -76,7 +82,7 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
         moveCategory = "blunder";
       } else if (winProbLoss > 0.12) {
         moveCategory = "mistake";
-      } else if (winProbLoss > 0.05) {
+      } else if (winProbLoss > 0.06) {
         moveCategory = "inaccuracy";
       } else {
         moveCategory = "good";
@@ -149,7 +155,6 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
       }
 
       setWhiteReport({
-        accuracy: (1 - whiteTotalWinProbLoss / whiteMoveCount) * 100,
         averageCpLoss: Math.max(whiteTotalCpLoss / whiteMoveCount, 0),
         moveCount: whiteMoveCount,
         inaccuracyCount: whiteInaccuracyCount,
@@ -158,7 +163,6 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
       });
 
       setBlackReport({
-        accuracy: (1 - blackTotalWinProbLoss / blackMoveCount) * 100,
         averageCpLoss: Math.max(blackTotalCpLoss / blackMoveCount, 0),
         moveCount: blackMoveCount,
         inaccuracyCount: blackInaccuracyCount,
@@ -176,6 +180,16 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
       engineWorker.postMessage("stop");
       engineWorker.terminate();
     };
+  };
+
+  const CustomDot = (props) => {
+    const { cx, cy, index, currentPly } = props;
+    if (index === currentPly - 1) {
+      return (
+        <circle cx={cx} cy={cy} r={3} stroke="hsl(var(--primary))" strokeWidth={3} />
+      );
+    }
+    return null;
   };
 
   return (
@@ -217,21 +231,64 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                 <h2>: {moveAnalyses[currentPly - 1].moveCategory}</h2>
               </div>
             }
+
+            <ChartContainer
+              config={{
+                winProb: {
+                  label: "White Win Probability",
+                },
+              }}
+              className="min-h-[100px] h-[200px] w-full"
+            >
+              <LineChart
+                accessibilityLayer
+                data={moveAnalyses?.map((analysis, index) => ({
+                  moveNumber: Math.floor((index + 2) / 2), // Represent full moves
+                  winProb: evalToWhiteWinProb(analysis.evalAfterMove) * 100,
+                }))}
+                margin={{ left: 12, right: 12 }}
+              >
+                <CartesianGrid stroke="hsl(var(--accent))" vertical={false} />
+                <XAxis
+                  dataKey="moveNumber"
+                  tickMargin={8}
+                  ticks={[1, ...Array.from({ length: Math.floor(game.moves.length / 10) }, (_, i) => (i + 1) * 10), Math.floor(game.moves.length / 2)]}
+                />
+                <YAxis
+                  domain={[-5, 105]}
+                  ticks={[0, 25, 50, 75, 100]}
+                  label={{ value: "White win%", angle: -90, position: "insideLeft" }}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                
+                <Line
+                  dataKey="winProb"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={3}
+                  dot={<CustomDot currentPly={currentPly} />} // Use the custom dot component
+                  type="linear"
+                />
+
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+              </LineChart>
+            </ChartContainer>
+
             <div className="grid grid-cols-2">
               <div className="flex flex-col gap-0.5">
                 <h3>White</h3>
-                <p>Accuracy: {whiteReport.accuracy.toFixed(2)}%</p>
-                <p>ACL: {whiteReport.averageCpLoss.toFixed(2)}</p>
-                <p>Move Count: {whiteReport.moveCount}</p>
+                <p>ACPL: {whiteReport.averageCpLoss.toFixed(2)}</p>
+                <p>Move count: {whiteReport.moveCount}</p>
                 <p>Inaccuracies: {whiteReport.inaccuracyCount}</p>
                 <p>Mistakes: {whiteReport.mistakeCount}</p>
                 <p>Blunders: {whiteReport.blunderCount}</p>
               </div>
               <div className="flex flex-col gap-0.5">
                 <h3>Black</h3>
-                <p>Accuracy: {blackReport.accuracy.toFixed(2)}%</p>
-                <p>ACL: {blackReport.averageCpLoss.toFixed(2)}</p>
-                <p>Move Count: {blackReport.moveCount}</p>
+                <p>ACPL: {blackReport.averageCpLoss.toFixed(2)}</p>
+                <p>Move count: {blackReport.moveCount}</p>
                 <p>Inaccuracies: {blackReport.inaccuracyCount}</p>
                 <p>Mistakes: {blackReport.mistakeCount}</p>
                 <p>Blunders: {blackReport.blunderCount}</p>

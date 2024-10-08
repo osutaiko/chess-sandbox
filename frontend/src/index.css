@@ -575,6 +575,11 @@ video {
   --input: 325 27% 50%;
   --ring: 325 69% 53%;
   --radius: 0.5rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
   --inaccuracy: 50 100% 40%;
   --mistake: 28 80% 50%;
   --blunder: 0 50% 50%;
@@ -832,6 +837,11 @@ small {
   width: 100%;
 }
 
+.w-min {
+  width: -moz-min-content;
+  width: min-content;
+}
+
 .min-w-\[8rem\] {
   min-width: 8rem;
 }
@@ -900,6 +910,10 @@ small {
   resize: both;
 }
 
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .grid-cols-\[100px_1fr\] {
   grid-template-columns: 100px 1fr;
 }
@@ -912,8 +926,8 @@ small {
   grid-template-columns: 40px 1fr 1fr 0.5fr;
 }
 
-.grid-cols-\[60px_60px_1fr\] {
-  grid-template-columns: 60px 60px 1fr;
+.grid-cols-\[60px_70px_1fr\] {
+  grid-template-columns: 60px 70px 1fr;
 }
 
 .flex-row {
@@ -1232,11 +1246,6 @@ small {
   line-height: 2rem;
 }
 
-.text-3xl {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-}
-
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -1273,6 +1282,10 @@ small {
   color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
+.text-blunder {
+  color: hsl(var(--blunder));
+}
+
 .text-card-foreground {
   color: hsl(var(--card-foreground));
 }
@@ -1287,6 +1300,14 @@ small {
 
 .text-foreground {
   color: hsl(var(--foreground));
+}
+
+.text-inaccuracy {
+  color: hsl(var(--inaccuracy));
+}
+
+.text-mistake {
+  color: hsl(var(--mistake));
 }
 
 .text-muted-foreground {
