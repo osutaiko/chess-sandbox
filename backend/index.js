@@ -65,7 +65,7 @@ app.get("/api/game", async (req, res) => {
     return res.status(400).json({ error: "Unsupported or invalid game URL" });
   }
 
-  const applyMoves = (chess, e) => {
+  const applyTcn = (chess, e) => {
     var T = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?{~}(^)[_]@#$,./&-*++=";
     var c, a, g = e.length, f = [];
     for (c = 0; c < g; c += 2) {
@@ -100,25 +100,13 @@ app.get("/api/game", async (req, res) => {
       if (response.ok) {
         const data = await response.json();
         let chess = new Chess();
-
-        applyMoves(chess, data.game.moveList);
+        applyTcn(chess, data.game.moveList);
 
         const isLiveGame = data.game.isLiveGame;
-        
-        const timestamps = isLiveGame ?
-          data.game.moveTimestamps.split(",").map((ts) => parseFloat(ts) / 10) :
-          data.game.timestamps.map((ts) => Math.floor(ts / 10));
-
-        const timeControl = isLiveGame ? {
-          base: Math.round(data.game.baseTime1 / 10),
-          increment: Math.round(data.game.timeIncrement1 / 10),
-        } : {
-          daysPerTurn: data.game.daysPerTurn,
-        };
 
         res.json({
           from: "Chess.com",
-          event: data.game.pgnHeaders.Event || "New Chess.com Game",
+          event: data.game.pgnHeaders.Event || "Chess.com Game",
           site: data.game.pgnHeaders.Site || "Chess.com",
           date: new Date(data.game.endTime * 1000).toLocaleDateString('en-CA', {
             year: 'numeric',
@@ -128,60 +116,68 @@ app.get("/api/game", async (req, res) => {
           round: data.game.pgnHeaders.Round || "?",
           players: {
             white: {
-              name: data.game.pgnHeaders.White,
-              avatarUrl: data.players.bottom.avatarUrl,
-              countryId: data.players.bottom.countryId,
-              ratingAfter: parseInt(data.players.bottom.rating),
-              ratingChange: parseInt(data.game.ratingChangeWhite),
+              name: data.game.pgnHeaders.White || "White",
+              title: data.players.bottom.chessTitle || null,
+              avatarUrl: data.players.bottom.avatarUrl || null,
+              countryId: data.players.bottom.countryId || null,
+              ratingAfter: parseInt(data.players.bottom.rating) || "?",
+              ratingChange: parseInt(data.game.ratingChangeWhite) || null,
             },
             black: {
-              name: data.game.pgnHeaders.Black,
-              avatarUrl: data.players.top.avatarUrl,
-              countryId: data.players.top.countryId,
-              ratingAfter: parseInt(data.players.top.rating),
-              ratingChange: parseInt(data.game.ratingChangeBlack),
+              name: data.game.pgnHeaders.Black || "Black",
+              title: data.players.top.chessTitle || null,
+              avatarUrl: data.players.top.avatarUrl || null,
+              countryId: data.players.top.countryId || null,
+              ratingAfter: parseInt(data.players.top.rating) || "?",
+              ratingChange: parseInt(data.game.ratingChangeBlack) || null,
             },
           },
           result: data.game.pgnHeaders.Result,
           resultMessage: data.game.resultMessage,
           moves: chess.history(),
           isLiveGame,
-          timestamps,
-          timeControl,
+          timestamps: isLiveGame ?
+            data.game.moveTimestamps.split(",").map((ts) => parseFloat(ts) / 10) :
+            data.game.timestamps.map((ts) => Math.floor(ts / 10)),
+          timeControl: isLiveGame ? {
+            base: Math.round(data.game.baseTime1 / 10),
+            increment: Math.round(data.game.timeIncrement1 / 10),
+          } : {
+            daysPerTurn: data.game.daysPerTurn,
+          },
         });
       } else {
         res.status(404).json({ error: "Game not found" });
       }
-    } else if (gameSource.from === "Lichess") {
-      // unimplemented
-      res.status(404).json({ error: "Game not found" });
     } else if (gameSource.from === "PGN") {
       let chess = new Chess();
       chess.loadPgn(pgn);
 
       res.json({
         from: "PGN",
-        event: chess.header().Event || "New PGN Game",
+        event: chess.header().Event || "PGN Game",
         site: chess.header().Site || "?",
         date: chess.header().Date || "????.??.??",
         round: chess.header().Round || "?",
         players: {
           white: {
-            name: chess.header().White || "?",
+            name: chess.header().White || "White",
+            title: chess.header().WhiteTitle || null,
             avatarUrl: null,
             countryId: null,
-            ratingAfter: parseInt(chess.header().WhiteElo || 0),
-            ratingChange: 0,
+            ratingAfter: chess.header().WhiteElo || chess.header().WhiteUSCF || "?",
+            ratingChange: null,
           },
           black: {
-            name: chess.header().Black || "?",
+            name: chess.header().Black || "Black",
+            title: chess.header().BlackTitle || null,
             avatarUrl: null,
             countryId: null,
-            ratingAfter: parseInt(chess.header().BlackElo || 0),
-            ratingChange: 0,
+            ratingAfter: chess.header().BlackElo || chess.header().BlackUSCF || "?",
+            ratingChange: null,
           },
         },
-        result: "*",
+        result: chess.header().Result || "*",
         resultMessage: chess.header().Termination || null,
         moves: chess.history(),
         isLiveGame: null,

@@ -195,7 +195,7 @@ const Game = () => {
       />
       <div ref={chessboardContainerRef} className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
         <Card className="flex flex-row items-center justify-between p-2">
-          <MiniProfile user={game.players.black} ratingChange={game.players.black.ratingChange} fen={fen} />
+          <MiniProfile player={game.players.black} ratingChange={game.players.black.ratingChange} fen={fen} />
           {game.isLiveGame && game.timeControl &&
             <ChessClock
               timeLeft={currentPly < 2 ? game.timeControl.base : game.timestamps[Math.floor((currentPly) / 2) * 2 - 1]}
@@ -203,10 +203,10 @@ const Game = () => {
             />
           }
         </Card>
-        <Chessboard position={fen} animationDuration={150} boardOrientation={boardOrientation} boardWidth={boardWidth} />
+        <Chessboard position={fen} animationDuration={150} boardOrientation={boardOrientation} boardWidth={boardWidth} arePiecesDraggable={false} />
         <Card className="flex flex-row items-center justify-between p-2">
-          <MiniProfile user={game.players.white} ratingChange={game.players.white.ratingChange} fen={fen} />
-          {game.isLiveGame && game.timeControl &&
+          <MiniProfile player={game.players.white} ratingChange={game.players.white.ratingChange} fen={fen} />
+          {game.isLiveGame && 
             <ChessClock
               timeLeft={currentPly < 1 ? game.timeControl.base : game.timestamps[Math.floor((currentPly - 1) / 2) * 2]}
               isToMove={currentPly > 0 && currentPly % 2 === 1}

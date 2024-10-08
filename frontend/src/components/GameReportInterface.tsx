@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 
-import { CartesianGrid, Line, LineChart, Area, AreaChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -265,7 +265,7 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, moveAnalyses, se
                   dataKey="winProb"
                   stroke="hsl(var(--primary))"
                   strokeWidth={3}
-                  dot={<CustomDot currentPly={currentPly} />} // Use the custom dot component
+                  dot={<CustomDot currentPly={currentPly} />}
                   type="linear"
                 />
 

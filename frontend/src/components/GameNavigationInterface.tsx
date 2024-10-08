@@ -26,7 +26,7 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
     }
   }, [currentPly]);
 
-  let timeControlString = game.event;
+  let timeControlString = "";
   if (game.timeControl) {
     if (game.isLiveGame) {
       const timeControlCategory = game.timeControl.base < 180 ? "Bullet" :
@@ -34,18 +34,18 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
   
       const baseString = game.timeControl.base < 60 ? `${game.timeControl.base} sec` : `${game.timeControl.base / 60}`;
       const incString = game.timeControl.increment.toString();
-      timeControlString = `${timeControlCategory}: ${baseString}+${incString}`;
+      timeControlString = `${timeControlCategory} ${baseString}+${incString}`;
     } else {
-      timeControlString = `Daily: ${game.timeControl.daysPerTurn} day${game.timeControl.daysPerTurn === 1 ? "" : "s"}/move`
+      timeControlString = `Daily ${game.timeControl.daysPerTurn} day${game.timeControl.daysPerTurn === 1 ? "" : "s"}/move`
     }
   }
 
   return (
-    <Card className="w-1/4 flex flex-col h-full">
+    <Card className="w-min flex flex-col h-full">
       <div className="p-4">
-        <h3>{timeControlString}</h3>
+        <h3>{game.event}{timeControlString ? ` - ${timeControlString}` : ""}</h3>
         <p>Date: {game.date}</p>
-        <p>{game.resultMessage}</p>
+        <p>Result: {game.resultMessage || game.result}</p>
       </div>
       <Separator />
       <ScrollArea className="flex-grow py-2">
@@ -69,7 +69,7 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
               }
 
               return (
-                <div key={index} className="select-none grid grid-cols-[40px_1fr_1fr_0.5fr] gap-1 items-center">
+                <div key={index} className={`select-none grid ${game.timeControl && game.timestamps ? "grid-cols-[40px_1fr_1fr_0.5fr]" : "grid-cols-[40px_1fr_1fr]"} gap-1 items-center`}>
                   <p>{moveNumber}.</p>
 
                   {/* White's move */}
@@ -104,7 +104,7 @@ const GameNavigationInterface = ({ game, moveAnalyses, currentPly, setCurrentPly
                   )}
 
                   {/* Timestamps */}
-                  {game.timestamps && game.timeControl &&
+                  {game.timeControl && game.timestamps &&
                     <div className="flex flex-col">
                       <small className="text-end">{whiteMoveTime}</small>
                       {nextMove && <small className="text-end">{blackMoveTime}</small>}
