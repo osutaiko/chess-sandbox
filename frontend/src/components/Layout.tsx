@@ -6,7 +6,7 @@ const Layout = () => {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen select-none">
       {location.pathname === "/" ?
         <header className="fixed top-0 right-0 p-8">
           <Link to="https://github.com/osutaiko/pawn-pulse">

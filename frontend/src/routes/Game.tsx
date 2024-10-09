@@ -195,7 +195,7 @@ const Game = () => {
   }
 
   return (
-    <div className="flex flex-row select-none gap-5 w-full h-[85vh]">
+    <div className="flex flex-row gap-4 w-full h-[85vh]">
       <GameNavigationInterface
         game={game}
         moveAnalyses={moveAnalyses}
@@ -205,7 +205,7 @@ const Game = () => {
         handleFlipBoardOrientation={handleFlipBoardOrientation}
         reportStatus={reportStatus}
       />
-      <div className={`flex gap-3 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
+      <div className={`flex gap-4 h-full ${boardOrientation === "white" ? "flex-col" : "flex-col-reverse"}`}>
         <Card className="flex flex-row items-center justify-between p-2">
           <MiniProfile player={game.players.black} color="black" fen={fen} />
           {game.isLiveGame && game.timeControl &&

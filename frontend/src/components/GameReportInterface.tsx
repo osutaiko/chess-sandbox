@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import { evalToWhiteWinProb, createWinProbLossBuckets } from "@/lib/utils";
@@ -12,7 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -28,17 +27,30 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, se
   const [whiteReport, setWhiteReport] = useState({ averageCpLoss: 0, moveCount: 0, counts: { best: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0 } });
   const [blackReport, setBlackReport] = useState({ averageCpLoss: 0, moveCount: 0, counts: { best: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0 } });
 
+  const BEST_LENIENCY = 0.01;
   const INACCURACY_THRESHOLD = 0.06;
   const MISTAKE_THRESHOLD = 0.12;
   const BLUNDER_THRESHOLD = 0.20;
 
+  const workerRef = useRef(null);
+
+  useEffect(() => {
+    workerRef.current = new Worker("/stockfish-16.1-lite-single.js");
+    
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.postMessage("stop");
+        workerRef.current.terminate();
+      }
+    };
+  }, []);
+
   const runGameReport = () => {
     setReportStatus("running");
-    const engineWorker = new Worker("/stockfish-16.1-lite-single.js");
   
     const getEval = (fen, depth) => {
       return new Promise((resolve) => {
-        engineWorker.onmessage = (event) => {
+        workerRef.current.onmessage = (event) => {
           const message = event.data;
   
           if (message.startsWith(`info depth ${depth}`)) {
@@ -64,9 +76,9 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, se
           }
         };
   
-        engineWorker.postMessage("uci");
-        engineWorker.postMessage(`position fen ${fen}`);
-        engineWorker.postMessage(`go depth ${depth}`);
+        workerRef.current.postMessage("uci");
+        workerRef.current.postMessage(`position fen ${fen}`);
+        workerRef.current.postMessage(`go depth ${depth}`);
       });
     };
   
@@ -94,7 +106,7 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, se
         moveCategory = "mistake";
       } else if (winProbLoss > INACCURACY_THRESHOLD) {
         moveCategory = "inaccuracy";
-      } else if (winProbLoss > 0.001) {
+      } else if (winProbLoss > BEST_LENIENCY) {
         moveCategory = "good";
       } else {
         moveCategory = "best";
@@ -171,11 +183,6 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, se
     };
   
     analyzeAllMoves();
-  
-    return () => {
-      engineWorker.postMessage("stop");
-      engineWorker.terminate();
-    };
   };
 
   const clearGameReport = () => {
@@ -204,9 +211,12 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, se
           </Button>
         }
         {reportStatus === "complete" && 
-          <Button size="sm" onClick={() => clearGameReport()} className="-my-2">
-            Clear
-          </Button>
+          <div className="flex flex-row gap-2">
+            <p>Report depth: {reportDepth}</p>
+            <Button size="sm" onClick={() => clearGameReport()} className="-my-2">
+              Clear
+            </Button>
+          </div>
         }
       </div>
       <Separator />
@@ -334,11 +344,8 @@ const GameReportInterface = ({ game, currentPly, setCurrentPly, reportStatus, se
 
                       moveAnalyses.forEach((analysis, index) => {
                         const isWhite = index % 2 === 0;
-                        const winProbLoss = isWhite
-                          ? Math.min(Math.max(evalToWhiteWinProb(analysis.evalBeforeMove) - evalToWhiteWinProb(analysis.evalAfterMove), 0), 1)
-                          : Math.min(Math.max(evalToWhiteWinProb(analysis.evalAfterMove) - evalToWhiteWinProb(analysis.evalBeforeMove), 0), 1);
 
-                        const bucketIndex = winProbLoss < 0.001 ? 0 : Math.min(Math.floor(winProbLoss / 0.02) + 1, buckets.length - 1);
+                        const bucketIndex = analysis.winProbLoss < BEST_LENIENCY ? 0 : Math.min(Math.floor(analysis.winProbLoss / 0.02) + 1, buckets.length - 1);
                         if (isWhite) {
                           buckets[bucketIndex].white++;
                         } else {
