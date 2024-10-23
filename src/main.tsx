@@ -8,6 +8,8 @@ import "./index.css";
 
 import Layout from "./components/Layout";
 import Home from "./routes/Home";
+import Create from "./routes/Create";
+import Browse from "./routes/Browse";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +18,14 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+      },
+      {
+        path: "/create",
+        element: <Create />,
+      },
+      {
+        path: "/browse",
+        element: <Browse />,
       },
     ],
   },

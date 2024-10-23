@@ -45,9 +45,10 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        inaccuracy: 'hsl(var(--inaccuracy))',
-        mistake: 'hsl(var(--mistake))',
-        blunder: 'hsl(var(--blunder))',
+        square: {
+          dark: "hsl(var(--square-dark))",
+          light: "hsl(var(--square-light))",
+        }
       },
       borderRadius: {
         lg: `var(--radius)`,

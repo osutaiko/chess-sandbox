@@ -1,5 +1,5 @@
 
-const Home = () => {
+const Browse = () => {
   return (
     <div className="">
       <p>azDSfg</p>
@@ -7,4 +7,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Browse;

@@ -18,26 +18,29 @@
 
 @layer base {
   :root {
-    --background: 224 10% 5%;
-    --foreground: 224 0% 90%;
-    --card: 224 0% 0%;
-    --card-foreground: 224 0% 90%;
-    --popover: 224 10% 5%;
-    --popover-foreground: 224 0% 90%;
-    --primary: 224 100% 31%;
+    --background: 39 31% 10%;
+    --foreground: 39 5% 90%;
+    --card: 39 31% 10%;
+    --card-foreground: 39 5% 90%;
+    --popover: 39 31% 5%;
+    --popover-foreground: 39 5% 90%;
+    --primary: 39 100% 38%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 224 10% 10%;
+    --secondary: 39 30% 20%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 186 10% 15%;
-    --muted-foreground: 224 0% 60%;
-    --accent: 186 10% 15%;
-    --accent-foreground: 224 0% 90%;
-    --destructive: 0 50% 30%;
-    --destructive-foreground: 224 0% 90%;
-    --border: 224 20% 18%;
-    --input: 224 20% 18%;
-    --ring: 224 100% 31%;
+    --muted: 1 30% 25%;
+    --muted-foreground: 39 5% 60%;
+    --accent: 1 30% 25%;
+    --accent-foreground: 39 5% 90%;
+    --destructive: 0 50% 40%;
+    --destructive-foreground: 39 5% 90%;
+    --border: 39 30% 40%;
+    --input: 39 30% 40%;
+    --ring: 39 100% 38%;
     --radius: 0.5rem;
+
+    --square-light: 26 30% 40%;
+    --square-dark: 26 30% 20%;
   }
 }
 
@@ -46,7 +49,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background;
+    @apply bg-background text-primary-foreground;
     font-family: 'Geist', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
@@ -57,10 +60,10 @@
     @apply font-bold text-2xl text-primary-foreground;
   }
   h3 {
-    @apply text-primary-foreground;
+    @apply text-xl text-primary-foreground;
   }
   h4 {
-    @apply text-sm text-primary-foreground;
+    @apply text-primary-foreground;
   }
   p {
     @apply text-sm text-muted-foreground;
