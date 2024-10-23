@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Geist';
+  src: url("/src/assets/fonts/Geist-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GeistMono';
+  src: url("/src/assets/fonts/GeistMono-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@layer base {
+  :root {
+    --background: 224 10% 5%;
+    --foreground: 224 0% 90%;
+    --card: 224 0% 0%;
+    --card-foreground: 224 0% 90%;
+    --popover: 224 10% 5%;
+    --popover-foreground: 224 0% 90%;
+    --primary: 224 100% 31%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 224 10% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 186 10% 15%;
+    --muted-foreground: 224 0% 60%;
+    --accent: 186 10% 15%;
+    --accent-foreground: 224 0% 90%;
+    --destructive: 0 50% 30%;
+    --destructive-foreground: 224 0% 90%;
+    --border: 224 20% 18%;
+    --input: 224 20% 18%;
+    --ring: 224 100% 31%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background;
+    font-family: 'Geist', sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1 {
+    @apply font-bold text-6xl text-primary-foreground;
+  }
+  h2 {
+    @apply font-bold text-2xl text-primary-foreground;
+  }
+  h3 {
+    @apply text-primary-foreground;
+  }
+  h4 {
+    @apply text-sm text-primary-foreground;
+  }
+  p {
+    @apply text-sm text-muted-foreground;
+  }
+  small {
+    font-size: 0.625rem;
+    line-height: 0.75rem;
+    @apply text-muted-foreground;
+  }
+}
+
+.code, pre, .font-mono {
+  font-family: 'Geist-Mono', monospace;
+}
+
+.lucide {
+  @apply text-primary-foreground;
+}
