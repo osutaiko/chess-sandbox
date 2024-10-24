@@ -127,13 +127,11 @@ const Create = () => {
 
       <div className="flex flex-col gap-8 flex-none w-[400px] pl-8">
         <h3>Pieces</h3>
-        {variant.pieces.forEach((piece) => {
-          return (
-            <Card>
-
-            </Card>
-          );
-        })}
+        {variant.pieces.map((piece) => (
+        <Card key={piece.id}>
+          <h3>{piece.name}</h3>
+        </Card>
+      ))}
       </div>
     </div>
   );
