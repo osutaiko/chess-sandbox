@@ -61,7 +61,7 @@ export const DEFAULT_VARIANT = {
         {
           type: "ride",
           captureTargets: ['p', 'n', 'b', 'r', 'q'],
-          conditions: [],
+          conditions: ["capture only"],
           offsets: [[1, 1], [-1, 1]],
           range: 1,
         },
@@ -85,7 +85,7 @@ export const DEFAULT_VARIANT = {
       isRoyal: false,
       moves: [
         {
-          type: "ride",
+          type: "leap",
           captureTargets: ['p', 'n', 'b', 'r', 'q'],
           conditions: [],
           offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
@@ -255,4 +255,33 @@ export const getSquareName = (width, height, rowIndex, colIndex) => {
   const rank = height - rowIndex;
 
   return `${file}${rank}`;
+};
+
+export const getReachableSquares = (moves, radius) => {
+  const squares = Array.from({ length: radius * 2 + 1 }, () => 
+    Array.from({ length: radius * 2 + 1 }, () => ({
+      canMove: false,
+      canCapture: false,
+      onlyOnInitial: false,
+    }))
+  );
+
+  moves.forEach((move) => {
+    if (move.type === "ride") {
+      move.offsets.forEach(([dx, dy]) => {
+        const x = radius + dx;
+        const y = radius - dy;
+
+        if (x >= 0 && x < squares.length && y >= 0 && y < squares[0].length) {
+          squares[y][x] = {
+            canMove: move.conditions.some((condition) => condition === "capture only") ? false : true,
+            canCapture: move.captureTargets.length > 0 ? true : false,
+            onlyOnInitial: move.conditions.some((condition) => condition === "initial") ? true : false,
+          };
+        }
+      });
+    }
+  });
+
+  return squares;
 };

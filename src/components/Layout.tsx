@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 const Layout = () => {
   return (
     <div className="flex flex-col min-h-screen select-none">
-      <header className="flex flex-row px-8 py-6 justify-between items-center w-full border-b">
+      <header className="flex flex-row px-8 py-6 justify-between items-center w-full border-b h-[72px]">
         <Link to="/" className="flex flex-row gap-4">
           <Castle />
           <h3>Chess Sandbox</h3>
@@ -23,7 +23,7 @@ const Layout = () => {
           </Link>
         </div>
       </header>
-      <main>
+      <main className="flex-grow overflow-hidden">
         <Outlet />
       </main>
     </div>
