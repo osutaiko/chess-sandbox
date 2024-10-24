@@ -20,7 +20,7 @@ export const DEFAULT_VARIANT = {
         color = 0;
       }
 
-      row.push({ square, piece: piece || null, color: color || null });
+      row.push({ square, piece: piece ?? null, color: color ?? null });
     }
     return row;
   }),
@@ -31,6 +31,9 @@ export const DEFAULT_VARIANT = {
 
       // Display name
       name: "Pawn",
+
+      // SVG title in assets (without color)
+      sprite: "pawn",
 
       // Not allowed to be captured, or the capture would result in a loss
       isRoyal: false,
@@ -78,6 +81,7 @@ export const DEFAULT_VARIANT = {
     {
       id: 'n',
       name: "Knight",
+      sprite: "knight",
       isRoyal: false,
       moves: [
         {
@@ -93,6 +97,7 @@ export const DEFAULT_VARIANT = {
     {
       id: 'b',
       name: "Bishop",
+      sprite: "bishop",
       isRoyal: false,
       moves: [
         {
@@ -109,6 +114,7 @@ export const DEFAULT_VARIANT = {
     {
       id: 'r',
       name: "Rook",
+      sprite: "rook",
       isRoyal: false,
       moves: [
         {
@@ -125,6 +131,7 @@ export const DEFAULT_VARIANT = {
     {
       id: 'q',
       name: "Queen",
+      sprite: "queen",
       isRoyal: false,
       moves: [
         {
@@ -141,6 +148,7 @@ export const DEFAULT_VARIANT = {
     {
       id: 'k',
       name: "King",
+      sprite: "king",
       isRoyal: true,
       moves: [
         {

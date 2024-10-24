@@ -3,9 +3,10 @@ const Chessboard = ({ variant }) => {
   const height = variant.board.length;
 
   const renderSquare = (row, col) => {
-    const isBlack = (height - row + col) % 2 === 1;
+    const isSquareBlack = (height - row + col) % 2 === 1;
     const isValidSquare = variant.board[row][col].square ? true : false;
-    const piece = variant.board[row][col].piece;
+    const pieceColor = variant.board[row][col].color;
+    const pieceObj = variant.board[row][col].piece ? variant.pieces.find(p => p.id === variant.board[row][col].piece) : null;
 
     const rankLabel = col === width - 1 ? height - row : null;
     const fileLabel = row === height - 1 ? String.fromCharCode(97 + col) : null;
@@ -13,12 +14,13 @@ const Chessboard = ({ variant }) => {
     return (
       <div
         key={variant.board[row][col].square}
-        className={`relative aspect-square ${isValidSquare ? (isBlack ? "bg-square-dark" : "bg-square-light") : ""} flex items-center justify-center`}
+        className={`relative aspect-square ${isValidSquare ? (isSquareBlack ? "bg-square-dark" : "bg-square-light") : ""} flex flex-col items-center justify-center`}
       >
-        {piece && (
-          <span className={`text-xl ${piece.color === 1 ? "text-white": "text-black"}`}>
-            {piece}
-          </span>
+        {pieceObj && (
+          <img
+            src={`/src/assets/images/pieces/${pieceObj.sprite}-${pieceColor}.svg`}
+            className="w-full aspect-square"
+          />
         )}
         {rankLabel && (
           <span className="absolute top-0.5 right-1 text-xs text-muted-foreground">

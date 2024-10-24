@@ -575,8 +575,8 @@ video {
   --input: 39 30% 40%;
   --ring: 39 100% 38%;
   --radius: 0.5rem;
-  --square-light: 26 30% 40%;
-  --square-dark: 26 30% 20%;
+  --square-light: 26 40% 50%;
+  --square-dark: 26 40% 30%;
 }
 
 * {
@@ -654,6 +654,14 @@ small {
   inset: 0px;
 }
 
+.bottom-0 {
+  bottom: 0px;
+}
+
+.left-1 {
+  left: 0.25rem;
+}
+
 .left-2 {
   left: 0.5rem;
 }
@@ -662,8 +670,16 @@ small {
   left: 50%;
 }
 
+.right-1 {
+  right: 0.25rem;
+}
+
 .right-4 {
   right: 1rem;
+}
+
+.top-0\.5 {
+  top: 0.125rem;
 }
 
 .top-4 {
@@ -1266,11 +1282,6 @@ small {
   line-height: 1.25rem;
 }
 
-.text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
@@ -1295,11 +1306,6 @@ small {
 
 .tracking-tight {
   letter-spacing: -0.025em;
-}
-
-.text-black {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 .text-card-foreground {
@@ -1336,11 +1342,6 @@ small {
 
 .text-secondary-foreground {
   color: hsl(var(--secondary-foreground));
-}
-
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .underline-offset-4 {
