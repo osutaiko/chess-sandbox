@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { z } from "zod";
 
-import { DEFAULT_BOARD, resizeBoard } from "@/lib/chess";
+import { DEFAULT_VARIANT, resizeBoard } from "@/lib/chess";
+import Chessboard from "@/components/Chessboard";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import Chessboard from "@/components/Chessboard";
+import { Card } from "@/components/ui/card";
 
 const configSchema = z.object({
   name: z.string().default("New Variant"),
@@ -31,7 +32,7 @@ const Create = () => {
     height: 8,
   });
   const [configErrors, setConfigErrors] = useState({});
-  const [board, setBoard] = useState(DEFAULT_BOARD);
+  const [variant, setVariant] = useState(DEFAULT_VARIANT);console.log(variant)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,8 +45,8 @@ const Create = () => {
   };
 
   const updateBoard = () => {
-    const newBoard = resizeBoard(board, config.width, config.height);
-    setBoard(newBoard);
+    const newVariant = resizeBoard(variant, config.width, config.height);
+    setVariant(newVariant);
   };
 
   const validateConfig = () => {
@@ -90,7 +91,7 @@ const Create = () => {
             {configErrors.description && <p className="text-destructive">{configErrors.description}</p>}
           </Label>
           <div className="flex flex-row gap-4">
-            <Label className="flex flex-col gap-2">
+            <Label className="flex flex-col gap-2 w-full">
               Width (Files)
               <Input
                 type="number"
@@ -102,7 +103,7 @@ const Create = () => {
               />
               {configErrors.width && <p className="text-destructive">{configErrors.width}</p>}
             </Label>
-            <Label className="flex flex-col gap-2">
+            <Label className="flex flex-col gap-2 w-full">
               Height (Ranks)
               <Input
                 type="number"
@@ -121,11 +122,18 @@ const Create = () => {
 
       <div className="flex flex-col gap-4 w-full px-8">
         <h3>Board Setup</h3>
-        <Chessboard board={board} />
+        <Chessboard variant={variant} />
       </div>
 
       <div className="flex flex-col gap-8 flex-none w-[400px] pl-8">
         <h3>Pieces</h3>
+        {variant.pieces.forEach((piece) => {
+          return (
+            <Card>
+
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,19 +1,19 @@
-const Chessboard = ({ board }) => {
-  const width = board[0].length;
-  const height = board.length;
+const Chessboard = ({ variant }) => {
+  const width = variant.board[0].length;
+  const height = variant.board.length;
 
   const renderSquare = (row, col) => {
     const isBlack = (height - row + col) % 2 === 1;
-    const isPlayable = board[row][col].square ? true : false;
-    const piece = board[row][col].piece;
+    const isValidSquare = variant.board[row][col].square ? true : false;
+    const piece = variant.board[row][col].piece;
 
     const rankLabel = col === width - 1 ? height - row : null;
     const fileLabel = row === height - 1 ? String.fromCharCode(97 + col) : null;
 
     return (
       <div
-        key={board[row][col].square}
-        className={`relative aspect-square ${isPlayable ? (isBlack ? "bg-square-dark" : "bg-square-light") : ""} flex items-center justify-center`}
+        key={variant.board[row][col].square}
+        className={`relative aspect-square ${isValidSquare ? (isBlack ? "bg-square-dark" : "bg-square-light") : ""} flex items-center justify-center`}
       >
         {piece && (
           <span className={`text-xl ${piece.color === 1 ? "text-white": "text-black"}`}>
