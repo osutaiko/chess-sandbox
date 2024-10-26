@@ -99,7 +99,7 @@ const PieceCraftDialog = ({
             <div className="flex flex-col gap-4">
               {isCreateMode && <h4>Piece Configuration</h4>}
               <Label className="flex flex-col gap-2 w-min">
-                Sprite
+                <h4>Sprite</h4>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
@@ -151,7 +151,7 @@ const PieceCraftDialog = ({
               </Label>
               <div className="flex flex-row gap-2">
                 <Label className="flex flex-col gap-2">
-                  Name
+                  <h4>Name</h4>
                   <Input
                     type="text"
                     name="name"
@@ -163,7 +163,7 @@ const PieceCraftDialog = ({
                   {pieceConfigErrors.name && <p className="text-destructive">{pieceConfigErrors.name}</p>}
                 </Label>
                 <Label className="flex flex-col gap-2">
-                  Abbr.
+                  <h4>Abbr.</h4>
                   <Input
                     type="text"
                     name="id"
@@ -175,7 +175,7 @@ const PieceCraftDialog = ({
                 </Label>
               </div>
               <Label className="flex flex-col gap-2">
-                Description
+                <h4>Description</h4>
                 <Textarea
                   name="description"
                   value={pieceConfig.description}
@@ -184,11 +184,35 @@ const PieceCraftDialog = ({
                 {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
               </Label>
               <Label className="flex flex-col gap-2">
-                Moves
+                <h4>Moves</h4>
                 <PieceMovesBoard isCraftMode={true} piece={piece} />
               </Label>
-              <Label className="flex flex-col gap-2">
-                Advanced
+              <h3>Advanced</h3>
+              {piece.moves.some((move) => Array.isArray(move.conditions) && move.conditions.includes("initial")) &&
+                <Label className="flex flex-row items-center gap-2">
+                  <Checkbox
+                    checked={pieceConfig.isEnPassantTarget} 
+                    onCheckedChange={(isChecked) => {
+                      setPieceConfig((prevConfig) => ({
+                        ...prevConfig,
+                        isEnPassantTarget: isChecked,
+                      }));
+                    }}
+                  />
+                  <h4>Can be captured by <span className="italic">en passant</span> ?</h4>
+                </Label>
+              }
+              <Label className="flex flex-row items-center gap-2">
+                <Checkbox
+                  checked={pieceConfig.isEnPassantCapturer}
+                  onCheckedChange={(isChecked) => {
+                    setPieceConfig((prevConfig) => ({
+                      ...prevConfig,
+                      isEnPassantCapturer: isChecked,
+                    }));
+                  }}
+                />
+                <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>
               </Label>
             </div>
           </div>

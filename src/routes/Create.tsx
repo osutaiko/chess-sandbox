@@ -161,7 +161,7 @@ const Create = () => {
         <ScrollArea>
           <div className="flex flex-col gap-5">
             <Label className="flex flex-col gap-2">
-              Variant Name
+              <h4>Variant Name</h4>
               <Input
                 type="text"
                 name="name"
@@ -172,7 +172,7 @@ const Create = () => {
               {gameConfigErrors.name && <p className="text-destructive">{gameConfigErrors.name}</p>}
             </Label>
             <Label className="flex flex-col gap-2">
-              Description
+              <h4>Description</h4>
               <Textarea
                 name="description"
                 value={gameConfig.description}
@@ -182,7 +182,7 @@ const Create = () => {
             </Label>
             <div className="flex flex-row gap-4">
               <Label className="flex flex-col gap-2 w-full">
-                Width (# of Files)
+                <h4>Width (# of Files)</h4>
                 <Input
                   type="number"
                   name="width"
@@ -194,7 +194,7 @@ const Create = () => {
                 {gameConfigErrors.width && <p className="text-destructive">{gameConfigErrors.width}</p>}
               </Label>
               <Label className="flex flex-col gap-2 w-full">
-                Height (# of Ranks)
+                <h4>Height (# of Ranks)</h4>
                 <Input
                   type="number"
                   name="height"
