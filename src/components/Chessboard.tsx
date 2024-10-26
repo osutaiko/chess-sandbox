@@ -1,25 +1,22 @@
 const Chessboard = ({ variant }) => {
-  const width = variant.board[0].length;
-  const height = variant.board.length;
-
   const renderSquare = (row, col) => {
-    const isSquareDark = (height - row + col) % 2 === 1;
-    const isValidSquare = variant.board[row][col].square ? true : false;
-    const pieceColor = variant.board[row][col].color;
-    const pieceObj = variant.board[row][col].piece ? variant.pieces.find(p => p.id === variant.board[row][col].piece) : null;
+    const isSquareDark = (variant.height - row + col) % 2 === 0;
+    const pieceObj = variant.board[row][col].piece ? 
+      variant.pieces.find(p => p.id === variant.board[row][col].piece) : null;
 
-    const rankLabel = col === width - 1 ? height - row : null;
-    const fileLabel = row === height - 1 ? String.fromCharCode(97 + col) : null;
+    const rankLabel = col === variant.width - 1 ? variant.height - row : null;
+    const fileLabel = row === variant.height - 1 ? String.fromCharCode(97 + col) : null;
 
     return (
       <div
-        key={variant.board[row][col].square}
-        className={`relative aspect-square ${isValidSquare ? (isSquareDark ? "bg-square-dark" : "bg-square-light") : ""} flex flex-col items-center justify-center`}
+        key={`${row}-${col}`}
+        className={`relative aspect-square ${isSquareDark ? "bg-square-dark" : "bg-square-light"} flex flex-col items-center justify-center`}
       >
         {pieceObj && (
           <img
-            src={`/src/assets/images/pieces/${pieceObj.sprite}-${pieceColor}.svg`}
-            className="w-full h-full aspect-square"
+            src={`/src/assets/images/pieces/${pieceObj.sprite}-${variant.board[row][col].color}.svg`}
+            className="aspect-square w-full h-full"
+            alt={pieceObj.id}
           />
         )}
         {rankLabel && (
@@ -38,14 +35,14 @@ const Chessboard = ({ variant }) => {
 
   return (
     <div
-      className="grid rounded-md"
+      className="grid rounded-md overflow-hidden"
       style={{
-        gridTemplateColumns: `repeat(${width}, 1fr)`,
-        gridTemplateRows: `repeat(${height}, 1fr)`,
+        gridTemplateColumns: `repeat(${variant.width}, 1fr)`,
+        gridTemplateRows: `repeat(${variant.height}, 1fr)`,
       }}
     >
-      {Array.from({ length: height }).map((_, row) =>
-        Array.from({ length: width }).map((_, col) => renderSquare(row, col))
+      {Array.from({ length: variant.height }).map((_, row) =>
+        Array.from({ length: variant.width }).map((_, col) => renderSquare(row, col))
       )}
     </div>
   );

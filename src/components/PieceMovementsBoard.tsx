@@ -2,8 +2,8 @@ import { getReachableSquares } from "@/lib/chess";
 
 import { Circle, Play } from "lucide-react";
 
-const PieceMovementsBoard = ({ piece }) => {
-  const radius = 3;
+const PieceMovementsBoard = ({ piece, selectedColor }) => {
+  const radius = 4;
   const width = 2 * radius + 1;
   const height = 2 * radius + 1;
 
@@ -31,18 +31,18 @@ const PieceMovementsBoard = ({ piece }) => {
         key={`${row}-${col}`}
         className={`relative ${
           isSquareDark ? "bg-square-dark" : "bg-square-light"
-        } flex flex-col items-center justify-center w-[25px] aspect-square`}
+        } flex flex-col items-center justify-center w-[18px] aspect-square`}
       >
         {row === radius && col === radius && (
           <img
-            src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
+            src={`/src/assets/images/pieces/${piece.sprite}-${selectedColor}.svg`}
             className="w-full aspect-square"
           />
         )}
         {showMarker && (
           square.onlyOnInitial ? 
-          <Play stroke={markerColor} size={16} /> :
-          <Circle stroke={markerColor} size={16} />
+          <Play stroke={markerColor} size={14} /> :
+          <Circle stroke={markerColor} size={14} />
         )}
       </div>
     );

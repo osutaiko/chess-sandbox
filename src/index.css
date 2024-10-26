@@ -555,25 +555,25 @@ video {
 }
 
 :root {
-  --background: 69 16% 10%;
-  --foreground: 69 5% 90%;
-  --card: 69 16% 10%;
-  --card-foreground: 69 5% 90%;
-  --popover: 69 16% 5%;
-  --popover-foreground: 69 5% 90%;
-  --primary: 69 100% 20%;
+  --background: 255 25% 10%;
+  --foreground: 255 5% 90%;
+  --card: 255 25% 10%;
+  --card-foreground: 255 5% 90%;
+  --popover: 255 25% 5%;
+  --popover-foreground: 255 5% 90%;
+  --primary: 255 71% 53%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 69 16% 20%;
+  --secondary: 255 25% 20%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 31 16% 25%;
-  --muted-foreground: 69 5% 60%;
-  --accent: 31 16% 25%;
-  --accent-foreground: 69 5% 90%;
-  --destructive: 0 50% 50%;
-  --destructive-foreground: 69 5% 90%;
-  --border: 69 20% 50%;
-  --input: 69 20% 50%;
-  --ring: 69 100% 20%;
+  --muted: 217 25% 25%;
+  --muted-foreground: 255 5% 60%;
+  --accent: 217 25% 25%;
+  --accent-foreground: 255 5% 90%;
+  --destructive: 0 50% 40%;
+  --destructive-foreground: 255 5% 90%;
+  --border: 255 25% 40%;
+  --input: 255 25% 40%;
+  --ring: 255 71% 53%;
   --radius: 0.5rem;
   --square-light: 27 35% 55%;
   --square-dark: 38 66% 82%;
@@ -672,10 +672,6 @@ small {
 
 .left-\[50\%\] {
   left: 50%;
-}
-
-.right-0 {
-  right: 0px;
 }
 
 .right-1 {
@@ -793,8 +789,20 @@ small {
   height: 2.25rem;
 }
 
+.h-\[100px\] {
+  height: 100px;
+}
+
 .h-\[1px\] {
   height: 1px;
+}
+
+.h-\[72px\] {
+  height: 72px;
+}
+
+.h-\[calc\(100vh-72px\)\] {
+  height: calc(100vh - 72px);
 }
 
 .h-\[var\(--radix-select-trigger-height\)\] {
@@ -866,16 +874,12 @@ small {
   width: 1px;
 }
 
+.w-\[25px\] {
+  width: 25px;
+}
+
 .w-\[300px\] {
   width: 300px;
-}
-
-.w-\[400px\] {
-  width: 400px;
-}
-
-.w-\[80px\] {
-  width: 80px;
 }
 
 .w-full {
@@ -904,6 +908,10 @@ small {
 
 .shrink-0 {
   flex-shrink: 0;
+}
+
+.flex-grow {
+  flex-grow: 1;
 }
 
 .grow {
@@ -994,6 +1002,10 @@ small {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.25rem;
 }
 
 .gap-1\.5 {
@@ -1194,12 +1206,12 @@ small {
   padding: 0.25rem;
 }
 
-.p-2 {
-  padding: 0.5rem;
-}
-
 .p-2\.5 {
   padding: 0.625rem;
+}
+
+.p-4 {
+  padding: 1rem;
 }
 
 .p-6 {
@@ -1252,6 +1264,11 @@ small {
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .py-6 {
@@ -1319,6 +1336,10 @@ small {
   line-height: 1rem;
 }
 
+.font-bold {
+  font-weight: 700;
+}
+
 .font-medium {
   font-weight: 500;
 }
@@ -1376,9 +1397,12 @@ small {
   color: hsl(var(--secondary-foreground));
 }
 
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
+.text-square-dark {
+  color: hsl(var(--square-dark));
+}
+
+.text-square-light {
+  color: hsl(var(--square-light));
 }
 
 .underline-offset-4 {
