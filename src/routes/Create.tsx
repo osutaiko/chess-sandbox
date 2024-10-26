@@ -4,7 +4,7 @@ import { z } from "zod";
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG, EMPTY_GAME_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard } from "@/lib/chess";
 import Chessboard from "@/components/Chessboard";
-import PieceMovementsBoard from "@/components/PieceMovementsBoard";
+import PieceMovesBoard from "@/components/PieceMovesBoard";
 import DraggablePiece from "@/components/DraggablePiece";
 
 import { Input } from "@/components/ui/input";
@@ -95,7 +95,7 @@ const Create = () => {
   };
 
   const handlePieceConfigSubmit = (isCreateMode, pieceBeforeEditId) => {
-    const errors = {};console.log(pieceBeforeEditId)
+    const errors = {};
 
     if (!pieceConfig.id) {
       errors.id = "One-letter piece abbreviation is required.";
@@ -261,7 +261,7 @@ const Create = () => {
                     <h4>{piece.name} ({piece.id})</h4>
                   </div>
                   <div className="py-4">
-                    <PieceMovementsBoard piece={piece} selectedColor={selectedPieceColor} />
+                    <PieceMovesBoard isCraftMode={false} piece={piece} />
                   </div>
                   <div className="flex flex-col gap-1 p-4">
                     <PieceCraftDialog

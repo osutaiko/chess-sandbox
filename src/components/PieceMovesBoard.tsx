@@ -2,11 +2,10 @@ import { getReachableSquares } from "@/lib/chess";
 
 import { Circle, Play } from "lucide-react";
 
-const PieceMovementsBoard = ({ piece, selectedColor }) => {
+const PieceMovesBoard = ({ isCraftMode, piece }) => {
   const radius = 4;
   const width = 2 * radius + 1;
   const height = 2 * radius + 1;
-
   const reachableSquares = getReachableSquares(piece.moves, radius);
 
   const renderSquare = (row, col) => {
@@ -29,20 +28,18 @@ const PieceMovementsBoard = ({ piece, selectedColor }) => {
     return (
       <div
         key={`${row}-${col}`}
-        className={`relative ${
-          isSquareDark ? "bg-square-dark" : "bg-square-light"
-        } flex flex-col items-center justify-center w-[18px] aspect-square`}
+        className={`relative ${row === radius && col === radius ? "bg-destructive" :  (isSquareDark ? "bg-square-dark" : "bg-square-light")} flex flex-col items-center justify-center ${isCraftMode ? "w-[48px]" : "w-[20px]"} aspect-square`}
       >
-        {row === radius && col === radius && (
+        {row === radius && col === radius && piece.sprite && (
           <img
-            src={`/src/assets/images/pieces/${piece.sprite}-${selectedColor}.svg`}
+            src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
             className="w-full aspect-square"
           />
         )}
         {showMarker && (
           square.onlyOnInitial ? 
-          <Play stroke={markerColor} size={14} /> :
-          <Circle stroke={markerColor} size={14} />
+          <Play stroke={markerColor} className="w-3/5 h-3/5" /> :
+          <Circle stroke={markerColor} className="w-1/2 h-1/2" />
         )}
       </div>
     );
@@ -50,7 +47,7 @@ const PieceMovementsBoard = ({ piece, selectedColor }) => {
 
   return (
     <div
-      className="grid rounded-sm overflow-hidden"
+      className="grid rounded-sm overflow-hidden w-min"
       style={{
         gridTemplateColumns: `repeat(${width}, 1fr)`,
         gridTemplateRows: `repeat(${height}, 1fr)`,
@@ -63,4 +60,4 @@ const PieceMovementsBoard = ({ piece, selectedColor }) => {
   );
 };
 
-export default PieceMovementsBoard;
+export default PieceMovesBoard;
