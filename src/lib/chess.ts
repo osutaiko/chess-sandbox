@@ -98,14 +98,12 @@ export const deletePiece = (variant, pieceId) => {
 
   newVariant.pieces = newVariant.pieces.map(piece => {
     const updatedMoves = piece.moves.map(move => {
-      const updatedCaptureTargets = move.captureTargets.filter(targetId => targetId !== pieceId);
       const updatedTargetPieces = move.type === "castle" ? 
         move.targetPieces.filter(targetId => targetId !== pieceId) : 
         move.targetPieces;
 
       return {
         ...move,
-        captureTargets: updatedCaptureTargets,
         targetPieces: updatedTargetPieces,
       };
     })

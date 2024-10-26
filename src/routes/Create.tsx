@@ -28,16 +28,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { Crown, Plus, SquarePen, Trash2 } from "lucide-react";
-
-const gameConfigSchema = z.object({
-  name: z.string().default("New Variant"),
-  description: z.string().optional(),
-  width: z.number().min(1).max(25),
-  height: z.number().min(1).max(25),
-});
 
 const gameConfigType = {
   name: "text",
@@ -45,15 +39,6 @@ const gameConfigType = {
   width: "number",
   height: "number",
 };
-
-const pieceConfigSchema = z.object({
-  id: z.string().length(1).regex(/^[a-z]$/),
-  name: z.string().default("New Piece"),
-  description: z.string().optional(),
-  sprite: z.string(),
-  isEnPassantTarget: z.boolean(),
-  isEnPassanCapturer: z.boolean(),
-});
 
 const pieceConfigType = {
 };
@@ -78,7 +63,11 @@ const Create = () => {
     promotions: [],
     isEnPassantTarget: false,
     isEnPassantCapturer: false,
-  });console.log(pieceConfig)
+  });
+  const [pieceConfigErrors, setPieceConfigErrors] = useState({});
+  const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState(false);
+  
+  console.log(pieceConfig)
 
   const handleGameInputChange = (e) => {
     const { name, value } = e.target;
@@ -105,34 +94,56 @@ const Create = () => {
     }));
   };
 
-  const updateBoard = () => {
-    const newVariant = resizeBoard(variant, gameConfig.width, gameConfig.height);
-    setVariant(newVariant);
-  };
+  const handleGameConfigSubmit = () => {
+    const errors = {};
 
-  const validateGameConfig = () => {
-    try {
-      gameConfigSchema.parse(gameConfig);
-      setGameConfigErrors({});
-      updateBoard();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const formattedErrors = {};
-        error.issues.forEach((issue) => {
-          formattedErrors[issue.path[0]] = issue.message;
-        });
-        setGameConfigErrors(formattedErrors);
-      }
+    if (!gameConfig.name) {
+        errors.name = "Variant name is required.";
+    }
+    if (!(1 <= gameConfig.width && gameConfig.width <= 25)) {
+        errors.width = "Width must be between 1 and 25.";
+    }
+    if (!(2 <= gameConfig.height && gameConfig.height <= 25)) {
+        errors.height = "Height must be between 2 and 25.";
+    }
+    setGameConfigErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      const newVariant = resizeBoard(variant, gameConfig.width, gameConfig.height);
+      setVariant(newVariant);
     }
   };
 
-  const handlePieceCreate = () => {
+  const handlePieceConfigSubmit = (closeDialog) => {
+    const errors = {};
 
-  };
+    variant.pieces.forEach((piece) => {
+      if (!pieceConfig.id) {
+        errors.id = "One-letter piece abbreviation is required.";
+      }
+      if (pieceConfig.id === piece.id) {
+        errors.id = "The one-letter piece abbreviation should be unique.";
+      }
+      if (!pieceConfig.name) {
+        errors.name = "Piece name is required.";
+      }
+      if (pieceConfig.name === piece.name) {
+        errors.name = "There is already another piece with this name.";
+      }
+      if (!pieceConfig.sprite) {
+        errors.sprite = "Please select a sprite for your piece.";
+      }
+      if (pieceConfig.sprite === piece.sprite) {
+        errors.sprite = "There is already another piece using this sprite.";
+      }
+    })
+    setPieceConfigErrors(errors);console.log(errors)
 
-  const handlePieceEdit = () => {
-
-  };
+    if (Object.keys(errors).length === 0) {
+      setVariant({ ...variant, pieces: [...variant.pieces, pieceConfig] });
+      setIsCreatePieceDialogOpen(false);
+    }
+  }
 
   const handlePieceDelete = (pieceId) => {
     const newVariant = deletePiece(variant, pieceId);
@@ -193,7 +204,7 @@ const Create = () => {
             </div>
           </div>
         </ScrollArea>
-        <Button onClick={validateGameConfig}>Apply</Button>
+        <Button onClick={handleGameConfigSubmit}>Apply</Button>
       </div>
 
       <ScrollArea className="w-full">
@@ -214,7 +225,7 @@ const Create = () => {
               <TabsTrigger value="1">Black</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Dialog>
+          <Dialog open={isCreatePieceDialogOpen} onOpenChange={setIsCreatePieceDialogOpen}>
             <DialogTrigger asChild>
             <Button size="icon">
               <Plus />
@@ -253,15 +264,20 @@ const Create = () => {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
-                        <img
-                          src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
-                          className="w-full h-full"
-                        />
-                        <img
-                          src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
-                          className="w-full h-full"
-                        />
-                        <SquarePen className="absolute right-1 bottom-1" />
+                        {pieceConfig.sprite ? 
+                          <>
+                            <img
+                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
+                              className="w-full h-full"
+                            />
+                            <img
+                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
+                              className="w-full h-full"
+                            />
+                            <SquarePen className="absolute right-1 bottom-1" />
+                          </> : 
+                          <Plus />
+                        }
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-full h-[200px]">
@@ -292,7 +308,7 @@ const Create = () => {
                       </ScrollArea>
                     </PopoverContent>
                   </Popover>
-                  
+                  {pieceConfigErrors.sprite && <p className="text-destructive">{pieceConfigErrors.sprite}</p>}
                 </Label>
                 <div className="flex flex-row gap-2">
                   <Label className="flex flex-col gap-2">
@@ -305,6 +321,7 @@ const Create = () => {
                       onChange={handlePieceInputChange}
                       className="w-[250px]"
                     />
+                    {pieceConfigErrors.name && <p className="text-destructive">{pieceConfigErrors.name}</p>}
                   </Label>
                   <Label className="flex flex-col gap-2">
                     Abbr.
@@ -315,6 +332,7 @@ const Create = () => {
                       onChange={handlePieceInputChange}
                       className="w-[50px]"
                     />
+                    {pieceConfigErrors.id && <p className="text-destructive">{pieceConfigErrors.id}</p>}
                   </Label>
                 </div>
                 <Label className="flex flex-col gap-2">
@@ -324,14 +342,19 @@ const Create = () => {
                     value={pieceConfig.description}
                     onChange={handlePieceInputChange}
                   />
+                  {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
+                </Label>
+                <Label className="flex flex-col gap-2">
+                  Moves
+                </Label>
+                <Label className="flex flex-col gap-2">
+                  Advanced
                 </Label>
               </div>
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button onClick={handlePieceCreate}>
-                    Confirm
-                  </Button>
-                </DialogClose>
+                <Button onClick={handlePieceConfigSubmit}>
+                  Confirm
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -341,16 +364,18 @@ const Create = () => {
             {variant.pieces.map((piece) => (
               <Card key={piece.id} className="bg-secondary">
                 <div className="flex flex-row items-center">
-                  <div className="flex flex-col items-center gap-2 p-4">
+                  <div className="flex flex-col items-center gap-2 p-4 w-[150px]">
                     <div
                       className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
                       onClick={() => {
                         setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
                       }}>
-                      <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} width={80} />
+                      <div className="w-[80px]">
+                        <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
+                      </div>
                       {variant.royals.includes(piece.id) && <Crown stroke="orange" fill="orange" className="absolute top-1 right-1" />}
                     </div>
-                    <h4>{piece.name}</h4>
+                    <h4>{piece.name} ({piece.id})</h4>
                   </div>
                   <div className="py-4">
                     <PieceMovementsBoard piece={piece} selectedColor={selectedPieceColor} />
@@ -369,7 +394,7 @@ const Create = () => {
                           asdf
                         <DialogFooter>
                           <DialogClose asChild>
-                            <Button onClick={() => handlePieceEdit(piece.id)}>
+                            <Button onClick={handlePieceConfigSubmit}>
                               Confirm
                             </Button>
                           </DialogClose>

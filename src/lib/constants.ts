@@ -159,7 +159,7 @@ export const PIECE_PRESETS = [
   {
     id: 'H',
     name: "Archbishop",
-    description: "Combines the power of the knight and bishop.",
+    description: "Combines the power of the knight and bishop. (Also known as: Princess, Cardinal)",
     sprite: "archbis",
     moves: [
       {
@@ -181,7 +181,7 @@ export const PIECE_PRESETS = [
   {
     id: 'E',
     name: "Chancellor",
-    description: "Combines the power of the knight and rook.",
+    description: "Combines the power of the knight and rook. (Also known as: Empress, Marshal)",
     sprite: "chancel",
     moves: [
       {
@@ -203,7 +203,7 @@ export const PIECE_PRESETS = [
   {
     id: 'A',
     name: "Amazon",
-    description: "Combines the power of the knight and queen.",
+    description: "Combines the power of the knight and queen. (Also known as: Dragon)",
     sprite: "amazon",
     moves: [
       {
