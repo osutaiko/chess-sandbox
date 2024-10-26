@@ -10,7 +10,7 @@ const Chessboard = ({ variant }) => {
     return (
       <div
         key={`${row}-${col}`}
-        className={`relative aspect-square ${isSquareDark ? "bg-square-dark" : "bg-square-light"} flex flex-col items-center justify-center`}
+        className={`relative aspect-square ${variant.board[row][col].isValid ? (isSquareDark ? "bg-square-dark" : "bg-square-light") : "bg-secondary"} flex flex-col items-center justify-center`}
       >
         {pieceObj && (
           <img
@@ -20,12 +20,12 @@ const Chessboard = ({ variant }) => {
           />
         )}
         {rankLabel && (
-          <span className={`absolute top-0.5 right-1 font-bold text-xs ${isSquareDark ? "text-square-light" : "text-square-dark"}`}>
+          <span className="absolute top-0.5 right-1 text-xs font-semibold text-muted">
             {rankLabel}
           </span>
         )}
         {fileLabel && (
-          <span className={`absolute bottom-0 left-1 font-bold text-xs ${isSquareDark ? "text-square-light" : "text-square-dark"}`}>
+          <span className="absolute bottom-0 left-1 text-xs font-semibold text-muted">
             {fileLabel}
           </span>
         )}
