@@ -59,7 +59,7 @@ export const getReachableSquares = (moves, radius) => {
           if (x >= 0 && x < squares.length && y >= 0 && y < squares[0].length) {
             squares[y][x] = {
               canMove: !move.conditions.some(condition => condition === "capture only"),
-              canCapture: move.captureTargets.length > 0,
+              canCapture: !move.conditions.some(condition => condition === "non-capture only"),
               onlyOnInitial: move.conditions.some(condition => condition === "initial"),
             };
           }
@@ -73,7 +73,7 @@ export const getReachableSquares = (moves, radius) => {
         if (x >= 0 && x < squares.length && y >= 0 && y < squares[0].length) {
           squares[y][x] = {
             canMove: true,
-            canCapture: move.captureTargets.length > 0,
+            canCapture: !move.conditions.some(condition => condition === "non-capture only"),
             onlyOnInitial: false,
           };
         }

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { z } from "zod";
 
-import { DEFAULT_VARIANT } from "@/lib/constants";
+import { DEFAULT_VARIANT, PIECE_PRESETS, AVAILABLE_SPRITES } from "@/lib/constants";
 import { deletePiece, resizeBoard } from "@/lib/chess";
 import Chessboard from "@/components/Chessboard";
 import PieceMovementsBoard from "@/components/PieceMovementsBoard";
@@ -23,55 +23,97 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { Crown, Plus, SquarePen, Trash2 } from "lucide-react";
 
-const configSchema = z.object({
+const gameConfigSchema = z.object({
   name: z.string().default("New Variant"),
   description: z.string().optional(),
   width: z.number().min(1).max(25),
   height: z.number().min(1).max(25),
 });
 
-const configType = {
+const gameConfigType = {
   name: "text",
   description: "textarea",
   width: "number",
   height: "number",
 };
 
+const pieceConfigSchema = z.object({
+  id: z.string().length(1).regex(/^[a-z]$/),
+  name: z.string().default("New Piece"),
+  description: z.string().optional(),
+  sprite: z.string(),
+  isEnPassantTarget: z.boolean(),
+  isEnPassanCapturer: z.boolean(),
+});
+
+const pieceConfigType = {
+};
+
 const Create = () => {
-  const [config, setConfig] = useState({
+  const [gameConfig, setGameConfig] = useState({
     name: "New Variant",
     description: "",
     width: 8,
     height: 8,
   });
-  const [configErrors, setConfigErrors] = useState({});
+  const [gameConfigErrors, setGameConfigErrors] = useState({});
   const [variant, setVariant] = useState(DEFAULT_VARIANT);
   const [selectedPieceColor, setSelectedPieceColor] = useState(0);
   const [selectedPieceId, setSelectedPieceId] = useState(null);
+  const [pieceConfig, setPieceConfig] = useState({
+    id: "",
+    name: "New Piece",
+    description: "",
+    sprite: "",
+    moves: [],
+    promotions: [],
+    isEnPassantTarget: false,
+    isEnPassantCapturer: false,
+  });console.log(pieceConfig)
 
-  const handleInputChange = (e) => {
+  const handleGameInputChange = (e) => {
     const { name, value } = e.target;
-    const newValue = configType[name] === "number" ? parseInt(value) : value;
+    const newValue = gameConfigType[name] === "number" ? parseInt(value) : value;
   
-    setConfig((prevConfig) => ({
+    setGameConfig((prevConfig) => ({
+      ...prevConfig,
+      [name]: newValue,
+    }));
+  };
+
+  const handlePieceInputChange = (e) => {
+    const { name, value } = e.target;
+    let newValue = pieceConfigType[name] === "number" ? parseInt(value) : value;
+    if (name === "id") {
+      const lastChar = newValue[newValue.length - 1];
+      const isAlphabet = /^[A-Za-z]*$/.test(lastChar);
+      newValue = isAlphabet ? lastChar.toUpperCase() : "";
+    }
+  
+    setPieceConfig((prevConfig) => ({
       ...prevConfig,
       [name]: newValue,
     }));
   };
 
   const updateBoard = () => {
-    const newVariant = resizeBoard(variant, config.width, config.height);
+    const newVariant = resizeBoard(variant, gameConfig.width, gameConfig.height);
     setVariant(newVariant);
   };
 
-  const validateConfig = () => {
+  const validateGameConfig = () => {
     try {
-      configSchema.parse(config);
-      setConfigErrors({});
+      gameConfigSchema.parse(gameConfig);
+      setGameConfigErrors({});
       updateBoard();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -79,9 +121,13 @@ const Create = () => {
         error.issues.forEach((issue) => {
           formattedErrors[issue.path[0]] = issue.message;
         });
-        setConfigErrors(formattedErrors);
+        setGameConfigErrors(formattedErrors);
       }
     }
+  };
+
+  const handlePieceCreate = () => {
+
   };
 
   const handlePieceEdit = () => {
@@ -92,7 +138,7 @@ const Create = () => {
     const newVariant = deletePiece(variant, pieceId);
     setVariant(newVariant);
   }
-console.log(variant)
+
   return (
     <div className="flex flex-row divide-x p-8 h-[calc(100vh-72px)]">
       <div className="flex flex-col flex-none gap-8 w-[300px] pr-8">
@@ -105,52 +151,52 @@ console.log(variant)
                 type="text"
                 name="name"
                 placeholder="New Variant"
-                value={config.name}
-                onChange={handleInputChange}
+                value={gameConfig.name}
+                onChange={handleGameInputChange}
               />
-              {configErrors.name && <p className="text-destructive">{configErrors.name}</p>}
+              {gameConfigErrors.name && <p className="text-destructive">{gameConfigErrors.name}</p>}
             </Label>
             <Label className="flex flex-col gap-2">
               Description
               <Textarea
                 name="description"
-                value={config.description}
-                onChange={handleInputChange}
+                value={gameConfig.description}
+                onChange={handleGameInputChange}
               />
-              {configErrors.description && <p className="text-destructive">{configErrors.description}</p>}
+              {gameConfigErrors.description && <p className="text-destructive">{gameConfigErrors.description}</p>}
             </Label>
             <div className="flex flex-row gap-4">
               <Label className="flex flex-col gap-2 w-full">
-                Width (Files)
+                Width (# of Files)
                 <Input
                   type="number"
                   name="width"
-                  value={config.width}
+                  value={gameConfig.width}
                   min={1}
                   max={25}
-                  onChange={handleInputChange}
+                  onChange={handleGameInputChange}
                 />
-                {configErrors.width && <p className="text-destructive">{configErrors.width}</p>}
+                {gameConfigErrors.width && <p className="text-destructive">{gameConfigErrors.width}</p>}
               </Label>
               <Label className="flex flex-col gap-2 w-full">
-                Height (Ranks)
+                Height (# of Ranks)
                 <Input
                   type="number"
                   name="height"
                   min={1}
                   max={25}
-                  value={config.height}
-                  onChange={handleInputChange}
+                  value={gameConfig.height}
+                  onChange={handleGameInputChange}
                 />
-                {configErrors.height && <p className="text-destructive">{configErrors.height}</p>}
+                {gameConfigErrors.height && <p className="text-destructive">{gameConfigErrors.height}</p>}
               </Label>
             </div>
           </div>
         </ScrollArea>
-        <Button onClick={validateConfig}>Apply</Button>
+        <Button onClick={validateGameConfig}>Apply</Button>
       </div>
 
-      <ScrollArea>
+      <ScrollArea className="w-full">
         <div className="flex flex-col px-8">
           <Chessboard variant={variant} setVariant={setVariant} selectedPieceId={selectedPieceId} selectedPieceColor={selectedPieceColor} />
         </div>
@@ -168,9 +214,127 @@ console.log(variant)
               <TabsTrigger value="1">Black</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button size="icon">
-            <Plus />
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+            <Button size="icon">
+              <Plus />
+            </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-full w-[1000px] gap-8">
+              <DialogHeader>
+                <DialogTitle>Create Piece</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <h4>Presets</h4>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
+                  {PIECE_PRESETS.map((piece) => {
+                    return (
+                      <Button
+                        key={piece.id}
+                        variant="secondary"
+                        className="flex flex-col gap-1 w-full h-min py-2"
+                        onClick={() => setPieceConfig(piece)}
+                      >
+                        <img
+                          src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
+                          alt={piece.name}
+                          className="w-full"
+                        />
+                        <p>{piece.name}</p>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                <h4>Piece Configuration</h4>
+                <Label className="flex flex-col gap-2 w-min">
+                  Sprite
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
+                        <img
+                          src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
+                          className="w-full h-full"
+                        />
+                        <img
+                          src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
+                          className="w-full h-full"
+                        />
+                        <SquarePen className="absolute right-1 bottom-1" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full h-[200px]">
+                      <ScrollArea className="w-full h-full">
+                        <div className="grid grid-cols-4 gap-1">
+                          {AVAILABLE_SPRITES.map((sprite) => {
+                            return (
+                              <Button
+                                key={sprite}
+                                variant="secondary"
+                                className="p-1 h-full gap-2"
+                                onClick={() => setPieceConfig({ ...pieceConfig, sprite })}
+                              >
+                                <img
+                                  src={`/src/assets/images/pieces/${sprite}-0.svg`}
+                                  alt={`${sprite}-0}`}
+                                  className="w-[50px] aspect-square"
+                                />
+                                <img
+                                  src={`/src/assets/images/pieces/${sprite}-1.svg`}
+                                  alt={`${sprite}-1}`}
+                                  className="w-[50px] aspect-square"
+                                />
+                              </Button>
+                            )
+                          })}
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
+                  
+                </Label>
+                <div className="flex flex-row gap-2">
+                  <Label className="flex flex-col gap-2">
+                    Name
+                    <Input
+                      type="text"
+                      name="name"
+                      placeholder="New Piece"
+                      value={pieceConfig.name}
+                      onChange={handlePieceInputChange}
+                      className="w-[250px]"
+                    />
+                  </Label>
+                  <Label className="flex flex-col gap-2">
+                    Abbr.
+                    <Input
+                      type="text"
+                      name="id"
+                      value={pieceConfig.id}
+                      onChange={handlePieceInputChange}
+                      className="w-[50px]"
+                    />
+                  </Label>
+                </div>
+                <Label className="flex flex-col gap-2">
+                  Description
+                  <Textarea
+                    name="description"
+                    value={pieceConfig.description}
+                    onChange={handlePieceInputChange}
+                  />
+                </Label>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button onClick={handlePieceCreate}>
+                    Confirm
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
         <ScrollArea>
           <div className="flex flex-col gap-4">
@@ -184,7 +348,7 @@ console.log(variant)
                         setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
                       }}>
                       <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} width={80} />
-                      {piece.isRoyal && <Crown stroke="orange" fill="orange" className="absolute top-1 right-1" />}
+                      {variant.royals.includes(piece.id) && <Crown stroke="orange" fill="orange" className="absolute top-1 right-1" />}
                     </div>
                     <h4>{piece.name}</h4>
                   </div>
@@ -202,7 +366,7 @@ console.log(variant)
                         <DialogHeader>
                           <DialogTitle>Edit Piece</DialogTitle>
                         </DialogHeader>
-
+                          asdf
                         <DialogFooter>
                           <DialogClose asChild>
                             <Button onClick={() => handlePieceEdit(piece.id)}>

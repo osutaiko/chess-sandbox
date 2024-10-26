@@ -1,124 +1,19 @@
 // Piece templates for creating new pieces
 export const PIECE_PRESETS = [
   {
-    id: 'p',
-    name: "Pawn",
-    sprite: "pawn",
-    isRoyal: false,
-    moves: [
-      {
-        type: "ride",
-        captureTargets: [],
-        conditions: [],
-        offsets: [[0, 1]],
-        range: 1,
-      },
-      {
-        type: "ride",
-        captureTargets: [],
-        conditions: ["initial"],
-        offsets: [[0, 2]],
-        range: 1,
-      },
-      {
-        type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
-        conditions: ["capture only"],
-        offsets: [[1, 1], [-1, 1]],
-        range: 1,
-      },
-    ],
-
-    promotions: [{
-      squares: [[0, 7], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7]],
-      becomes: ['n', 'b', 'r', 'q'],
-    }],
-    isEnPassantTarget: true,
-    isEnPassantCapturer: true,
-  },
-  {
-    id: 'n',
-    name: "Knight",
-    sprite: "knight",
-    isRoyal: false,
-    moves: [
-      {
-        type: "leap",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
-        conditions: [],
-        offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
-      },
-    ],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
-  },
-  {
-    id: 'b',
-    name: "Bishop",
-    sprite: "bishop",
-    isRoyal: false,
-    moves: [
-      {
-        type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
-        conditions: [],
-        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
-        range: Infinity,
-      },
-    ],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
-  },
-  {
-    id: 'r',
-    name: "Rook",
-    sprite: "rook",
-    isRoyal: false,
-    moves: [
-      {
-        type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
-        conditions: [],
-        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
-        range: Infinity,
-      },
-    ],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
-  },
-  {
-    id: 'q',
-    name: "Queen",
-    sprite: "queen",
-    isRoyal: false,
-    moves: [
-      {
-        type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
-        conditions: [],
-        offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
-        range: Infinity,
-      },
-    ],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
-  },
-  {
-    id: 'k',
+    id: 'K',
     name: "King",
+    description: "Moves one square orthogonally or diagonally.",
     sprite: "king",
-    isRoyal: true,
     moves: [
       {
         type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
         conditions: [],
         offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
         range: 1,
       },
       {
         type: "castle",
-        captureTargets: [],
         selfConditions: ["initial"],
         targetPieces: ['r'],
         targetConditions: ["initial"],
@@ -129,7 +24,6 @@ export const PIECE_PRESETS = [
       },
       {
         type: "castle",
-        captureTargets: [],
         selfConditions: ["initial"],
         targetPieces: ['r'],
         targetConditions: ["initial"],
@@ -140,7 +34,6 @@ export const PIECE_PRESETS = [
       },
       {
         type: "castle",
-        captureTargets: [],
         selfConditions: ["initial"],
         targetPieces: ['r'],
         targetConditions: ["initial"],
@@ -151,7 +44,6 @@ export const PIECE_PRESETS = [
       },
       {
         type: "castle",
-        captureTargets: [],
         selfConditions: ["initial"],
         targetPieces: ['r'],
         targetConditions: ["initial"],
@@ -161,75 +53,172 @@ export const PIECE_PRESETS = [
         targetOffset: [-3, 0],
       },
     ],
+    promotions: [],
     isEnPassantTarget: false,
     isEnPassantCapturer: false,
   },
   {
-    id: 'a',
-    name: "Archbishop",
-    sprite: "archbis",
-    isRoyal: false,
+    id: 'P',
+    name: "Pawn",
+    description: "Moves one square straight forward (except on its first move, when it may move two squares), but captures one square diagonally forward.",
+    sprite: "pawn",
     moves: [
       {
         type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
+        conditions: ["non-capture only"],
+        offsets: [[0, 1]],
+        range: 1,
+      },
+      {
+        type: "ride",
+        conditions: ["initial", "non-capture only"],
+        offsets: [[0, 2]],
+        range: 1,
+      },
+      {
+        type: "ride",
+        conditions: ["capture only"],
+        offsets: [[1, 1], [-1, 1]],
+        range: 1,
+      },
+    ],
+    promotions: [{
+      squares: [[0, 7], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7]],
+      becomes: ['n', 'b', 'r', 'q'],
+    }],
+    isEnPassantTarget: true,
+    isEnPassantCapturer: true,
+  },
+  {
+    id: 'N',
+    name: "Knight",
+    description: "Moves two squares in one direction (orthogonally) and then one square at a right angle to that direction.",
+    sprite: "knight",
+    moves: [
+      {
+        type: "leap",
+        conditions: [],
+        offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
+      },
+    ],
+    promotions: [],
+    isEnPassantTarget: false,
+    isEnPassantCapturer: false,
+  },
+  {
+    id: 'B',
+    name: "Bishop",
+    description: "Moves diagonally across any number of squares.",
+    sprite: "bishop",
+    moves: [
+      {
+        type: "ride",
+        conditions: [],
+        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        range: Infinity,
+      },
+    ],
+    promotions: [],
+    isEnPassantTarget: false,
+    isEnPassantCapturer: false,
+  },
+  {
+    id: 'R',
+    name: "Rook",
+    description: "Moves orthogonally across any number of squares.",
+    sprite: "rook",
+    moves: [
+      {
+        type: "ride",
+        conditions: [],
+        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        range: Infinity,
+      },
+    ],
+    promotions: [],
+    isEnPassantTarget: false,
+    isEnPassantCapturer: false,
+  },
+  {
+    id: 'Q',
+    name: "Queen",
+    description: "Moves orthogonally or diagonally across any number of squares.",
+    sprite: "queen",
+    moves: [
+      {
+        type: "ride",
+        conditions: [],
+        offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
+        range: Infinity,
+      },
+    ],
+    promotions: [],
+    isEnPassantTarget: false,
+    isEnPassantCapturer: false,
+  },
+  {
+    id: 'H',
+    name: "Archbishop",
+    description: "Combines the power of the knight and bishop.",
+    sprite: "archbis",
+    moves: [
+      {
+        type: "ride",
         conditions: [],
         offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
         range: Infinity,
       },
       {
         type: "leap",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
         conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
       },
     ],
+    promotions: [],
     isEnPassantTarget: false,
     isEnPassantCapturer: false,
   },
   {
-    id: 'c',
+    id: 'E',
     name: "Chancellor",
+    description: "Combines the power of the knight and rook.",
     sprite: "chancel",
-    isRoyal: false,
     moves: [
       {
         type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
         conditions: [],
         offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
         range: Infinity,
       },
       {
         type: "leap",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
         conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
       },
     ],
+    promotions: [],
     isEnPassantTarget: false,
     isEnPassantCapturer: false,
   },
   {
-    id: 'd',
+    id: 'A',
     name: "Amazon",
+    description: "Combines the power of the knight and queen.",
     sprite: "amazon",
-    isRoyal: false,
     moves: [
       {
         type: "ride",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
         conditions: [],
         offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
         range: Infinity,
       },
       {
         type: "leap",
-        captureTargets: ['p', 'n', 'b', 'r', 'q'],
         conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
       },
     ],
+    promotions: [],
     isEnPassantTarget: false,
     isEnPassantCapturer: false,
   },
@@ -248,16 +237,16 @@ export const DEFAULT_VARIANT = {
       let color = null;
 
       if (i === 0) {
-        piece = 'rnbqkbnr'[j];
+        piece = 'RNBQKBNR'[j];
         color = 1;
       } else if (i === 1) {
-        piece = 'p';
+        piece = 'P';
         color = 1;
       } else if (i === 6) {
-        piece = 'p';
+        piece = 'P';
         color = 0;
       } else if (i === 7) {
-        piece = 'rnbqkbnr'[j];
+        piece = 'RNBQKBNR'[j];
         color = 0;
       }
 
@@ -265,7 +254,8 @@ export const DEFAULT_VARIANT = {
     }
     return row;
   }),
-  pieces: PIECE_PRESETS.filter(p => ['p', 'r', 'n', 'b', 'q', 'k'].includes(p.id)),
+  pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
+  royals: ['K'],
   rules: {
     onCheckmateLastRoyal: "win",
     onCaptureLastRoyal: null,
@@ -274,3 +264,31 @@ export const DEFAULT_VARIANT = {
     onOpponentWipe: null,
   }
 };
+
+export const AVAILABLE_SPRITES = [
+  "amazon",
+  "archbis",
+  "augna",
+  "augnd",
+  "augnf",
+  "augnw",
+  "bishop",
+  "bpawn",
+  "bpawn2",
+  "centaur",
+  "chancel",
+  "commonr",
+  "giraffe",
+  "grassh",
+  "king",
+  "knight",
+  "nightrd",
+  "nrking",
+  "pawn",
+  "queen",
+  "rknight",
+  "rook",
+  "rook4",
+  "rqueen",
+  "zebra"
+]
