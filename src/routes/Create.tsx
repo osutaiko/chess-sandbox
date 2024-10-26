@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { z } from "zod";
 
-import { DEFAULT_VARIANT, deletePiece, resizeBoard } from "@/lib/chess";
+import { DEFAULT_VARIANT } from "@/lib/constants";
+import { deletePiece, resizeBoard } from "@/lib/chess";
 import Chessboard from "@/components/Chessboard";
 import PieceMovementsBoard from "@/components/PieceMovementsBoard";
 import DraggablePiece from "@/components/DraggablePiece";
@@ -91,7 +92,7 @@ const Create = () => {
     const newVariant = deletePiece(variant, pieceId);
     setVariant(newVariant);
   }
-
+console.log(variant)
   return (
     <div className="flex flex-row divide-x p-8 h-[calc(100vh-72px)]">
       <div className="flex flex-col flex-none gap-8 w-[300px] pr-8">
@@ -182,8 +183,8 @@ const Create = () => {
                       onClick={() => {
                         setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
                       }}>
-                      <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
-                      {piece.isRoyal && <Crown stroke="orange" className="absolute top-2 right-2" />}
+                      <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} width={80} />
+                      {piece.isRoyal && <Crown stroke="orange" fill="orange" className="absolute top-1 right-1" />}
                     </div>
                     <h4>{piece.name}</h4>
                   </div>
@@ -199,8 +200,9 @@ const Create = () => {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Editing {piece.name}</DialogTitle>
+                          <DialogTitle>Edit Piece</DialogTitle>
                         </DialogHeader>
+
                         <DialogFooter>
                           <DialogClose asChild>
                             <Button onClick={() => handlePieceEdit(piece.id)}>
