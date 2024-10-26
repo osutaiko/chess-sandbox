@@ -1,34 +1,47 @@
 export const resizeBoard = (variant, newWidth, newHeight) => {
-  const currentWidth = variant.width;
-  const currentHeight = variant.height;
+  const { width: currentWidth, height: currentHeight } = variant;
 
+  const createEmptyRow = (width) => Array.from({ length: width }, () => ({ isValid: true, piece: null, color: null }));
   let newBoard = [...variant.board];
 
   if (newHeight > currentHeight) {
-    for (let i = currentHeight; i < newHeight; i++) {
-      const newRow = [];
-      for (let j = 0; j < currentWidth; j++) {
-        newRow.push({ isValid: true, piece: null, color: null });
-      }
-      newBoard.push(newRow);
-    }
+    const topHalf = newBoard.slice(0, Math.ceil(currentHeight / 2));
+    const bottomHalf = newBoard.slice(Math.floor(currentHeight / 2));
+    const rowsToInsert = newHeight - currentHeight;
+
+    newBoard = [
+      ...topHalf,
+      ...Array.from({ length: rowsToInsert }, () => createEmptyRow(currentWidth)),
+      ...bottomHalf,
+    ];
   } else if (newHeight < currentHeight) {
-    newBoard = newBoard.slice(0, newHeight);
+    const rowsToRemove = currentHeight - newHeight;
+
+    newBoard = [
+      ...newBoard.slice(0, Math.floor(newBoard.length / 2) - Math.floor(rowsToRemove / 2)),
+      ...newBoard.slice(Math.floor(newBoard.length / 2) + Math.ceil(rowsToRemove / 2)),
+    ];
   }
 
-  newBoard = newBoard.map((row, i) => {
+  newBoard = newBoard.map((row) => {
     if (newWidth > currentWidth) {
-      for (let j = currentWidth; j < newWidth; j++) {
-        row.push({ isValid: true, piece: null, color: null });
-      }
+      const leftPadding = Math.floor((newWidth - currentWidth) / 2);
+      return [
+        ...createEmptyRow(leftPadding),
+        ...row,
+        ...createEmptyRow(newWidth - currentWidth - leftPadding),
+      ];
     } else if (newWidth < currentWidth) {
-      row = row.slice(0, newWidth);
+      const excessWidth = currentWidth - newWidth;
+      const startIndex = Math.floor(excessWidth / 2);
+      return row.slice(startIndex, startIndex + newWidth);
     }
-    return row;
+    return row; // no change if width is the same
   });
 
   return { ...variant, width: newWidth, height: newHeight, board: newBoard };
 };
+
 
 export const getSquareName = (width, height, rowIndex, colIndex) => {
   if (rowIndex < 0 || rowIndex >= height || colIndex < 0 || colIndex >= width) {

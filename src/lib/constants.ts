@@ -291,4 +291,22 @@ export const AVAILABLE_SPRITES = [
   "rook4",
   "rqueen",
   "zebra"
-]
+];
+
+export const EMPTY_GAME_CONFIG = {
+  name: "New Variant",
+  description: "",
+  width: 8,
+  height: 8,
+}
+
+export const EMPTY_PIECE_CONFIG = {
+  id: "",
+  name: "New Piece",
+  description: "",
+  sprite: "",
+  moves: [],
+  promotions: [],
+  isEnPassantTarget: false,
+  isEnPassantCapturer: false,
+};

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { z } from "zod";
 
-import { DEFAULT_VARIANT, PIECE_PRESETS, AVAILABLE_SPRITES } from "@/lib/constants";
+import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG, EMPTY_GAME_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard } from "@/lib/chess";
 import Chessboard from "@/components/Chessboard";
 import PieceMovementsBoard from "@/components/PieceMovementsBoard";
@@ -23,15 +23,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 
 import { Crown, Plus, SquarePen, Trash2 } from "lucide-react";
+import PieceCraftDialog from "@/components/PieceCraftDialog";
 
 const gameConfigType = {
   name: "text",
@@ -44,30 +39,15 @@ const pieceConfigType = {
 };
 
 const Create = () => {
-  const [gameConfig, setGameConfig] = useState({
-    name: "New Variant",
-    description: "",
-    width: 8,
-    height: 8,
-  });
+  const [gameConfig, setGameConfig] = useState(EMPTY_GAME_CONFIG);
   const [gameConfigErrors, setGameConfigErrors] = useState({});
   const [variant, setVariant] = useState(DEFAULT_VARIANT);
   const [selectedPieceColor, setSelectedPieceColor] = useState(0);
   const [selectedPieceId, setSelectedPieceId] = useState(null);
-  const [pieceConfig, setPieceConfig] = useState({
-    id: "",
-    name: "New Piece",
-    description: "",
-    sprite: "",
-    moves: [],
-    promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
-  });
+  const [pieceConfig, setPieceConfig] = useState(EMPTY_PIECE_CONFIG);
   const [pieceConfigErrors, setPieceConfigErrors] = useState({});
   const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState(false);
-  
-  console.log(pieceConfig)
+  const [openPieceDialogId, setOpenPieceDialogId] = useState(null);
 
   const handleGameInputChange = (e) => {
     const { name, value } = e.target;
@@ -114,34 +94,58 @@ const Create = () => {
     }
   };
 
-  const handlePieceConfigSubmit = (closeDialog) => {
-    const errors = {};
+  const handlePieceConfigSubmit = (isCreateMode, pieceBeforeEditId) => {
+    const errors = {};console.log(pieceBeforeEditId)
 
-    variant.pieces.forEach((piece) => {
-      if (!pieceConfig.id) {
-        errors.id = "One-letter piece abbreviation is required.";
-      }
-      if (pieceConfig.id === piece.id) {
-        errors.id = "The one-letter piece abbreviation should be unique.";
-      }
-      if (!pieceConfig.name) {
-        errors.name = "Piece name is required.";
-      }
-      if (pieceConfig.name === piece.name) {
-        errors.name = "There is already another piece with this name.";
-      }
-      if (!pieceConfig.sprite) {
-        errors.sprite = "Please select a sprite for your piece.";
-      }
-      if (pieceConfig.sprite === piece.sprite) {
-        errors.sprite = "There is already another piece using this sprite.";
-      }
-    })
-    setPieceConfigErrors(errors);console.log(errors)
+    if (!pieceConfig.id) {
+      errors.id = "One-letter piece abbreviation is required.";
+    }
+    if (!pieceConfig.name) {
+      errors.name = "Piece name is required.";
+    }
+    if (!pieceConfig.sprite) {
+      errors.sprite = "Please select a sprite for your piece.";
+    }
+
+    if (isCreateMode) { // Checks only on create mode
+      variant.pieces.forEach((piece) => {
+        if (piece.id === pieceConfig.id) {
+          errors.id = "There is already another piece with this one-letter abbreviation.";
+        }
+        if (piece.name === pieceConfig.name) {
+          errors.name = "There is already another piece with this name.";
+        }
+        if (piece.sprite === pieceConfig.sprite) {
+          errors.sprite = "There is already another piece using this sprite.";
+        }
+      })
+    } else { // Checks only on edit mode
+      variant.pieces.forEach((piece) => {
+        if (piece.id === pieceConfig.id && piece.id !== pieceBeforeEditId) {
+          errors.id = "There is already another piece with this one-letter abbreviation.";
+        }
+        if (piece.name === pieceConfig.name && piece.id !== pieceBeforeEditId) {
+          errors.name = "There is already another piece with this name.";
+        }
+        if (piece.sprite === pieceConfig.sprite && piece.id !== pieceBeforeEditId) {
+          errors.sprite = "There is already another piece using this sprite.";
+        }
+      })
+    }
+    setPieceConfigErrors(errors);
 
     if (Object.keys(errors).length === 0) {
-      setVariant({ ...variant, pieces: [...variant.pieces, pieceConfig] });
-      setIsCreatePieceDialogOpen(false);
+      if (isCreateMode) {
+        setVariant({ ...variant, pieces: [...variant.pieces, pieceConfig] });
+        setIsCreatePieceDialogOpen(false);
+      } else {
+        const updatedPieces = variant.pieces.map((piece) => 
+          piece.id === pieceBeforeEditId ? pieceConfig : piece
+        );
+        setVariant({ ...variant, pieces: updatedPieces });
+        setOpenPieceDialogId(null);
+      }
+      setPieceConfig(EMPTY_PIECE_CONFIG);
     }
   }
 
@@ -225,139 +229,18 @@ const Create = () => {
               <TabsTrigger value="1">Black</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Dialog open={isCreatePieceDialogOpen} onOpenChange={setIsCreatePieceDialogOpen}>
-            <DialogTrigger asChild>
-            <Button size="icon">
-              <Plus />
-            </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-full w-[1000px] gap-8">
-              <DialogHeader>
-                <DialogTitle>Create Piece</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col gap-4">
-                <h4>Presets</h4>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
-                  {PIECE_PRESETS.map((piece) => {
-                    return (
-                      <Button
-                        key={piece.id}
-                        variant="secondary"
-                        className="flex flex-col gap-1 w-full h-min py-2"
-                        onClick={() => setPieceConfig(piece)}
-                      >
-                        <img
-                          src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
-                          alt={piece.name}
-                          className="w-full"
-                        />
-                        <p>{piece.name}</p>
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex flex-col gap-4">
-                <h4>Piece Configuration</h4>
-                <Label className="flex flex-col gap-2 w-min">
-                  Sprite
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
-                        {pieceConfig.sprite ? 
-                          <>
-                            <img
-                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
-                              className="w-full h-full"
-                            />
-                            <img
-                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
-                              className="w-full h-full"
-                            />
-                            <SquarePen className="absolute right-1 bottom-1" />
-                          </> : 
-                          <Plus />
-                        }
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full h-[200px]">
-                      <ScrollArea className="w-full h-full">
-                        <div className="grid grid-cols-4 gap-1">
-                          {AVAILABLE_SPRITES.map((sprite) => {
-                            return (
-                              <Button
-                                key={sprite}
-                                variant="secondary"
-                                className="p-1 h-full gap-2"
-                                onClick={() => setPieceConfig({ ...pieceConfig, sprite })}
-                              >
-                                <img
-                                  src={`/src/assets/images/pieces/${sprite}-0.svg`}
-                                  alt={`${sprite}-0}`}
-                                  className="w-[50px] aspect-square"
-                                />
-                                <img
-                                  src={`/src/assets/images/pieces/${sprite}-1.svg`}
-                                  alt={`${sprite}-1}`}
-                                  className="w-[50px] aspect-square"
-                                />
-                              </Button>
-                            )
-                          })}
-                        </div>
-                      </ScrollArea>
-                    </PopoverContent>
-                  </Popover>
-                  {pieceConfigErrors.sprite && <p className="text-destructive">{pieceConfigErrors.sprite}</p>}
-                </Label>
-                <div className="flex flex-row gap-2">
-                  <Label className="flex flex-col gap-2">
-                    Name
-                    <Input
-                      type="text"
-                      name="name"
-                      placeholder="New Piece"
-                      value={pieceConfig.name}
-                      onChange={handlePieceInputChange}
-                      className="w-[250px]"
-                    />
-                    {pieceConfigErrors.name && <p className="text-destructive">{pieceConfigErrors.name}</p>}
-                  </Label>
-                  <Label className="flex flex-col gap-2">
-                    Abbr.
-                    <Input
-                      type="text"
-                      name="id"
-                      value={pieceConfig.id}
-                      onChange={handlePieceInputChange}
-                      className="w-[50px]"
-                    />
-                    {pieceConfigErrors.id && <p className="text-destructive">{pieceConfigErrors.id}</p>}
-                  </Label>
-                </div>
-                <Label className="flex flex-col gap-2">
-                  Description
-                  <Textarea
-                    name="description"
-                    value={pieceConfig.description}
-                    onChange={handlePieceInputChange}
-                  />
-                  {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
-                </Label>
-                <Label className="flex flex-col gap-2">
-                  Moves
-                </Label>
-                <Label className="flex flex-col gap-2">
-                  Advanced
-                </Label>
-              </div>
-              <DialogFooter>
-                <Button onClick={handlePieceConfigSubmit}>
-                  Confirm
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <PieceCraftDialog
+            isCreateMode={true}
+            variant={variant}
+            pieceConfig={pieceConfig}
+            setPieceConfig={setPieceConfig}
+            pieceConfigErrors={pieceConfigErrors}
+            setPieceConfigErrors={setPieceConfigErrors}
+            handlePieceInputChange={handlePieceInputChange}
+            handlePieceConfigSubmit={handlePieceConfigSubmit}
+            isCreatePieceDialogOpen={isCreatePieceDialogOpen}
+            setIsCreatePieceDialogOpen={setIsCreatePieceDialogOpen}
+          />
         </div>
         <ScrollArea>
           <div className="flex flex-col gap-4">
@@ -373,7 +256,7 @@ const Create = () => {
                       <div className="w-[80px]">
                         <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
                       </div>
-                      {variant.royals.includes(piece.id) && <Crown stroke="orange" fill="orange" className="absolute top-1 right-1" />}
+                      {variant.royals.includes(piece.id) && <Crown stroke="orange" fill="orange" className="absolute top-0 right-0" />}
                     </div>
                     <h4>{piece.name} ({piece.id})</h4>
                   </div>
@@ -381,26 +264,19 @@ const Create = () => {
                     <PieceMovementsBoard piece={piece} selectedColor={selectedPieceColor} />
                   </div>
                   <div className="flex flex-col gap-1 p-4">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="icon">
-                          <SquarePen />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Edit Piece</DialogTitle>
-                        </DialogHeader>
-                          asdf
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button onClick={handlePieceConfigSubmit}>
-                              Confirm
-                            </Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    <PieceCraftDialog
+                      isCreateMode={false}
+                      variant={variant}
+                      pieceConfig={pieceConfig}
+                      setPieceConfig={setPieceConfig}
+                      pieceConfigErrors={pieceConfigErrors}
+                      setPieceConfigErrors={setPieceConfigErrors}
+                      handlePieceInputChange={handlePieceInputChange}
+                      handlePieceConfigSubmit={handlePieceConfigSubmit}
+                      pieceBeforeEditId={piece.id}
+                      openPieceDialogId={openPieceDialogId}
+                      setOpenPieceDialogId={setOpenPieceDialogId}
+                    />
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="destructive" size="icon">
