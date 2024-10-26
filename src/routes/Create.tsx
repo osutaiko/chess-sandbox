@@ -4,6 +4,7 @@ import { z } from "zod";
 import { DEFAULT_VARIANT, deletePiece, resizeBoard } from "@/lib/chess";
 import Chessboard from "@/components/Chessboard";
 import PieceMovementsBoard from "@/components/PieceMovementsBoard";
+import DraggablePiece from "@/components/DraggablePiece";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,9 +22,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { Crown, Plus, SquarePen, Trash2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const configSchema = z.object({
   name: z.string().default("New Variant"),
@@ -48,7 +49,8 @@ const Create = () => {
   });
   const [configErrors, setConfigErrors] = useState({});
   const [variant, setVariant] = useState(DEFAULT_VARIANT);
-  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedPieceColor, setSelectedPieceColor] = useState(0);
+  const [selectedPieceId, setSelectedPieceId] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -149,7 +151,7 @@ const Create = () => {
 
       <ScrollArea>
         <div className="flex flex-col px-8">
-          <Chessboard variant={variant} setVariant={setVariant} />
+          <Chessboard variant={variant} setVariant={setVariant} selectedPieceId={selectedPieceId} selectedPieceColor={selectedPieceColor} />
         </div>
       </ScrollArea>
 
@@ -158,7 +160,7 @@ const Create = () => {
         <div className="flex flex-row justify-between">
           <Tabs
             defaultValue="0"
-            onValueChange={(value) =>setSelectedColor(parseInt(value))}
+            onValueChange={(value) =>setSelectedPieceColor(parseInt(value))}
           >
             <TabsList>
               <TabsTrigger value="0">White</TabsTrigger>
@@ -175,17 +177,18 @@ const Create = () => {
               <Card key={piece.id} className="bg-secondary">
                 <div className="flex flex-row items-center">
                   <div className="flex flex-col items-center gap-2 p-4">
-                    <div className="relative">
-                      <img
-                        src={`/src/assets/images/pieces/${piece.sprite}-${selectedColor}.svg`}
-                        className="h-[100px]"
-                      />
-                      {piece.isRoyal && <Crown stroke="orange" className="absolute top-0 right-0" />}
+                    <div
+                      className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
+                      onClick={() => {
+                        setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
+                      }}>
+                      <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
+                      {piece.isRoyal && <Crown stroke="orange" className="absolute top-2 right-2" />}
                     </div>
                     <h4>{piece.name}</h4>
                   </div>
                   <div className="py-4">
-                    <PieceMovementsBoard piece={piece} selectedColor={selectedColor} />
+                    <PieceMovementsBoard piece={piece} selectedColor={selectedPieceColor} />
                   </div>
                   <div className="flex flex-col gap-1 p-4">
                     <Dialog>

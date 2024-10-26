@@ -1,3 +1,4 @@
+// Standard chess variant specifications
 export const DEFAULT_VARIANT = {
   width: 8,
   height: 8,
@@ -339,4 +340,24 @@ export const deletePiece = (variant, pieceId) => {
   });
 
   return newVariant;
+};
+
+export const removePieceFromBoard = (variant, rowIndex, colIndex) => {
+  const updatedVariant = { ...variant };
+  if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
+    updatedVariant.board[rowIndex][colIndex].piece = null;
+  }
+  return updatedVariant;
+};
+
+export const addPieceToBoard = (variant, pieceId, color, rowIndex, colIndex) => {
+  const updatedVariant = { ...variant };
+  if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
+    updatedVariant.board[rowIndex][colIndex] = {
+      ...updatedVariant.board[rowIndex][colIndex],
+      piece: pieceId,
+      color: color
+    };
+  }
+  return updatedVariant;
 };
