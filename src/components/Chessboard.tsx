@@ -28,12 +28,12 @@ const Square = React.memo(({ row, col, variant, handlePieceDrop, handleLeftClick
         <DraggablePiece piece={pieceObj} color={variant.board[row][col].color} row={row} col={col} />
       )}
       {rankLabel && (
-        <span className="absolute top-0.5 right-1 text-xs font-semibold text-muted">
+        <span className={`absolute top-0.5 right-1 text-xs font-semibold ${variant.board[row][col].isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
           {rankLabel}
         </span>
       )}
       {fileLabel && (
-        <span className="absolute bottom-0 left-1 text-xs font-semibold text-muted">
+        <span className={`absolute bottom-0 left-1 text-xs font-semibold ${variant.board[row][col].isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
           {fileLabel}
         </span>
       )}

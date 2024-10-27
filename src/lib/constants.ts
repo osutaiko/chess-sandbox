@@ -7,10 +7,22 @@ export const PIECE_PRESETS = [
     sprite: "king",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
-        offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
-        range: 1,
+        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        range: {
+          from: 1,
+          to: 1,
+        },
+      },
+      {
+        type: "slide",
+        conditions: [],
+        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        range: {
+          from: 1,
+          to: 1,
+        },
       },
       {
         type: "castle",
@@ -64,22 +76,31 @@ export const PIECE_PRESETS = [
     sprite: "pawn",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: ["non-capture only"],
         offsets: [[0, 1]],
-        range: 1,
+        range: {
+          from: 1,
+          to: 1,
+        },
       },
       {
-        type: "ride",
+        type: "slide",
         conditions: ["initial", "non-capture only"],
-        offsets: [[0, 2]],
-        range: 1,
+        offsets: [[0, 1]],
+        range: {
+          from: 2,
+          to: 2,
+        },
       },
       {
-        type: "ride",
+        type: "slide",
         conditions: ["capture only"],
         offsets: [[1, 1], [-1, 1]],
-        range: 1,
+        range: {
+          from: 1,
+          to: 1,
+        },
       },
     ],
     promotions: [{
@@ -112,10 +133,13 @@ export const PIECE_PRESETS = [
     sprite: "bishop",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
         offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
-        range: Infinity,
+        range: {
+          from: 1,
+          to: Infinity,
+        },
       },
     ],
     promotions: [],
@@ -129,10 +153,13 @@ export const PIECE_PRESETS = [
     sprite: "rook",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
         offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
-        range: Infinity,
+        range: {
+          from: 1,
+          to: Infinity,
+        },
       },
     ],
     promotions: [],
@@ -146,10 +173,22 @@ export const PIECE_PRESETS = [
     sprite: "queen",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
-        offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
-        range: Infinity,
+        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        range: {
+          from: 1,
+          to: Infinity,
+        },
+      },
+      {
+        type: "slide",
+        conditions: [],
+        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        range: {
+          from: 1,
+          to: Infinity,
+        },
       },
     ],
     promotions: [],
@@ -163,10 +202,13 @@ export const PIECE_PRESETS = [
     sprite: "archbis",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
         offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
-        range: Infinity,
+        range: {
+          from: 1,
+          to: Infinity,
+        },
       },
       {
         type: "leap",
@@ -185,10 +227,13 @@ export const PIECE_PRESETS = [
     sprite: "chancel",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
         offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
-        range: Infinity,
+        range: {
+          from: 1,
+          to: Infinity,
+        },
       },
       {
         type: "leap",
@@ -207,10 +252,22 @@ export const PIECE_PRESETS = [
     sprite: "amazon",
     moves: [
       {
-        type: "ride",
+        type: "slide",
         conditions: [],
-        offsets: [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]],
-        range: Infinity,
+        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        range: {
+          from: 1,
+          to: Infinity,
+        },
+      },
+      {
+        type: "slide",
+        conditions: [],
+        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        range: {
+          from: 1,
+          to: Infinity,
+        },
       },
       {
         type: "leap",

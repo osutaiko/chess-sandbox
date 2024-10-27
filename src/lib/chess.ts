@@ -36,7 +36,7 @@ export const resizeBoard = (variant, newWidth, newHeight) => {
       const startIndex = Math.floor(excessWidth / 2);
       return row.slice(startIndex, startIndex + newWidth);
     }
-    return row; // no change if width is the same
+    return row;
   });
 
   return { ...variant, width: newWidth, height: newHeight, board: newBoard };
@@ -63,8 +63,8 @@ export const getReachableSquares = (moves, radius) => {
   );
 
   moves.forEach((move) => {
-    if (move.type === "ride") {
-      for (let r = 1; r <= (move.range === Infinity ? radius : move.range); r++) {
+    if (move.type === "slide") {
+      for (let r = move.range.from; r <= (move.range.to === Infinity ? radius : move.range.to); r++) {
         move.offsets.forEach(([dx, dy]) => {
           const x = radius + dx * r;
           const y = radius - dy * r;
@@ -150,3 +150,55 @@ export const addPieceToBoard = (variant, pieceId, color, rowIndex, colIndex) => 
   }
   return updatedVariant;
 };
+
+export const decodeSlideOffsets = (offsets) => {
+  const orthogonalOffsets = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+  const diagonalOffsets = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
+
+  const isOrthogonal = offsets.every(offset =>
+    orthogonalOffsets.some(([x, y]) => x === offset[0] && y === offset[1])
+  );
+  const isDiagonal = offsets.every(offset =>
+    diagonalOffsets.some(([x, y]) => x === offset[0] && y === offset[1])
+  );
+
+  if (isOrthogonal) {
+    const canForward = offsets.some(([x, y]) => y > 0);
+    const canBackward = offsets.some(([x, y]) => y < 0);
+    const canSideways = offsets.some(([x, y]) => x !== 0 && y === 0);
+    return { direction: "orthogonal", canForward, canBackward, canSideways };
+  }
+
+  if (isDiagonal) {
+    const canForward = offsets.some(([x, y]) => y > 0);
+    const canBackward = offsets.some(([x, y]) => y < 0);
+    return { direction: "diagonal", canForward, canBackward };
+  }
+
+  return { direction: "other" };
+};
+
+export const encodeSlideOffsets = (param) => {
+  let offsets = [];
+  if (param.direction === "orthogonal") {
+    if (param.canForward) {
+      offsets.push([0, 1]);
+    }
+    if (param.canBackward) {
+      offsets.push([0, -1]);
+    }
+    if (param.canSideways) {
+      offsets.push([1, 0], [0, 1]);
+    }
+  } else if (param.direction === "diagonal") {
+    if (param.canForward) {
+      offsets.push([1, 1], [1, -1]);
+    }
+    if (param.canBackward) {
+      offsets.push([-1, -1], [1, -1]);
+    }
+  } else {
+
+  }
+  return offsets;
+}

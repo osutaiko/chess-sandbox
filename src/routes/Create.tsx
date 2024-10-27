@@ -28,16 +28,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Crown, Plus, SquarePen, Trash2 } from "lucide-react";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
 
-const gameConfigType = {
-  name: "text",
-  description: "textarea",
-  width: "number",
-  height: "number",
-};
-
-const pieceConfigType = {
-};
-
 const Create = () => {
   const [gameConfig, setGameConfig] = useState(EMPTY_GAME_CONFIG);
   const [gameConfigErrors, setGameConfigErrors] = useState({});
@@ -51,7 +41,7 @@ const Create = () => {
 
   const handleGameInputChange = (e) => {
     const { name, value } = e.target;
-    const newValue = gameConfigType[name] === "number" ? parseInt(value) : value;
+    const newValue = (name === "width" || name === "height") ? parseInt(value) : value;
   
     setGameConfig((prevConfig) => ({
       ...prevConfig,
@@ -61,7 +51,8 @@ const Create = () => {
 
   const handlePieceInputChange = (e) => {
     const { name, value } = e.target;
-    let newValue = pieceConfigType[name] === "number" ? parseInt(value) : value;
+    let newValue = value;
+    
     if (name === "id") {
       const lastChar = newValue[newValue.length - 1];
       const isAlphabet = /^[A-Za-z]*$/.test(lastChar);

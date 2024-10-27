@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { DualRangeSlider } from "@/components/ui/DualRangeSlider";
 import {
   Dialog,
   DialogClose,
@@ -20,10 +21,28 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Plus, SquarePen } from "lucide-react";
 import { AVAILABLE_SPRITES, EMPTY_PIECE_CONFIG, PIECE_PRESETS } from "@/lib/constants";
-import PieceMovesBoard from "./PieceMovesBoard";
+import PieceMovesBoard from "@/components/PieceMovesBoard";
+import { decodeSlideOffsets, encodeSlideOffsets } from "@/lib/chess";
 
 const PieceCraftDialog = ({
   isCreateMode,
@@ -40,7 +59,12 @@ const PieceCraftDialog = ({
   openPieceDialogId,
   setOpenPieceDialogId,
 }) => {
-  const piece = isCreateMode ? pieceConfig : variant.pieces.find((piece) => piece.id === pieceBeforeEditId);
+  const updateMoveProperty = (index, name, value) => {
+    const updatedMoves = [...pieceConfig.moves];
+    updatedMoves[index] = { ...updatedMoves[index], [name]: value };
+    setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+  };
+
   return (
     <Dialog
       open={isCreateMode ? isCreatePieceDialogOpen : pieceBeforeEditId === openPieceDialogId}
@@ -59,14 +83,14 @@ const PieceCraftDialog = ({
         size="icon"
         onClick={() => {
           if (!isCreateMode) {
-            setPieceConfig(piece);
+            setPieceConfig(variant.pieces.find((piece) => piece.id === pieceBeforeEditId));
           }
         }}
       >
         {isCreateMode ? <Plus /> : <SquarePen />}
       </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-full w-[1000px] gap-8">
+      <DialogContent className="max-w-full w-[900px] gap-8">
         <DialogHeader>
           <DialogTitle>{isCreateMode ? "Create New Piece" : `Edit Piece`}</DialogTitle>
         </DialogHeader>
@@ -98,58 +122,57 @@ const PieceCraftDialog = ({
             }
             <div className="flex flex-col gap-4">
               {isCreateMode && <h4>Piece Configuration</h4>}
-              <Label className="flex flex-col gap-2 w-min">
-                <h4>Sprite</h4>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
-                      {pieceConfig.sprite ? 
-                        <>
-                          <img
-                            src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
-                            className="w-full h-full"
-                          />
-                          <img
-                            src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
-                            className="w-full h-full"
-                          />
-                          <SquarePen className="absolute right-1 bottom-1" />
-                        </> : 
-                        <Plus />
-                      }
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full h-[200px]">
-                    <ScrollArea className="w-full h-full">
-                      <div className="grid grid-cols-4 gap-1">
-                        {AVAILABLE_SPRITES.map((sprite) => {
-                          return (
-                            <Button
-                              key={sprite}
-                              variant="secondary"
-                              className="p-1 h-full gap-2"
-                              onClick={() => setPieceConfig({ ...pieceConfig, sprite })}
-                            >
-                              <img
-                                src={`/src/assets/images/pieces/${sprite}-0.svg`}
-                                alt={`${sprite}-0}`}
-                                className="w-[50px] aspect-square"
-                              />
-                              <img
-                                src={`/src/assets/images/pieces/${sprite}-1.svg`}
-                                alt={`${sprite}-1}`}
-                                className="w-[50px] aspect-square"
-                              />
-                            </Button>
-                          )
-                        })}
-                      </div>
-                    </ScrollArea>
-                  </PopoverContent>
-                </Popover>
-                {pieceConfigErrors.sprite && <p className="text-destructive">{pieceConfigErrors.sprite}</p>}
-              </Label>
               <div className="flex flex-row gap-2">
+                <Label className="flex flex-col gap-2 w-min">
+                  <Popover modal={true}>
+                    <PopoverTrigger asChild>
+                      <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
+                        {pieceConfig.sprite ? 
+                          <>
+                            <img
+                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
+                              className="w-full h-full"
+                            />
+                            <img
+                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
+                              className="w-full h-full"
+                            />
+                            <SquarePen className="absolute right-1 bottom-1" />
+                          </> : 
+                          <Plus />
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full h-[200px]">
+                      <ScrollArea className="w-full h-full">
+                        <div className="grid grid-cols-4 gap-1">
+                          {AVAILABLE_SPRITES.map((sprite) => {
+                            return (
+                              <Button
+                                key={sprite}
+                                variant="secondary"
+                                className="p-1 h-full gap-2"
+                                onClick={() => setPieceConfig({ ...pieceConfig, sprite })}
+                              >
+                                <img
+                                  src={`/src/assets/images/pieces/${sprite}-0.svg`}
+                                  alt={`${sprite}-0}`}
+                                  className="w-[50px] aspect-square"
+                                />
+                                <img
+                                  src={`/src/assets/images/pieces/${sprite}-1.svg`}
+                                  alt={`${sprite}-1}`}
+                                  className="w-[50px] aspect-square"
+                                />
+                              </Button>
+                            )
+                          })}
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
+                  {pieceConfigErrors.sprite && <p className="text-destructive">{pieceConfigErrors.sprite}</p>}
+                </Label>
                 <Label className="flex flex-col gap-2">
                   <h4>Name</h4>
                   <Input
@@ -183,12 +206,104 @@ const PieceCraftDialog = ({
                 />
                 {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
               </Label>
-              <Label className="flex flex-col gap-2">
-                <h4>Moves</h4>
-                <PieceMovesBoard isCraftMode={true} piece={piece} />
-              </Label>
+              <div className="flex flex-col gap-2">
+                <h3>Moves</h3>
+                <div className="flex flex-row gap-4">
+                  <div className="flex-none">
+                    <PieceMovesBoard isCraftMode={true} piece={pieceConfig} />
+                  </div>
+                  <div className="flex flex-col gap-2 w-full">
+                    {pieceConfig.moves.map((move, index) => {
+                      if (move.type !== "castle") {
+                        return (
+                          <Card key={index}>
+                            <CardHeader className="p-4">
+                              <Select value={move.type} defaultValue="slide" onValueChange={(value) => updateMoveProperty(index, "type", value)}>
+                                <SelectTrigger className="w-[90px] bg-primary border-none font-bold">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem key="slide" value="slide">Slide</SelectItem>
+                                  <SelectItem key="leap" value="leap">Leap</SelectItem>
+                                  <SelectItem key="hop" value="hop">Hop</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </CardHeader>
+                            <CardContent className="flex flex-row gap-6 p-4 pt-0">
+                              {move.type === "slide" && (() => {
+                                const decodedOffsets = decodeSlideOffsets(move.offsets);
+                                const handleCheckboxChange = (key) => (checked) => {
+                                  const updatedOffsets = { ...decodedOffsets, [key]: checked };
+                                  updateMoveProperty(index, "offsets", encodeSlideOffsets(updatedOffsets));
+                                };
+                                return (
+                                  <>
+                                    <RadioGroup
+                                      value={decodedOffsets.direction}
+                                      onValueChange={(value) => updateMoveProperty(index, "offsets", encodeSlideOffsets(decodedOffsets))}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <RadioGroupItem value="orthogonal" id="orthogonal" />
+                                        <Label htmlFor="orthogonal">Orthogonal</Label>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <RadioGroupItem value="diagonal" id="diagonal" />
+                                        <Label htmlFor="diagonal">Diagonal</Label>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <RadioGroupItem value="other" id="other" />
+                                        <Label htmlFor="other">Other</Label>
+                                      </div>
+                                    </RadioGroup>
+                                    <div className="flex flex-col gap-2">
+                                      <div className="flex items-center gap-2">
+                                        <Checkbox id="forward" defaultChecked={decodedOffsets.canForward} onCheckedChange={handleCheckboxChange("canForward")} />
+                                        <Label htmlFor="forward">Forward</Label>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Checkbox id="backward" defaultChecked={decodedOffsets.canBackward} onCheckedChange={handleCheckboxChange("canBackward")} />
+                                        <Label htmlFor="backward">Backward</Label>
+                                      </div>
+                                      {decodedOffsets.direction === "orthogonal" && (
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox id="sideways" defaultChecked={decodedOffsets.canSideways} onCheckedChange={handleCheckboxChange("canSideways")} />
+                                          <Label htmlFor="sideways">Sideways</Label>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                              {(move.type === "slide" || move.type === "hop") && (
+                                <div className="flex flex-col gap-4">
+                                  <Label htmlFor="range">Range</Label>
+                                  <DualRangeSlider
+                                    id="range"
+                                    className="w-[240px]"
+                                    min={1}
+                                    max={9} // Using 9 to represent "Infinity"
+                                    step={1}
+                                    label={(value) => value === 9 ? "∞" : String(value)}
+                                    labelPosition="bottom"
+                                    value={[move.range.from === Infinity ? 9 : move.range.from, move.range.to === Infinity ? 9 : move.range.to]}
+                                  />
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      }
+                    })}
+                    {pieceConfig.moves.some((move) => move.type === "castle") && (
+                      <Card className="p-2">
+                        <Badge>Castle</Badge>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+              </div>
               <h3>Advanced</h3>
-              {piece.moves.some((move) => Array.isArray(move.conditions) && move.conditions.includes("initial")) &&
+              {pieceConfig.moves.some((move) => Array.isArray(move.conditions) && move.conditions.includes("initial")) &&
                 <Label className="flex flex-row items-center gap-2">
                   <Checkbox
                     checked={pieceConfig.isEnPassantTarget} 

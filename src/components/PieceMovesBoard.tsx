@@ -28,7 +28,7 @@ const PieceMovesBoard = ({ isCraftMode, piece }) => {
     return (
       <div
         key={`${row}-${col}`}
-        className={`relative ${row === radius && col === radius ? "bg-destructive" :  (isSquareDark ? "bg-square-dark" : "bg-square-light")} flex flex-col items-center justify-center ${isCraftMode ? "w-[48px]" : "w-[20px]"} aspect-square`}
+        className={`relative ${row === radius && col === radius ? "bg-destructive" :  (isSquareDark ? "bg-square-dark" : "bg-square-light")} flex flex-col items-center justify-center ${isCraftMode ? "w-[36px]" : "w-[20px]"} aspect-square`}
       >
         {row === radius && col === radius && piece.sprite && (
           <img
@@ -38,8 +38,8 @@ const PieceMovesBoard = ({ isCraftMode, piece }) => {
         )}
         {showMarker && (
           square.onlyOnInitial ? 
-          <Play stroke={markerColor} className="w-3/5 h-3/5" /> :
-          <Circle stroke={markerColor} className="w-1/2 h-1/2" />
+          <Play stroke={markerColor} strokeWidth={2} className="w-3/5 h-3/5" /> :
+          <Circle stroke={markerColor} strokeWidth={2} className="w-1/2 h-1/2" />
         )}
       </div>
     );
