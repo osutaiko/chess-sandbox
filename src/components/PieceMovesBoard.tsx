@@ -1,6 +1,5 @@
 import { getReachableSquares } from "@/lib/chess";
-
-import { Circle, Play } from "lucide-react";
+import { Circle, Play, ArrowRightFromLine } from "lucide-react";
 
 const PieceMovesBoard = ({ isCraftMode, piece }) => {
   const radius = 4;
@@ -8,38 +7,55 @@ const PieceMovesBoard = ({ isCraftMode, piece }) => {
   const height = 2 * radius + 1;
   const reachableSquares = getReachableSquares(piece.moves, radius);
 
+  const getColor = (canNonCapture, canCapture) => {
+    if (canNonCapture && canCapture) return "black";
+    else if (canNonCapture) return "green";
+    else if (canCapture) return "red";
+    return null;
+  };
+
   const renderSquare = (row, col) => {
     const isSquareDark = (row + col) % 2 === 1;
     const square = reachableSquares[row][col];
-
-    let markerColor = "transparent";
-    let showMarker = false;
-    if (square.canMove && square.canCapture) {
-      markerColor = "black";
-      showMarker = true;
-    } else if (square.canMove) {
-      markerColor = "green";
-      showMarker = true;
-    } else if (square.canCapture) {
-      markerColor = "red";
-      showMarker = true;
-    }
+    const { onInitial, onNonInitial } = square;
 
     return (
       <div
         key={`${row}-${col}`}
-        className={`relative ${row === radius && col === radius ? "bg-destructive" :  (isSquareDark ? "bg-square-dark" : "bg-square-light")} flex flex-col items-center justify-center ${isCraftMode ? "w-[36px]" : "w-[20px]"} aspect-square`}
+        className={`relative ${
+          row === radius && col === radius ? "bg-destructive" : (isSquareDark ? "bg-square-dark" : "bg-square-light")
+        } flex flex-col items-center justify-center ${isCraftMode ? "w-[36px]" : "w-[20px]"} aspect-square`}
       >
         {row === radius && col === radius && piece.sprite && (
           <img
             src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
             className="w-full aspect-square"
+            alt="Piece"
           />
         )}
-        {showMarker && (
-          square.onlyOnInitial ? 
-          <Play stroke={markerColor} strokeWidth={2} className="w-3/5 h-3/5" /> :
-          <Circle stroke={markerColor} strokeWidth={2} className="w-1/2 h-1/2" />
+        
+        {onInitial.canNonCapture === onNonInitial.canNonCapture && onInitial.canCapture === onNonInitial.canCapture ? (
+          (() => {
+            const color = getColor(onInitial.canNonCapture, onInitial.canCapture);
+            return color ? <Circle stroke={color} strokeWidth={2} className="w-1/2 h-1/2" /> : null;
+          })()
+        ) : (
+          <>
+            {onInitial && (onInitial.canCapture || onInitial.canNonCapture) && (
+              <Play
+                stroke={getColor(onInitial.canNonCapture, onInitial.canCapture)}
+                strokeWidth={2}
+                className="w-3/5 h-3/5"
+              />
+            )}
+            {onNonInitial && (onNonInitial.canCapture || onNonInitial.canNonCapture) && (
+              <ArrowRightFromLine
+                stroke={getColor(onNonInitial.canNonCapture, onNonInitial.canCapture)}
+                strokeWidth={2}
+                className="w-3/5 h-3/5"
+              />
+            )}
+          </>
         )}
       </div>
     );

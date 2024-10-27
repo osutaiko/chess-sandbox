@@ -54,46 +54,77 @@ export const getSquareName = (width, height, rowIndex, colIndex) => {
 };
 
 export const getReachableSquares = (moves, radius) => {
-  const squares = Array.from({ length: radius * 2 + 1 }, () => 
+  const squares = Array.from({ length: radius * 2 + 1 }, () =>
     Array.from({ length: radius * 2 + 1 }, () => ({
-      canMove: false,
-      canCapture: false,
-      onlyOnInitial: false,
+      onInitial: {
+        canNonCapture: false,
+        canCapture: false,
+      },
+      onNonInitial: {
+        canNonCapture: false,
+        canCapture: false,
+      },
     }))
   );
 
   moves.forEach((move) => {
-    if (move.type === "slide") {
-      for (let r = move.range.from; r <= (move.range.to === Infinity ? radius : move.range.to); r++) {
-        move.offsets.forEach(([dx, dy]) => {
-          const x = radius + dx * r;
-          const y = radius - dy * r;
+    const { type, canNonCapture, canCapture, isInitialOnly } = move;
 
-          if (x >= 0 && x < squares.length && y >= 0 && y < squares[0].length) {
-            squares[y][x] = {
-              canMove: !move.conditions.some(condition => condition === "capture only"),
-              canCapture: !move.conditions.some(condition => condition === "non-capture only"),
-              onlyOnInitial: move.conditions.some(condition => condition === "initial"),
-            };
-          }
-        });
+    if (type === "slide") {
+      const { offset, range, canForward, canBackward, canSideways } = move;
+      const [a, b] = offset;
+      const directions = [];
+
+      if (a === 1 && b === 0) {
+        if (canForward) directions.push([0, 1]);
+        if (canBackward) directions.push([0, -1]);
+        if (canSideways) directions.push([1, 0], [-1, 0]);
+      } else {
+        if (canForward) directions.push([a, b], [-a, b]);
+        if (canBackward) directions.push([a, -b], [-a, -b]);
       }
-    } else if (move.type === "leap") {
+
+      directions.forEach(([dx, dy]) => {
+        for (let i = range.from; i <= range.to; i++) {
+          const x = radius + dx * i;
+          const y = radius - dy * i;
+
+          if (x >= 0 && x < squares[0].length && y >= 0 && y < squares.length) {
+            squares[y][x] = {
+              onInitial: {
+                canNonCapture: squares[y][x].onInitial.canNonCapture || canNonCapture,
+                canCapture: squares[y][x].onInitial.canCapture || canCapture,
+              },
+              onNonInitial: {
+                canNonCapture: !isInitialOnly ? squares[y][x].onNonInitial.canNonCapture || canNonCapture : squares[y][x].onNonInitial.canNonCapture,
+                canCapture: !isInitialOnly ? squares[y][x].onNonInitial.canCapture || canCapture : squares[y][x].onNonInitial.canCapture,
+              },
+            };
+          } else {
+            break;
+          }
+        }
+      });
+    } else if (type === "leap") {
       move.offsets.forEach(([dx, dy]) => {
         const x = radius + dx;
         const y = radius - dy;
 
-        if (x >= 0 && x < squares.length && y >= 0 && y < squares[0].length) {
+        if (x >= 0 && x < squares[0].length && y >= 0 && y < squares.length) {
           squares[y][x] = {
-            canMove: true,
-            canCapture: !move.conditions.some(condition => condition === "non-capture only"),
-            onlyOnInitial: false,
+            onInitial: {
+              canNonCapture: squares[y][x].onInitial.canNonCapture || canNonCapture,
+              canCapture: squares[y][x].onInitial.canCapture || canCapture,
+            },
+            onNonInitial: {
+              canNonCapture: !isInitialOnly ? squares[y][x].onNonInitial.canNonCapture || canNonCapture : squares[y][x].onNonInitial.canNonCapture,
+              canCapture: !isInitialOnly ? squares[y][x].onNonInitial.canCapture || canCapture : squares[y][x].onNonInitial.canCapture,
+            },
           };
         }
       });
     }
   });
-
   return squares;
 };
 
@@ -150,55 +181,3 @@ export const addPieceToBoard = (variant, pieceId, color, rowIndex, colIndex) => 
   }
   return updatedVariant;
 };
-
-export const decodeSlideOffsets = (offsets) => {
-  const orthogonalOffsets = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-  const diagonalOffsets = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
-
-  const isOrthogonal = offsets.every(offset =>
-    orthogonalOffsets.some(([x, y]) => x === offset[0] && y === offset[1])
-  );
-  const isDiagonal = offsets.every(offset =>
-    diagonalOffsets.some(([x, y]) => x === offset[0] && y === offset[1])
-  );
-
-  if (isOrthogonal) {
-    const canForward = offsets.some(([x, y]) => y > 0);
-    const canBackward = offsets.some(([x, y]) => y < 0);
-    const canSideways = offsets.some(([x, y]) => x !== 0 && y === 0);
-    return { direction: "orthogonal", canForward, canBackward, canSideways };
-  }
-
-  if (isDiagonal) {
-    const canForward = offsets.some(([x, y]) => y > 0);
-    const canBackward = offsets.some(([x, y]) => y < 0);
-    return { direction: "diagonal", canForward, canBackward };
-  }
-
-  return { direction: "other" };
-};
-
-export const encodeSlideOffsets = (param) => {
-  let offsets = [];
-  if (param.direction === "orthogonal") {
-    if (param.canForward) {
-      offsets.push([0, 1]);
-    }
-    if (param.canBackward) {
-      offsets.push([0, -1]);
-    }
-    if (param.canSideways) {
-      offsets.push([1, 0], [0, 1]);
-    }
-  } else if (param.direction === "diagonal") {
-    if (param.canForward) {
-      offsets.push([1, 1], [1, -1]);
-    }
-    if (param.canBackward) {
-      offsets.push([-1, -1], [1, -1]);
-    }
-  } else {
-
-  }
-  return offsets;
-}

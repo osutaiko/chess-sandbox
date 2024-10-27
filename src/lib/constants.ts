@@ -8,21 +8,30 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        offset: [1, 0],
+        canForward: true,
+        canBackward: true,
+        canSideways: true,
         range: {
           from: 1,
           to: 1,
         },
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        offset: [1, 1],
+        canForward: true,
+        canBackward: true,
         range: {
           from: 1,
           to: 1,
         },
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "castle",
@@ -77,30 +86,44 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: ["non-capture only"],
-        offsets: [[0, 1]],
+        offset: [1, 0],
         range: {
           from: 1,
           to: 1,
         },
+        canForward: true,
+        canBackward: false,
+        canSideways: false,
+        canNonCapture: true,
+        canCapture: false,
+        isInitialOnly: false,
       },
       {
         type: "slide",
-        conditions: ["initial", "non-capture only"],
-        offsets: [[0, 1]],
+        offset: [1, 0],
         range: {
           from: 2,
           to: 2,
         },
+        canForward: true,
+        canBackward: false,
+        canSideways: false,
+        canNonCapture: true,
+        canCapture: false,
+        isInitialOnly: true,
       },
       {
         type: "slide",
-        conditions: ["capture only"],
-        offsets: [[1, 1], [-1, 1]],
+        offset: [1, 1],
         range: {
           from: 1,
           to: 1,
         },
+        canForward: true,
+        canBackward: false,
+        canNonCapture: false,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [{
@@ -118,8 +141,10 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "leap",
-        conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -134,12 +159,16 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        offset: [1, 1],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -154,12 +183,17 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        offset: [1, 0],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canSideways: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -174,21 +208,30 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        offset: [1, 0],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canSideways: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        offset: [1, 1],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -203,17 +246,23 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        offset: [1, 1],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "leap",
-        conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -228,17 +277,24 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        offset: [1, 0],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canSideways: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "leap",
-        conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -253,26 +309,37 @@ export const PIECE_PRESETS = [
     moves: [
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+        offset: [1, 0],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canSideways: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "slide",
-        conditions: [],
-        offsets: [[1, 1], [-1, 1], [-1, -1], [1, -1]],
+        offset: [1, 1],
         range: {
           from: 1,
           to: Infinity,
         },
+        canForward: true,
+        canBackward: true,
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
       {
         type: "leap",
-        conditions: [],
         offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
+        canNonCapture: true,
+        canCapture: true,
+        isInitialOnly: false,
       },
     ],
     promotions: [],
@@ -367,3 +434,44 @@ export const EMPTY_PIECE_CONFIG = {
   isEnPassantTarget: false,
   isEnPassantCapturer: false,
 };
+
+export const EMPTY_MOVE_PROPERTY = (moveType, direction=null) => {
+  if (moveType === "slide") {
+    return {
+      type: "slide",
+      offset: direction === "orthogonal" ? [1, 0] : direction === "diagonal" ? [1, 1] : [1, 0],
+      canForward: true,
+      canBackward: true,
+      canSideways: true,
+      range: {
+        from: 1,
+        to: 1,
+      },
+      canNonCapture: true,
+      canCapture: true,
+      isInitialOnly: false,
+    };
+  }
+
+  if (moveType === "leap") {
+    return {
+      type: "leap",
+      offsets: [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]],
+      canNonCapture: true,
+      canCapture: true,
+      isInitialOnly: false,
+    };
+  }
+
+  if (moveType === "hop") {
+    return {
+      type: "hop",
+      conditions: [],
+      offsets: [],
+      range: {
+        from: 1,
+        to: Infinity,
+      },
+    }
+  }
+}

@@ -40,7 +40,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Plus, SquarePen } from "lucide-react";
-import { AVAILABLE_SPRITES, EMPTY_PIECE_CONFIG, PIECE_PRESETS } from "@/lib/constants";
+import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG, PIECE_PRESETS } from "@/lib/constants";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
 import { decodeSlideOffsets, encodeSlideOffsets } from "@/lib/chess";
 
@@ -59,6 +59,8 @@ const PieceCraftDialog = ({
   openPieceDialogId,
   setOpenPieceDialogId,
 }) => {
+  const slideInfStart = 9;
+
   const updateMoveProperty = (index, name, value) => {
     const updatedMoves = [...pieceConfig.moves];
     updatedMoves[index] = { ...updatedMoves[index], [name]: value };
@@ -218,7 +220,11 @@ const PieceCraftDialog = ({
                         return (
                           <Card key={index}>
                             <CardHeader className="p-4">
-                              <Select value={move.type} defaultValue="slide" onValueChange={(value) => updateMoveProperty(index, "type", value)}>
+                              <Select value={move.type} defaultValue="slide" onValueChange={(value) => {
+                                const updatedMoves = [...pieceConfig.moves];
+                                updatedMoves[index] = EMPTY_MOVE_PROPERTY(value);
+                                setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                              }}>
                                 <SelectTrigger className="w-[90px] bg-primary border-none font-bold">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -229,66 +235,107 @@ const PieceCraftDialog = ({
                                 </SelectContent>
                               </Select>
                             </CardHeader>
-                            <CardContent className="flex flex-row gap-6 p-4 pt-0">
-                              {move.type === "slide" && (() => {
-                                const decodedOffsets = decodeSlideOffsets(move.offsets);
-                                const handleCheckboxChange = (key) => (checked) => {
-                                  const updatedOffsets = { ...decodedOffsets, [key]: checked };
-                                  updateMoveProperty(index, "offsets", encodeSlideOffsets(updatedOffsets));
-                                };
-                                return (
-                                  <>
-                                    <RadioGroup
-                                      value={decodedOffsets.direction}
-                                      onValueChange={(value) => updateMoveProperty(index, "offsets", encodeSlideOffsets(decodedOffsets))}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <RadioGroupItem value="orthogonal" id="orthogonal" />
-                                        <Label htmlFor="orthogonal">Orthogonal</Label>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <RadioGroupItem value="diagonal" id="diagonal" />
-                                        <Label htmlFor="diagonal">Diagonal</Label>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <RadioGroupItem value="other" id="other" />
-                                        <Label htmlFor="other">Other</Label>
-                                      </div>
-                                    </RadioGroup>
-                                    <div className="flex flex-col gap-2">
-                                      <div className="flex items-center gap-2">
-                                        <Checkbox id="forward" defaultChecked={decodedOffsets.canForward} onCheckedChange={handleCheckboxChange("canForward")} />
-                                        <Label htmlFor="forward">Forward</Label>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Checkbox id="backward" defaultChecked={decodedOffsets.canBackward} onCheckedChange={handleCheckboxChange("canBackward")} />
-                                        <Label htmlFor="backward">Backward</Label>
-                                      </div>
-                                      {decodedOffsets.direction === "orthogonal" && (
+                            <CardContent className="flex flex-col gap-6 p-4 pt-0">
+                              <div className="flex flex-row gap-8">
+                                {move.type === "slide" && (() => {
+                                  const [a, b] = move.offset;
+                                  const decodedOffset =
+                                    a === 1 && b === 0 ? "orthogonal" :
+                                    a === 1 && b === 1 ? "diagonal" :
+                                    "other";
+                                  return (
+                                    <>
+                                      <RadioGroup
+                                        value={decodedOffset}
+                                        onValueChange={(value) => {
+                                          const updatedMoves = [...pieceConfig.moves];
+                                          updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
+                                          setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                        }}
+                                      >
                                         <div className="flex items-center gap-2">
-                                          <Checkbox id="sideways" defaultChecked={decodedOffsets.canSideways} onCheckedChange={handleCheckboxChange("canSideways")} />
-                                          <Label htmlFor="sideways">Sideways</Label>
+                                          <RadioGroupItem value="orthogonal" id="orthogonal" />
+                                          <Label htmlFor="orthogonal">Orthogonal</Label>
                                         </div>
-                                      )}
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                              {(move.type === "slide" || move.type === "hop") && (
-                                <div className="flex flex-col gap-4">
-                                  <Label htmlFor="range">Range</Label>
-                                  <DualRangeSlider
-                                    id="range"
-                                    className="w-[240px]"
-                                    min={1}
-                                    max={9} // Using 9 to represent "Infinity"
-                                    step={1}
-                                    label={(value) => value === 9 ? "∞" : String(value)}
-                                    labelPosition="bottom"
-                                    value={[move.range.from === Infinity ? 9 : move.range.from, move.range.to === Infinity ? 9 : move.range.to]}
+                                        <div className="flex items-center gap-2">
+                                          <RadioGroupItem value="diagonal" id="diagonal" />
+                                          <Label htmlFor="diagonal">Diagonal</Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <RadioGroupItem value="other" id="other" />
+                                          <Label htmlFor="other">Other</Label>
+                                        </div>
+                                      </RadioGroup>
+                                      <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox id="forward" defaultChecked={move.canForward} onCheckedChange={(checked) => updateMoveProperty(index, "canForward", checked)} />
+                                          <Label htmlFor="forward">Forward</Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox id="backward" defaultChecked={move.canBackward} onCheckedChange={(checked) => updateMoveProperty(index, "canBackward", checked)} />
+                                          <Label htmlFor="backward">Backward</Label>
+                                        </div>
+                                        {decodedOffset === "orthogonal" && (
+                                          <div className="flex items-center gap-2">
+                                            <Checkbox id="sideways" defaultChecked={move.canSideways} onCheckedChange={(checked) => updateMoveProperty(index, "canSideways", checked)} />
+                                            <Label htmlFor="sideways">Sideways</Label>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </>
+                                  );
+                                })()}
+                                {(move.type === "slide" || move.type === "hop") && (
+                                  <div className="flex flex-col gap-4">
+                                    <Label htmlFor="range">Range</Label>
+                                    <DualRangeSlider
+                                      id="range"
+                                      className="w-[200px]"
+                                      min={1}
+                                      max={slideInfStart} // Using 9 to represent "Infinity"
+                                      step={1}
+                                      label={(value) => value === slideInfStart ? "∞" : String(value)}
+                                      labelPosition="bottom"
+                                      value={[move.range.from === Infinity ? slideInfStart : move.range.from, move.range.to === Infinity ? slideInfStart : move.range.to]}
+                                      onValueChange={(value) => updateMoveProperty(index, "range", { from: value[0], to: value[1] })}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    id="canNonCapture"
+                                    checked={move.canNonCapture}
+                                    onCheckedChange={(checked) => {
+                                      if (checked || move.canCapture) {
+                                        updateMoveProperty(index, "canNonCapture", checked);
+                                      }
+                                    }}
                                   />
+                                  <Label htmlFor="canNonCapture">Allow non-capturing moves?</Label>
                                 </div>
-                              )}
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    id="canCapture"
+                                    checked={move.canCapture}
+                                    onCheckedChange={(checked) => {
+                                      if (checked || move.canNonCapture) {
+                                        updateMoveProperty(index, "canCapture", checked);
+                                      }
+                                    }}
+                                  />
+                                  <Label htmlFor="canCapture">Allow capturing moves?</Label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    id="isInitialOnly"
+                                    checked={move.isInitialOnly}
+                                    onCheckedChange={(checked) => {updateMoveProperty(index, "isInitialOnly", checked)}}
+                                  />
+                                  <Label htmlFor="isInitialOnly">Only on initial move?</Label>
+                                </div>
+                              </div>
                             </CardContent>
                           </Card>
                         );
