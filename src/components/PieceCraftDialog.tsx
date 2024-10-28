@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { Plus, SquarePen } from "lucide-react";
+import { Plus, SquarePen, Trash2 } from "lucide-react";
 import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG, PIECE_PRESETS } from "@/lib/constants";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
 import { decodeSlideOffsets, encodeSlideOffsets } from "@/lib/chess";
@@ -66,8 +66,6 @@ const PieceCraftDialog = ({
     updatedMoves[index] = { ...updatedMoves[index], [name]: value };
     setPieceConfig({ ...pieceConfig, moves: updatedMoves });
   };
-
-  console.log(pieceConfig.moves)
 
   return (
     <Dialog
@@ -210,8 +208,22 @@ const PieceCraftDialog = ({
                 />
                 {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
               </Label>
-              <div className="flex flex-col gap-2">
-                <h3>Moves</h3>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-row justify-between">
+                  <h4>Moves</h4>
+                  <Button
+                    size="icon"
+                    onClick={() => {
+                      const newMove = EMPTY_MOVE_PROPERTY("slide", "orthogonal");
+                      setPieceConfig({
+                        ...pieceConfig,
+                        moves: [...pieceConfig.moves, newMove],
+                      });
+                    }}
+                  >
+                    <Plus />
+                  </Button>
+                </div>
                 <div className="flex flex-row gap-4">
                   <div className="flex-none sticky top-0 h-min">
                     <PieceMovesBoard isCraftMode={true} piece={pieceConfig} />
@@ -221,7 +233,7 @@ const PieceCraftDialog = ({
                       if (move.type !== "castle") {
                         return (
                           <Card key={index}>
-                            <CardHeader className="p-4">
+                            <CardHeader className="flex flex-row justify-between p-4 space-y-0">
                               <Select value={move.type} defaultValue="slide" onValueChange={(value) => {
                                 const updatedMoves = [...pieceConfig.moves];
                                 updatedMoves[index] = {
@@ -238,6 +250,16 @@ const PieceCraftDialog = ({
                                   <SelectItem key="hop" value="hop">Hop</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <Button
+                                size="icon"
+                                variant="destructive"
+                                onClick={() => {
+                                  const updatedMoves = pieceConfig.moves.filter((_, i) => i !== index);
+                                  setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                }}
+                              >
+                                <Trash2 />
+                              </Button>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-6 p-4 pt-0">
                               <div className="flex flex-row gap-8">

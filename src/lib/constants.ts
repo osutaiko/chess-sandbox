@@ -468,7 +468,7 @@ export const EMPTY_MOVE_PROPERTY = (moveType, direction = null, existingMove = {
       canForward: true,
       canBackward: true,
       canSideways: true,
-      range: { from: 1, to: Infinity },
+      range: { from: 1, to: 1 },
     };
   }
 
@@ -491,7 +491,7 @@ export const EMPTY_MOVE_PROPERTY = (moveType, direction = null, existingMove = {
       canForward: true,
       canBackward: true,
       canSideways: true,
-      range: { from: 1, to: Infinity },
+      range: { from: 1, to: 1 },
     };
   }
 };
