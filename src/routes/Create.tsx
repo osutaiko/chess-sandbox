@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogClose,
@@ -247,7 +248,12 @@ const Create = () => {
                         <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} isRoyal={variant.royals.includes(piece.id)} />
                       </div>
                     </div>
-                    <h4 className="break-words">{piece.name} ({piece.id})</h4>
+                    <div className="flex flex-col gap-2 items-center">
+                    <Badge className="text-base">{piece.id}</Badge>
+                      <h4 className="text-center break-all line-clamp-2">
+                       {piece.name}
+                      </h4>
+                    </div>
                   </div>
                   <div className="py-4">
                     <PieceMovesBoard isCraftMode={false} piece={piece} />
