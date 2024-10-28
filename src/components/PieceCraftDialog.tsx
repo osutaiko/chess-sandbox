@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { DualRangeSlider } from "@/components/ui/DualRangeSlider";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -40,8 +46,9 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { Plus, ScanSearch, SquarePen, Trash2 } from "lucide-react";
-import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG, PIECE_PRESETS } from "@/lib/constants";
+import { Plus, ScanSearch, SquarePen, Trash2, Ellipsis } from "lucide-react";
+import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG } from "@/lib/constants";
+import { PIECE_PRESETS } from "@/lib/piecePresets";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
 import { decodeSlideOffsets, encodeSlideOffsets } from "@/lib/chess";
 
@@ -105,13 +112,13 @@ const PieceCraftDialog = ({
             {isCreateMode && 
               <div className="flex flex-col gap-4">
                 <h4>Presets</h4>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
-                  {PIECE_PRESETS.map((piece) => {
+                <div className="flex flex-row gap-2">
+                  {PIECE_PRESETS.slice(0, 6).map((piece) => {
                     return (
                       <Button
                         key={piece.id}
                         variant="secondary"
-                        className="flex flex-col gap-1 w-full h-min py-2"
+                        className="flex flex-col gap-1 w-[85px] h-[95px] py-2"
                         onClick={() => setPieceConfig(piece)}
                       >
                         <img
@@ -123,6 +130,36 @@ const PieceCraftDialog = ({
                       </Button>
                     );
                   })}
+                  <Popover modal={true}>
+                    <PopoverTrigger asChild>
+                      <Button variant="secondary" className="h-[95px]">
+                        <Ellipsis />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full h-[200px]">
+                      <ScrollArea className="w-full h-full">
+                        <div className="grid grid-cols-4 gap-1">
+                          {PIECE_PRESETS.slice(6).map((piece) => {
+                            return (
+                              <Button
+                                key={piece.id}
+                                variant="secondary"
+                                className="flex flex-col gap-1 w-[85px] h-[95px] py-2"
+                                onClick={() => setPieceConfig(piece)}
+                              >
+                                <img
+                                  src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
+                                  alt={piece.name}
+                                  className="w-full"
+                                />
+                                <p>{piece.name}</p>
+                              </Button>
+                            )
+                          })}
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             }

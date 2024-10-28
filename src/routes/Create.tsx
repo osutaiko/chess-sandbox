@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { z } from "zod";
 
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG, EMPTY_GAME_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard } from "@/lib/chess";
@@ -25,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Crown, Plus, SquarePen, Trash2 } from "lucide-react";
+import { Crown, Trash2 } from "lucide-react";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
 
 const Create = () => {
