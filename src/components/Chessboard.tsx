@@ -25,7 +25,7 @@ const Square = React.memo(({ row, col, variant, handlePieceDrop, handleLeftClick
       onContextMenu={(event) => handleRightClick(event, row, col)}
     >
       {pieceObj && (
-        <DraggablePiece piece={pieceObj} color={variant.board[row][col].color} row={row} col={col} isRoyal={variant.royals.includes(pieceObj.id)} />
+        <DraggablePiece piece={pieceObj} color={variant.board[row][col].color} row={row} col={col} />
       )}
       {rankLabel && (
         <span className={`absolute top-0.5 right-1 text-xs font-semibold ${variant.board[row][col].isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>

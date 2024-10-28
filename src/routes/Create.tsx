@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Trash2 } from "lucide-react";
+import { Crown, Trash2 } from "lucide-react";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
 
 const Create = () => {
@@ -197,6 +198,11 @@ const Create = () => {
                 {gameConfigErrors.height && <p className="text-destructive">{gameConfigErrors.height}</p>}
               </Label>
             </div>
+            <div className="flex flex-row gap-2">
+              <Checkbox />
+              <Label></Label>
+              
+            </div>
           </div>
         </ScrollArea>
         <Button onClick={handleGameConfigSubmit}>Apply</Button>
@@ -235,69 +241,91 @@ const Create = () => {
         </div>
         <ScrollArea>
           <div className="flex flex-col gap-4">
-            {variant.pieces.map((piece) => (
-              <Card key={piece.id} className="bg-secondary">
-                <div className="flex flex-row items-center">
-                  <div className="flex flex-col items-center gap-2 p-4 w-[130px]">
-                    <div
-                      className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
-                      onClick={() => {
-                        setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
-                      }}>
-                      <div className="w-[80px]">
-                        <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} isRoyal={variant.royals.includes(piece.id)} />
+            {variant.pieces.map((piece) => {
+              const isRoyal = variant.royals.includes(piece.id);
+              return (
+                <Card key={piece.id} className="bg-secondary">
+                  <div className="flex flex-row items-center">
+                    <div className="flex flex-col items-center gap-2 p-4 w-[130px]">
+                      <div
+                        className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
+                        onClick={() => {
+                          setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
+                        }}>
+                        <div className="w-[80px]">
+                          <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute -top-3 -right-3 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setVariant((prev) => ({
+                              ...prev,
+                              royals: isRoyal
+                                ? prev.royals.filter((id) => id !== piece.id)
+                                : [...prev.royals, piece.id],
+                            }));
+                          }}
+                        >
+                          <Crown
+                            stroke={isRoyal ? "orange" : "gray"}
+                            fill={isRoyal ? "orange" : "transparent"}
+                          />
+                        </Button>
+                      </div>
+                      <div className="flex flex-col gap-2 items-center">
+                      <Badge className="text-base">{piece.id}</Badge>
+                        <h4 className="text-center break-all line-clamp-2">
+                        {piece.name}
+                        </h4>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2 items-center">
-                    <Badge className="text-base">{piece.id}</Badge>
-                      <h4 className="text-center break-all line-clamp-2">
-                       {piece.name}
-                      </h4>
+                    <div className="py-4">
+                      <PieceMovesBoard isCraftMode={false} piece={piece} />
+                    </div>
+                    <div className="flex flex-col gap-1 p-4">
+                      <PieceCraftDialog
+                        isCreateMode={false}
+                        variant={variant}
+                        pieceConfig={pieceConfig}
+                        setPieceConfig={setPieceConfig}
+                        pieceConfigErrors={pieceConfigErrors}
+                        setPieceConfigErrors={setPieceConfigErrors}
+                        handlePieceInputChange={handlePieceInputChange}
+                        handlePieceConfigSubmit={handlePieceConfigSubmit}
+                        pieceBeforeEditId={piece.id}
+                        openPieceDialogId={openPieceDialogId}
+                        setOpenPieceDialogId={setOpenPieceDialogId}
+                      />
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive" size="icon">
+                            <Trash2 />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Deleting {piece.name}</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete this piece?
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button variant="destructive" onClick={() => handlePieceDelete(piece.id)}>
+                                Delete
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
-                  <div className="py-4">
-                    <PieceMovesBoard isCraftMode={false} piece={piece} />
-                  </div>
-                  <div className="flex flex-col gap-1 p-4">
-                    <PieceCraftDialog
-                      isCreateMode={false}
-                      variant={variant}
-                      pieceConfig={pieceConfig}
-                      setPieceConfig={setPieceConfig}
-                      pieceConfigErrors={pieceConfigErrors}
-                      setPieceConfigErrors={setPieceConfigErrors}
-                      handlePieceInputChange={handlePieceInputChange}
-                      handlePieceConfigSubmit={handlePieceConfigSubmit}
-                      pieceBeforeEditId={piece.id}
-                      openPieceDialogId={openPieceDialogId}
-                      setOpenPieceDialogId={setOpenPieceDialogId}
-                    />
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="destructive" size="icon">
-                          <Trash2 />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Deleting {piece.name}</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to delete this piece?
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button variant="destructive" onClick={() => handlePieceDelete(piece.id)}>
-                              Delete
-                            </Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </ScrollArea>
       </div>
