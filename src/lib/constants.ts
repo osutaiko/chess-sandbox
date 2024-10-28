@@ -32,13 +32,11 @@ export const DEFAULT_VARIANT = {
   }),
   pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
   royals: ['K'],
-  rules: {
-    onCheckmateLastRoyal: "win",
-    onCaptureLastRoyal: null,
-    onStalemate: "draw",
-    onThirdRepetition: "draw",
-    onOpponentWipe: null,
-  }
+  onCheckmateLastRoyal: "win",
+  onCaptureLastRoyal: null,
+  onStalemate: "draw",
+  onThirdRepetition: "draw",
+  onOpponentWipe: null,
 };
 
 export const AVAILABLE_SPRITES = [

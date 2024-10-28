@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Crown, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
 
 const Create = () => {
@@ -237,18 +237,17 @@ const Create = () => {
             {variant.pieces.map((piece) => (
               <Card key={piece.id} className="bg-secondary">
                 <div className="flex flex-row items-center">
-                  <div className="flex flex-col items-center gap-2 p-4 w-[150px]">
+                  <div className="flex flex-col items-center gap-2 p-4 w-[130px]">
                     <div
                       className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
                       onClick={() => {
                         setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
                       }}>
                       <div className="w-[80px]">
-                        <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
+                        <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} isRoyal={variant.royals.includes(piece.id)} />
                       </div>
-                      {variant.royals.includes(piece.id) && <Crown stroke="orange" fill="orange" className="absolute top-0 right-0" />}
                     </div>
-                    <h4>{piece.name} ({piece.id})</h4>
+                    <h4 className="break-words">{piece.name} ({piece.id})</h4>
                   </div>
                   <div className="py-4">
                     <PieceMovesBoard isCraftMode={false} piece={piece} />
