@@ -263,16 +263,35 @@ const PieceCraftDialog = ({
                                 >
                                   <ScanSearch />
                                 </Button>
-                                <Button
-                                  size="icon"
-                                  variant="destructive"
-                                  onClick={() => {
-                                    const updatedMoves = pieceConfig.moves.filter((_, i) => i !== index);
-                                    setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                  }}
-                                >
-                                  <Trash2 />
-                                </Button>
+                                
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      size="icon"
+                                      variant="destructive"
+                                    >
+                                      <Trash2 />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Deleting Move</DialogTitle>
+                                      <DialogDescription>
+                                        Are you sure you want to delete this move?
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                      <DialogClose asChild>
+                                        <Button variant="destructive" onClick={() => {
+                                          const updatedMoves = pieceConfig.moves.filter((_, i) => i !== index);
+                                          setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                        }}>
+                                          Delete
+                                        </Button>
+                                      </DialogClose>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
                               </div>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-6 p-4 pt-0">
