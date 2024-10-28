@@ -1,11 +1,14 @@
 import { getReachableSquares } from "@/lib/chess";
 import { Circle, Play, ArrowRightFromLine } from "lucide-react";
 
-const PieceMovesBoard = ({ isCraftMode, piece }) => {
+const PieceMovesBoard = ({ isCraftMode, piece, highlightedMoveIndex }) => {
   const radius = 4;
   const width = 2 * radius + 1;
   const height = 2 * radius + 1;
-  const reachableSquares = getReachableSquares(piece.moves, radius);
+  const reachableSquares = getReachableSquares(
+    (isCraftMode && (highlightedMoveIndex !== null)) ? [piece.moves[highlightedMoveIndex]] : piece.moves,
+    radius
+  );
 
   const getColor = (canNonCapture, canCapture) => {
     if (canNonCapture && canCapture) return "black";
@@ -40,23 +43,24 @@ const PieceMovesBoard = ({ isCraftMode, piece }) => {
             return color ? <Circle stroke={color} strokeWidth={2} className="w-1/2 h-1/2" /> : null;
           })()
         ) : (
-          <>
+          <div className="flex flex-row w-full h-full justify-center items-center">
             {onInitial && (onInitial.canCapture || onInitial.canNonCapture) && (
               <Play
                 stroke={getColor(onInitial.canNonCapture, onInitial.canCapture)}
                 strokeWidth={2}
-                className="w-3/5 h-3/5"
+                className={`${onNonInitial && (onNonInitial.canCapture || onNonInitial.canNonCapture) ? "w-full h-full" : "w-3/5 h-3/5"}`}
               />
             )}
             {onNonInitial && (onNonInitial.canCapture || onNonInitial.canNonCapture) && (
               <ArrowRightFromLine
                 stroke={getColor(onNonInitial.canNonCapture, onNonInitial.canCapture)}
                 strokeWidth={2}
-                className="w-3/5 h-3/5"
+                className={`${onInitial && (onInitial.canCapture || onInitial.canNonCapture) ? "w-full h-full" : "w-3/5 h-3/5"}`}
               />
             )}
-          </>
+          </div>
         )}
+        {(isCraftMode && (highlightedMoveIndex !== null)) && <div className="absolute inset-0 bg-white opacity-20" />}
       </div>
     );
   };

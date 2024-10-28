@@ -1,3 +1,4 @@
+import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +40,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { Plus, SquarePen, Trash2 } from "lucide-react";
+import { Plus, ScanSearch, SquarePen, Trash2 } from "lucide-react";
 import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG, PIECE_PRESETS } from "@/lib/constants";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
 import { decodeSlideOffsets, encodeSlideOffsets } from "@/lib/chess";
@@ -59,6 +60,8 @@ const PieceCraftDialog = ({
   openPieceDialogId,
   setOpenPieceDialogId,
 }) => {
+  const [highlightedMoveIndex, setHighlightedMoveIndex] = useState(null);
+
   const slideInfStart = 9;
 
   const updateMoveProperty = (index, name, value) => {
@@ -78,6 +81,7 @@ const PieceCraftDialog = ({
           setOpenPieceDialogId(open ? pieceBeforeEditId : null);
         }
         setPieceConfigErrors({});
+        setHighlightedMoveIndex(null);
       }}
     >
       <DialogTrigger asChild>
@@ -209,7 +213,7 @@ const PieceCraftDialog = ({
                 {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
               </Label>
               <div className="flex flex-col gap-4">
-                <div className="flex flex-row justify-between">
+                <div className="flex flex-row justify-between items-center">
                   <h4>Moves</h4>
                   <Button
                     size="icon"
@@ -226,7 +230,7 @@ const PieceCraftDialog = ({
                 </div>
                 <div className="flex flex-row gap-4">
                   <div className="flex-none sticky top-0 h-min">
-                    <PieceMovesBoard isCraftMode={true} piece={pieceConfig} />
+                    <PieceMovesBoard isCraftMode={true} piece={pieceConfig} highlightedMoveIndex={highlightedMoveIndex} />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
                     {pieceConfig.moves.map((move, index) => {
@@ -247,19 +251,29 @@ const PieceCraftDialog = ({
                                 <SelectContent>
                                   <SelectItem key="slide" value="slide">Slide</SelectItem>
                                   <SelectItem key="leap" value="leap">Leap</SelectItem>
-                                  <SelectItem key="hop" value="hop">Hop</SelectItem>
+                                  {/* <SelectItem key="hop" value="hop">Hop</SelectItem> */}
                                 </SelectContent>
                               </Select>
-                              <Button
-                                size="icon"
-                                variant="destructive"
-                                onClick={() => {
-                                  const updatedMoves = pieceConfig.moves.filter((_, i) => i !== index);
-                                  setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                }}
-                              >
-                                <Trash2 />
-                              </Button>
+                              <div className="flex flex-row items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="secondary"
+                                  onMouseEnter={() => setHighlightedMoveIndex(index)}
+                                  onMouseLeave={() => setHighlightedMoveIndex(null)}
+                                >
+                                  <ScanSearch />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const updatedMoves = pieceConfig.moves.filter((_, i) => i !== index);
+                                    setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                  }}
+                                >
+                                  <Trash2 />
+                                </Button>
+                              </div>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-6 p-4 pt-0">
                               <div className="flex flex-row gap-8">
