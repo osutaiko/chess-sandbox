@@ -32,11 +32,12 @@ export const DEFAULT_VARIANT = {
   }),
   pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
   royals: ['K'],
-  onCheckmateLastRoyal: "win",
-  onCaptureLastRoyal: null,
-  onStalemate: "draw",
-  onThirdRepetition: "draw",
-  onOpponentWipe: null,
+  isWinOnCheckmate: true,
+  mustCheckmateAllRoyals: true,
+  isWinOnStalemate: false,
+  isWinOnOpponentWipe: false,
+  nMoveRuleCount: 50,
+  nMoveRulePieces: [],
 };
 
 export const AVAILABLE_SPRITES = [
@@ -72,6 +73,13 @@ export const EMPTY_GAME_CONFIG = {
   description: "",
   width: 8,
   height: 8,
+  isWinOnCheckmate: false,
+  mustCheckmateAllRoyals: false,
+  isWinOnStalemate: false,
+  isWinOnOpponentWipe: false,
+  isDrawOnNMoveRule: false,
+  nMoveRuleCount: 50,
+  nMoveRulePieces: [],
 }
 
 export const EMPTY_PIECE_CONFIG = {

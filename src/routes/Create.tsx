@@ -25,6 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Crown, Trash2 } from "lucide-react";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
@@ -198,10 +199,64 @@ const Create = () => {
                 {gameConfigErrors.height && <p className="text-destructive">{gameConfigErrors.height}</p>}
               </Label>
             </div>
-            <div className="flex flex-row gap-2">
-              <Checkbox />
-              <Label></Label>
-              
+            <div className="flex flex-col gap-2">
+              <h4>Win Conditions</h4>
+              {variant.royals.length > 0 && 
+                <>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="checkmate" />
+                    <Label htmlFor="checkmate">Checkmate the opponent</Label>
+                  </div>
+                  {gameConfig.isWinOnCheckmate && variant.royals.length >= 2 && 
+                    <RadioGroup
+                      value={String(gameConfig.mustCheckmateAllRoyals)}
+                      onValueChange={(value) => {}}
+                      className="ml-4 mb-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="false" id="false" />
+                        <Label htmlFor="false">... one of the royals</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="true" id="true" />
+                        <Label htmlFor="true">... the final remaining royal</Label>
+                      </div>
+                    </RadioGroup>
+
+                  }
+                </>
+              }
+              <div className="flex items-center gap-2">
+                <Checkbox id="win-stalemate" />
+                <Label htmlFor="win-stalemate">Stalemate the opponent</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="capture-all" />
+                <Label htmlFor="capture-all">Capture all opponent's pieces</Label>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <h4>Draw Conditions</h4>
+              <div className="flex items-center gap-2">
+                <Checkbox id="draw-stalemate" />
+                <Label htmlFor="draw-stalemate">Stalemate the opponent</Label>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={true} disabled={true} />
+                  <Label className="!cursor-default !opacity-100">N-move rule</Label>
+                </div>
+                <div className="flex flex-col gap-2 ml-2">
+                  <Label htmlFor="n-count">... on move:</Label>
+                  <Input
+                    type="text"
+                    name="n-count"
+                    value={gameConfig.nMoveRuleCount}
+                    onChange={handleGameInputChange}
+                  />
+                  <Label htmlFor="n-pieces">... Breaks after moving:</Label>
+                </div>
+              </div>
             </div>
           </div>
         </ScrollArea>
