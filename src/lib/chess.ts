@@ -70,18 +70,18 @@ export const getReachableSquares = (moves, radius) => {
   moves.forEach((move) => {
     const { type, canNonCapture, canCapture, isInitialOnly } = move;
 
-    if (type === "slide") {
-      const { offset, range, canForward, canBackward, canSideways } = move;
+    if (type === "slide" || type === "leap") {
+      const { offset, range={ from: 1, to: 1 }, canForward, canBackward, canSideways } = move;
       const [a, b] = offset;
       const directions = [];
 
-      if (a === 1 && b === 0) {
-        if (canForward) directions.push([0, 1]);
-        if (canBackward) directions.push([0, -1]);
-        if (canSideways) directions.push([1, 0], [-1, 0]);
+      if (b === 0) {
+        if (canForward) directions.push([b, a]);
+        if (canBackward) directions.push([b, -a]);
+        if (canSideways) directions.push([a, b], [-a, b]);
       } else {
-        if (canForward) directions.push([a, b], [-a, b]);
-        if (canBackward) directions.push([a, -b], [-a, -b]);
+        if (canForward) directions.push([a, b], [-a, b], [b, a], [-b, a]);
+        if (canBackward) directions.push([a, -b], [-a, -b], [b, -a], [-b, -a]);
       }
 
       directions.forEach(([dx, dy]) => {
@@ -103,24 +103,6 @@ export const getReachableSquares = (moves, radius) => {
           } else {
             break;
           }
-        }
-      });
-    } else if (type === "leap") {
-      move.offsets.forEach(([dx, dy]) => {
-        const x = radius + dx;
-        const y = radius - dy;
-
-        if (x >= 0 && x < squares[0].length && y >= 0 && y < squares.length) {
-          squares[y][x] = {
-            onInitial: {
-              canNonCapture: squares[y][x].onInitial.canNonCapture || canNonCapture,
-              canCapture: squares[y][x].onInitial.canCapture || canCapture,
-            },
-            onNonInitial: {
-              canNonCapture: !isInitialOnly ? squares[y][x].onNonInitial.canNonCapture || canNonCapture : squares[y][x].onNonInitial.canNonCapture,
-              canCapture: !isInitialOnly ? squares[y][x].onNonInitial.canCapture || canCapture : squares[y][x].onNonInitial.canCapture,
-            },
-          };
         }
       });
     }

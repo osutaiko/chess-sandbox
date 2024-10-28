@@ -67,6 +67,8 @@ const PieceCraftDialog = ({
     setPieceConfig({ ...pieceConfig, moves: updatedMoves });
   };
 
+  console.log(pieceConfig.moves)
+
   return (
     <Dialog
       open={isCreateMode ? isCreatePieceDialogOpen : pieceBeforeEditId === openPieceDialogId}
@@ -211,7 +213,7 @@ const PieceCraftDialog = ({
               <div className="flex flex-col gap-2">
                 <h3>Moves</h3>
                 <div className="flex flex-row gap-4">
-                  <div className="flex-none">
+                  <div className="flex-none sticky top-0 h-min">
                     <PieceMovesBoard isCraftMode={true} piece={pieceConfig} />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
@@ -222,7 +224,9 @@ const PieceCraftDialog = ({
                             <CardHeader className="p-4">
                               <Select value={move.type} defaultValue="slide" onValueChange={(value) => {
                                 const updatedMoves = [...pieceConfig.moves];
-                                updatedMoves[index] = EMPTY_MOVE_PROPERTY(value);
+                                updatedMoves[index] = {
+                                  ...EMPTY_MOVE_PROPERTY(value, "orthogonal", updatedMoves[index]),
+                                };
                                 setPieceConfig({ ...pieceConfig, moves: updatedMoves });
                               }}>
                                 <SelectTrigger className="w-[90px] bg-primary border-none font-bold">
@@ -237,47 +241,82 @@ const PieceCraftDialog = ({
                             </CardHeader>
                             <CardContent className="flex flex-col gap-6 p-4 pt-0">
                               <div className="flex flex-row gap-8">
-                                {move.type === "slide" && (() => {
+                                {(move.type === "slide" || move.type === "leap") && (() => {
                                   const [a, b] = move.offset;
                                   const decodedOffset =
-                                    a === 1 && b === 0 ? "orthogonal" :
+                                    b === 0 ? "orthogonal" :
                                     a === 1 && b === 1 ? "diagonal" :
                                     "other";
                                   return (
                                     <>
-                                      <RadioGroup
-                                        value={decodedOffset}
-                                        onValueChange={(value) => {
-                                          const updatedMoves = [...pieceConfig.moves];
-                                          updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
-                                          setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                        }}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <RadioGroupItem value="orthogonal" id="orthogonal" />
-                                          <Label htmlFor="orthogonal">Orthogonal</Label>
+                                      <div className="flex flex-col gap-4">
+                                        {move.type === "slide" && 
+                                          <RadioGroup
+                                            value={decodedOffset}
+                                            onValueChange={(value) => {
+                                              const updatedMoves = [...pieceConfig.moves];
+                                              updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
+                                              setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                            }}
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <RadioGroupItem value="orthogonal" id="orthogonal" />
+                                              <Label htmlFor="orthogonal">Orthogonal</Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <RadioGroupItem value="diagonal" id="diagonal" />
+                                              <Label htmlFor="diagonal">Diagonal</Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <RadioGroupItem value="other" id="other" />
+                                              <Label htmlFor="other">Other</Label>
+                                            </div>
+                                          </RadioGroup>
+                                        }
+                                        <div className="flex flex-col gap-2">
+                                          <Label>Offset:</Label>
+                                          <div className="flex flex-row gap-1">
+                                            <Input
+                                              type="number"
+                                              name="offset-0"
+                                              value={move.offset[0]}
+                                              disabled={move.type === "slide" && decodedOffset !== "other"}
+                                              min={1}
+                                              max={4}
+                                              onChange={(e) => {
+                                                const newValue = parseInt(e.target.value, 10);
+                                                updateMoveProperty(index, "offset", [newValue, move.offset[1]]);
+                                              }}
+                                              className="w-[60px]"
+                                            />
+                                            <Input
+                                              type="number"
+                                              name="offset-1"
+                                              value={move.offset[1]}
+                                              disabled={move.type === "slide" && decodedOffset !== "other"}
+                                              min={0}
+                                              max={move.offset[0]}
+                                              onChange={(e) => {
+                                                const newValue = parseInt(e.target.value, 10);
+                                                updateMoveProperty(index, "offset", [move.offset[0], newValue]);
+                                              }}
+                                              className="w-[60px]"
+                                            />
+                                          </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                          <RadioGroupItem value="diagonal" id="diagonal" />
-                                          <Label htmlFor="diagonal">Diagonal</Label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <RadioGroupItem value="other" id="other" />
-                                          <Label htmlFor="other">Other</Label>
-                                        </div>
-                                      </RadioGroup>
+                                      </div>
                                       <div className="flex flex-col gap-2">
                                         <div className="flex items-center gap-2">
-                                          <Checkbox id="forward" defaultChecked={move.canForward} onCheckedChange={(checked) => updateMoveProperty(index, "canForward", checked)} />
+                                          <Checkbox id="forward" checked={move.canForward} onCheckedChange={(checked) => updateMoveProperty(index, "canForward", checked)} />
                                           <Label htmlFor="forward">Forward</Label>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                          <Checkbox id="backward" defaultChecked={move.canBackward} onCheckedChange={(checked) => updateMoveProperty(index, "canBackward", checked)} />
+                                          <Checkbox id="backward" checked={move.canBackward} onCheckedChange={(checked) => updateMoveProperty(index, "canBackward", checked)} />
                                           <Label htmlFor="backward">Backward</Label>
                                         </div>
                                         {decodedOffset === "orthogonal" && (
                                           <div className="flex items-center gap-2">
-                                            <Checkbox id="sideways" defaultChecked={move.canSideways} onCheckedChange={(checked) => updateMoveProperty(index, "canSideways", checked)} />
+                                            <Checkbox id="sideways" checked={move.canSideways} onCheckedChange={(checked) => updateMoveProperty(index, "canSideways", checked)} />
                                             <Label htmlFor="sideways">Sideways</Label>
                                           </div>
                                         )}
@@ -287,10 +326,10 @@ const PieceCraftDialog = ({
                                 })()}
                                 {(move.type === "slide" || move.type === "hop") && (
                                   <div className="flex flex-col gap-4">
-                                    <Label htmlFor="range">Range</Label>
+                                    <Label htmlFor="range">Range:</Label>
                                     <DualRangeSlider
                                       id="range"
-                                      className="w-[200px]"
+                                      className="w-[180px]"
                                       min={1}
                                       max={slideInfStart} // Using 9 to represent "Infinity"
                                       step={1}
@@ -313,7 +352,7 @@ const PieceCraftDialog = ({
                                       }
                                     }}
                                   />
-                                  <Label htmlFor="canNonCapture">Allow non-capturing moves?</Label>
+                                  <Label htmlFor="canNonCapture">Allow non-capturing moves</Label>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Checkbox
@@ -325,7 +364,7 @@ const PieceCraftDialog = ({
                                       }
                                     }}
                                   />
-                                  <Label htmlFor="canCapture">Allow capturing moves?</Label>
+                                  <Label htmlFor="canCapture">Allow capturing moves</Label>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Checkbox
@@ -333,7 +372,7 @@ const PieceCraftDialog = ({
                                     checked={move.isInitialOnly}
                                     onCheckedChange={(checked) => {updateMoveProperty(index, "isInitialOnly", checked)}}
                                   />
-                                  <Label htmlFor="isInitialOnly">Only on initial move?</Label>
+                                  <Label htmlFor="isInitialOnly">Allow only on initial move</Label>
                                 </div>
                               </div>
                             </CardContent>
@@ -350,32 +389,34 @@ const PieceCraftDialog = ({
                 </div>
               </div>
               <h3>Advanced</h3>
-              {pieceConfig.moves.some((move) => Array.isArray(move.conditions) && move.conditions.includes("initial")) &&
+              <div className="flex flex-col gap-2">
+                {pieceConfig.moves.some((move) => move.isInitialOnly) &&
+                  <Label className="flex flex-row items-center gap-2">
+                    <Checkbox
+                      checked={pieceConfig.isEnPassantTarget} 
+                      onCheckedChange={(isChecked) => {
+                        setPieceConfig((prevConfig) => ({
+                          ...prevConfig,
+                          isEnPassantTarget: isChecked,
+                        }));
+                      }}
+                    />
+                    <h4>Can be captured by <span className="italic">en passant</span> ?</h4>
+                  </Label>
+                }
                 <Label className="flex flex-row items-center gap-2">
                   <Checkbox
-                    checked={pieceConfig.isEnPassantTarget} 
+                    checked={pieceConfig.isEnPassantCapturer}
                     onCheckedChange={(isChecked) => {
                       setPieceConfig((prevConfig) => ({
                         ...prevConfig,
-                        isEnPassantTarget: isChecked,
+                        isEnPassantCapturer: isChecked,
                       }));
                     }}
                   />
-                  <h4>Can be captured by <span className="italic">en passant</span> ?</h4>
+                  <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>
                 </Label>
-              }
-              <Label className="flex flex-row items-center gap-2">
-                <Checkbox
-                  checked={pieceConfig.isEnPassantCapturer}
-                  onCheckedChange={(isChecked) => {
-                    setPieceConfig((prevConfig) => ({
-                      ...prevConfig,
-                      isEnPassantCapturer: isChecked,
-                    }));
-                  }}
-                />
-                <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>
-              </Label>
+              </div>
             </div>
           </div>
         </ScrollArea>
