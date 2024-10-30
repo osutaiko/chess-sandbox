@@ -1,5 +1,9 @@
-export const resizeBoard = (variant, newWidth, newHeight) => {
-  const { width: currentWidth, height: currentHeight } = variant;
+export const resizeBoard = (variant) => {
+  const currentWidth = variant.board[0].length;
+  const currentHeight = variant.board.length;
+
+  const newWidth = variant.width;
+  const newHeight = variant.height;
 
   const createEmptyRow = (width) => Array.from({ length: width }, () => ({ isValid: true, piece: null, color: null }));
   let newBoard = [...variant.board];

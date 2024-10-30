@@ -2,6 +2,8 @@ import { PIECE_PRESETS } from "@/lib/piecePresets";
 
 // Standard chess variant specifications
 export const DEFAULT_VARIANT = {
+  name: "New Variant",
+  description: "",
   width: 8,
   height: 8,
   gridType: "square",
@@ -37,7 +39,7 @@ export const DEFAULT_VARIANT = {
   isWinOnStalemate: false,
   isWinOnOpponentWipe: false,
   nMoveRuleCount: 50,
-  nMoveRulePieces: [],
+  nMoveRulePieces: ['P'],
 };
 
 export const AVAILABLE_SPRITES = [
@@ -67,20 +69,6 @@ export const AVAILABLE_SPRITES = [
   "rqueen",
   "zebra"
 ];
-
-export const EMPTY_GAME_CONFIG = {
-  name: "New Variant",
-  description: "",
-  width: 8,
-  height: 8,
-  isWinOnCheckmate: false,
-  mustCheckmateAllRoyals: false,
-  isWinOnStalemate: false,
-  isWinOnOpponentWipe: false,
-  isDrawOnNMoveRule: false,
-  nMoveRuleCount: 50,
-  nMoveRulePieces: [],
-}
 
 export const EMPTY_PIECE_CONFIG = {
   id: "",
