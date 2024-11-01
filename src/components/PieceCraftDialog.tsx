@@ -1,16 +1,16 @@
 import { useState } from "react";
 
+import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG } from "@/lib/constants";
+import { PIECE_PRESETS } from "@/lib/piecePresets";
+import { MoveType, Piece, PieceMove, Variant } from "@/lib/types";
+
+import PieceMovesBoard from "@/components/PieceMovesBoard";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { DualRangeSlider } from "@/components/ui/DualRangeSlider";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   Dialog,
   DialogClose,
@@ -31,10 +31,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,12 +44,22 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Plus, ScanSearch, SquarePen, Trash2, Ellipsis } from "lucide-react";
-import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG } from "@/lib/constants";
-import { PIECE_PRESETS } from "@/lib/piecePresets";
-import PieceMovesBoard from "@/components/PieceMovesBoard";
-import { decodeSlideOffsets, encodeSlideOffsets } from "@/lib/chess";
 
-const PieceCraftDialog = ({
+const PieceCraftDialog: React.FC<{
+  isCreateMode: boolean;
+  variant: Variant;
+  pieceConfig: Piece;
+  setPieceConfig: (config: Piece) => void;
+  pieceConfigErrors: Record<string, string>;
+  setPieceConfigErrors: (errors: Record<string, string>) => void;
+  handlePieceInputChange: (e: any) => void;
+  handlePieceConfigSubmit: (e: any) => void;
+  isCreatePieceDialogOpen: boolean;
+  setIsCreatePieceDialogOpen: (isOpen: boolean) => void;
+  pieceBeforeEditId: string | null;
+  openPieceDialogId: string | null;
+  setOpenPieceDialogId: (id: string | null) => void;
+}> = ({
   isCreateMode,
   variant,
   pieceConfig,
@@ -67,11 +74,11 @@ const PieceCraftDialog = ({
   openPieceDialogId,
   setOpenPieceDialogId,
 }) => {
-  const [highlightedMoveIndex, setHighlightedMoveIndex] = useState(null);
+  const [highlightedMoveIndex, setHighlightedMoveIndex] = useState<number | null>(null);
 
   const slideInfStart = 9;
 
-  const updateMoveProperty = (index, name, value) => {
+  const updateMoveProperty = (index: number, name: string, value: any) => {
     const updatedMoves = [...pieceConfig.moves];
     updatedMoves[index] = { ...updatedMoves[index], [name]: value };
     setPieceConfig({ ...pieceConfig, moves: updatedMoves });
@@ -96,7 +103,7 @@ const PieceCraftDialog = ({
         size="icon"
         onClick={() => {
           if (!isCreateMode) {
-            setPieceConfig(variant.pieces.find((piece) => piece.id === pieceBeforeEditId));
+            setPieceConfig(variant.pieces.find((piece: Piece) => piece.id === pieceBeforeEditId)!);
           }
         }}
       >
@@ -270,12 +277,12 @@ const PieceCraftDialog = ({
                     <PieceMovesBoard isCraftMode={true} piece={pieceConfig} highlightedMoveIndex={highlightedMoveIndex} />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
-                    {pieceConfig.moves.map((move, index) => {
+                    {pieceConfig.moves.map((move: PieceMove, index) => {
                       if (move.type !== "castle") {
                         return (
                           <Card key={index}>
                             <CardHeader className="flex flex-row justify-between p-4 space-y-0">
-                              <Select value={move.type} defaultValue="slide" onValueChange={(value) => {
+                              <Select value={move.type} defaultValue="slide" onValueChange={(value: MoveType) => {
                                 const updatedMoves = [...pieceConfig.moves];
                                 updatedMoves[index] = {
                                   ...EMPTY_MOVE_PROPERTY(value, "orthogonal", updatedMoves[index]),
@@ -320,7 +327,7 @@ const PieceCraftDialog = ({
                                     <DialogFooter>
                                       <DialogClose asChild>
                                         <Button variant="destructive" onClick={() => {
-                                          const updatedMoves = pieceConfig.moves.filter((_, i) => i !== index);
+                                          const updatedMoves = pieceConfig.moves.filter((_, i: number) => i !== index);
                                           setPieceConfig({ ...pieceConfig, moves: updatedMoves });
                                         }}>
                                           Delete
@@ -486,8 +493,8 @@ const PieceCraftDialog = ({
                   <Label className="flex flex-row items-center gap-2">
                     <Checkbox
                       checked={pieceConfig.isEnPassantTarget} 
-                      onCheckedChange={(isChecked) => {
-                        setPieceConfig((prevConfig) => ({
+                      onCheckedChange={(isChecked: boolean) => {
+                        setPieceConfig((prevConfig: Piece) => ({
                           ...prevConfig,
                           isEnPassantTarget: isChecked,
                         }));
@@ -499,8 +506,8 @@ const PieceCraftDialog = ({
                 <Label className="flex flex-row items-center gap-2">
                   <Checkbox
                     checked={pieceConfig.isEnPassantCapturer}
-                    onCheckedChange={(isChecked) => {
-                      setPieceConfig((prevConfig) => ({
+                    onCheckedChange={(isChecked: boolean) => {
+                      setPieceConfig((prevConfig: Piece) => ({
                         ...prevConfig,
                         isEnPassantCapturer: isChecked,
                       }));

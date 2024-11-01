@@ -1,4 +1,5 @@
 import { PIECE_PRESETS } from "@/lib/piecePresets";
+import { MoveType, PieceMove, VariantGridType } from "@/lib/types";
 
 // Standard chess variant specifications
 export const DEFAULT_VARIANT = {
@@ -6,7 +7,7 @@ export const DEFAULT_VARIANT = {
   description: "",
   width: 8,
   height: 8,
-  gridType: "square",
+  gridType: "square" as VariantGridType,
   playerCount: 2,
   board: Array.from({ length: 8 }, (_, i) => {
     const row = [];
@@ -81,51 +82,61 @@ export const EMPTY_PIECE_CONFIG = {
   isEnPassantCapturer: false,
 };
 
-export const EMPTY_MOVE_PROPERTY = (moveType, direction = null, existingMove = {}) => {
+export const EMPTY_MOVE_PROPERTY = (
+  moveType: MoveType,
+  direction: string,
+  existingMove: Partial<PieceMove> = {}
+): PieceMove => {
   const {
     canNonCapture = true,
     canCapture = true,
     isInitialOnly = false,
   } = existingMove;
 
-  const baseMove = {
-    canNonCapture,
-    canCapture,
-    isInitialOnly,
-  };
-
   if (moveType === "slide") {
     return {
-      ...baseMove,
       type: "slide",
       offset: direction === "orthogonal" ? [1, 0] : direction === "diagonal" ? [1, 1] : [2, 1],
       canForward: true,
       canBackward: true,
       canSideways: true,
       range: { from: 1, to: 1 },
+      canNonCapture,
+      canCapture,
+      isInitialOnly,
     };
   }
 
   if (moveType === "leap") {
     return {
-      ...baseMove,
       type: "leap",
       offset: [2, 1],
+      range: {
+        from: 1,
+        to: 1,
+      },
       canForward: true,
       canBackward: true,
       canSideways: true,
+      canNonCapture,
+      canCapture,
+      isInitialOnly,
     };
   }
 
   if (moveType === "hop") {
     return {
-      ...baseMove,
       type: "hop",
       offset: direction === "orthogonal" ? [1, 0] : direction === "diagonal" ? [1, 1] : [1, 0],
       canForward: true,
       canBackward: true,
       canSideways: true,
       range: { from: 1, to: 1 },
+      canNonCapture,
+      canCapture,
+      isInitialOnly,
     };
   }
+
+  throw new Error(`Invalid move type: ${moveType}`);
 };

@@ -1,5 +1,7 @@
+import { Piece } from "@/lib/types";
+
 // Piece templates for creating new pieces
-export const PIECE_PRESETS = [
+export const PIECE_PRESETS: Piece[] = [
   {
     id: 'K',
     name: "King",
@@ -25,6 +27,7 @@ export const PIECE_PRESETS = [
         offset: [1, 1],
         canForward: true,
         canBackward: true,
+        canSideways: true,
         range: {
           from: 1,
           to: 1,
@@ -35,43 +38,10 @@ export const PIECE_PRESETS = [
       },
       {
         type: "castle",
-        selfConditions: ["initial"],
-        targetPieces: ['r'],
-        targetConditions: ["initial"],
-        otherSquares: [[1, 0, '-'], [2, 0, '-']],
-        targetPos: [3, 0],
-        selfOffset: [2, 0],
-        targetOffset: [-2, 0],
-      },
-      {
-        type: "castle",
-        selfConditions: ["initial"],
-        targetPieces: ['r'],
-        targetConditions: ["initial"],
-        otherSquares: [[-1, 0, '-'], [-2, 0, '-'], [-3, 0, '-']],
-        targetPos: [-4, 0],
-        selfOffset: [-2, 0],
-        targetOffset: [3, 0],
-      },
-      {
-        type: "castle",
-        selfConditions: ["initial"],
-        targetPieces: ['r'],
-        targetConditions: ["initial"],
-        otherSquares: [[-1, 0, '-'], [-2, 0, '-']],
-        targetPos: [-3, 0],
-        selfOffset: [-2, 0],
-        targetOffset: [2, 0],
-      },
-      {
-        type: "castle",
-        selfConditions: ["initial"],
-        targetPieces: ['r'],
-        targetConditions: ["initial"],
-        otherSquares: [[1, 0, '-'], [2, 0, '-'], [3, 0, '-']],
-        targetPos: [4, 0],
-        selfOffset: [2, 0],
-        targetOffset: [-3, 0],
+        targetPieces: ['R'],
+        canNonCapture: true,
+        canCapture: false,
+        isInitialOnly: true,
       },
     ],
     promotions: [],
@@ -121,6 +91,7 @@ export const PIECE_PRESETS = [
         },
         canForward: true,
         canBackward: false,
+        canSideways: true,
         canNonCapture: false,
         canCapture: true,
         isInitialOnly: false,
@@ -142,6 +113,10 @@ export const PIECE_PRESETS = [
       {
         type: "leap",
         offset: [2, 1],
+        range: {
+          from: 1,
+          to: 1,
+        },
         canForward: true,
         canBackward: true,
         canSideways: true,
@@ -169,6 +144,7 @@ export const PIECE_PRESETS = [
         },
         canForward: true,
         canBackward: true,
+        canSideways: true,
         canNonCapture: true,
         canCapture: true,
         isInitialOnly: false,
@@ -232,6 +208,7 @@ export const PIECE_PRESETS = [
         },
         canForward: true,
         canBackward: true,
+        canSideways: true,
         canNonCapture: true,
         canCapture: true,
         isInitialOnly: false,
@@ -256,6 +233,7 @@ export const PIECE_PRESETS = [
         },
         canForward: true,
         canBackward: true,
+        canSideways: true,
         canNonCapture: true,
         canCapture: true,
         isInitialOnly: false,
@@ -263,6 +241,10 @@ export const PIECE_PRESETS = [
       {
         type: "leap",
         offset: [2, 1],
+        range: {
+          from: 1,
+          to: 1,
+        },
         canForward: true,
         canBackward: true,
         canSideways: true,
@@ -298,6 +280,10 @@ export const PIECE_PRESETS = [
       {
         type: "leap",
         offset: [2, 1],
+        range: {
+          from: 1,
+          to: 1,
+        },
         canForward: true,
         canBackward: true,
         canSideways: true,
@@ -339,6 +325,7 @@ export const PIECE_PRESETS = [
         },
         canForward: true,
         canBackward: true,
+        canSideways: true,
         canNonCapture: true,
         canCapture: true,
         isInitialOnly: false,
@@ -346,6 +333,10 @@ export const PIECE_PRESETS = [
       {
         type: "leap",
         offset: [2, 1],
+        range: {
+          from: 1,
+          to: 1,
+        },
         canForward: true,
         canBackward: true,
         canSideways: true,

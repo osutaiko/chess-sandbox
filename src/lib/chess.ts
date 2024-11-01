@@ -1,11 +1,13 @@
-export const resizeBoard = (variant) => {
+import { Variant, PieceMove } from "@/lib/types";
+
+export const resizeBoard = (variant: Variant) => {
   const currentWidth = variant.board[0].length;
   const currentHeight = variant.board.length;
 
   const newWidth = variant.width;
   const newHeight = variant.height;
 
-  const createEmptyRow = (width) => Array.from({ length: width }, () => ({ isValid: true, piece: null, color: null }));
+  const createEmptyRow = (width: number) => Array.from({ length: width }, () => ({ isValid: true, piece: null, color: null }));
   let newBoard = [...variant.board];
 
   if (newHeight > currentHeight) {
@@ -47,7 +49,7 @@ export const resizeBoard = (variant) => {
 };
 
 
-export const getSquareName = (width, height, rowIndex, colIndex) => {
+export const getSquareName = (width: number, height: number, rowIndex: number, colIndex: number) => {
   if (rowIndex < 0 || rowIndex >= height || colIndex < 0 || colIndex >= width) {
     throw new Error("Invalid indices");
   }
@@ -57,7 +59,7 @@ export const getSquareName = (width, height, rowIndex, colIndex) => {
   return `${file}${rank}`;
 };
 
-export const getReachableSquares = (moves, radius) => {
+export const getReachableSquares = (moves: PieceMove[], radius: number) => {
   const squares = Array.from({ length: radius * 2 + 1 }, () =>
     Array.from({ length: radius * 2 + 1 }, () => ({
       onInitial: {
@@ -114,13 +116,13 @@ export const getReachableSquares = (moves, radius) => {
   return squares;
 };
 
-export const deletePiece = (variant, pieceId) => {
+export const deletePiece = (variant: Variant, pieceId: string) => {
   const newVariant = {
     ...variant,
     board: variant.board.map(row => 
       row.map(square => ({
         ...square,
-        piece: square.piece?.id === pieceId ? null : square.piece,
+        piece: square.piece === pieceId ? null : square.piece,
       }))
     ),
     pieces: variant.pieces.filter(piece => piece.id !== pieceId),
@@ -128,14 +130,11 @@ export const deletePiece = (variant, pieceId) => {
 
   newVariant.pieces = newVariant.pieces.map(piece => {
     const updatedMoves = piece.moves.map(move => {
-      const updatedTargetPieces = move.type === "castle" ? 
-        move.targetPieces.filter(targetId => targetId !== pieceId) : 
-        move.targetPieces;
-
-      return {
-        ...move,
-        targetPieces: updatedTargetPieces,
-      };
+      if (move.type === "castle") {
+        return { ...move, targetPieces: move.targetPieces.filter(targetId => targetId !== pieceId) };
+      } else {
+        return move;
+      }
     })
     .filter(move => !(move.type === "castle" && move.targetPieces.length === 0));
 
@@ -148,7 +147,7 @@ export const deletePiece = (variant, pieceId) => {
   return newVariant;
 };
 
-export const removePieceFromBoard = (variant, rowIndex, colIndex) => {
+export const removePieceFromBoard = (variant: Variant, rowIndex: number, colIndex: number) => {
   const updatedVariant = { ...variant };
   if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
     updatedVariant.board[rowIndex][colIndex].piece = null;
@@ -156,7 +155,7 @@ export const removePieceFromBoard = (variant, rowIndex, colIndex) => {
   return updatedVariant;
 };
 
-export const addPieceToBoard = (variant, pieceId, color, rowIndex, colIndex) => {
+export const addPieceToBoard = (variant: Variant, pieceId: string, color: number, rowIndex: number, colIndex: number) => {
   const updatedVariant = { ...variant };
   if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
     updatedVariant.board[rowIndex][colIndex] = {

@@ -1,10 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard } from "@/lib/chess";
+import { Piece, PieceErrors, Variant, VariantErrors } from "@/lib/types";
+
 import Chessboard from "@/components/Chessboard";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
 import DraggablePiece from "@/components/DraggablePiece";
+import PieceCraftDialog from "@/components/PieceCraftDialog";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,22 +30,20 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-import { Crown, Trash2 } from "lucide-react";
-import PieceCraftDialog from "@/components/PieceCraftDialog";
 import { Separator } from "@/components/ui/separator";
 
+import { Crown, Trash2 } from "lucide-react";
+
 const Create = () => {
-  const [gameConfig, setGameConfig] = useState(DEFAULT_VARIANT); // Variant before form confirmation
-  const [gameConfigErrors, setGameConfigErrors] = useState({});
-  const [variant, setVariant] = useState(DEFAULT_VARIANT); // Variant after form confirmation
-  const [selectedPieceColor, setSelectedPieceColor] = useState(0);
-  const [selectedPieceId, setSelectedPieceId] = useState(null);
-  const [pieceConfig, setPieceConfig] = useState(EMPTY_PIECE_CONFIG);
-  const [pieceConfigErrors, setPieceConfigErrors] = useState({});
-  const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState(false);
-  const [openPieceDialogId, setOpenPieceDialogId] = useState(null);
-console.log(gameConfig)
+  const [gameConfig, setGameConfig] = useState<Variant>(DEFAULT_VARIANT); // Variant before form confirmation
+  const [gameConfigErrors, setGameConfigErrors] = useState<VariantErrors>({});
+  const [variant, setVariant] = useState<Variant>(DEFAULT_VARIANT); // Variant after form confirmation
+  const [selectedPieceColor, setSelectedPieceColor] = useState<number>(0);
+  const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
+  const [pieceConfig, setPieceConfig] = useState<Piece>(EMPTY_PIECE_CONFIG);
+  const [pieceConfigErrors, setPieceConfigErrors] = useState<PieceErrors>({});
+  const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState<boolean>(false);
+  const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
 
   const handleGameInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,14 +55,14 @@ console.log(gameConfig)
     }));
   };
 
-  const handleGameCheckedChange = (name, checked) => {
+  const handleGameCheckedChange = (name: string, checked: boolean) => {
     setGameConfig((prevConfig) => ({
       ...prevConfig,
       [name]: checked,
     }));
   };
 
-  const handlePieceInputChange = (e) => {
+  const handlePieceInputChange = (e: any) => {
     const { name, value } = e.target;
     let newValue = value;
     
