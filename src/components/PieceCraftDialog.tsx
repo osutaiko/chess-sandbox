@@ -45,7 +45,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Plus, ScanSearch, SquarePen, Trash2, Ellipsis } from "lucide-react";
 
-const PieceCraftDialog: React.FC<{
+interface BaseProps {
   isCreateMode: boolean;
   variant: Variant;
   pieceConfig: Piece;
@@ -53,13 +53,32 @@ const PieceCraftDialog: React.FC<{
   pieceConfigErrors: Record<string, string>;
   setPieceConfigErrors: (errors: Record<string, string>) => void;
   handlePieceInputChange: (e: any) => void;
-  handlePieceConfigSubmit: (e: any) => void;
+  handlePieceConfigSubmit: (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => void;
+}
+
+// Props for create mode
+interface CreateModeProps extends BaseProps {
+  isCreateMode: true;
   isCreatePieceDialogOpen: boolean;
   setIsCreatePieceDialogOpen: (isOpen: boolean) => void;
+  pieceBeforeEditId?: undefined;
+  openPieceDialogId?: undefined;
+  setOpenPieceDialogId?: undefined;
+}
+
+// Props for edit mode
+interface EditModeProps extends BaseProps {
+  isCreateMode: false;
   pieceBeforeEditId: string | null;
   openPieceDialogId: string | null;
   setOpenPieceDialogId: (id: string | null) => void;
-}> = ({
+  isCreatePieceDialogOpen?: undefined;
+  setIsCreatePieceDialogOpen?: undefined;
+}
+
+type PieceCraftDialogProps = CreateModeProps | EditModeProps;
+
+const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
   isCreateMode,
   variant,
   pieceConfig,
@@ -494,10 +513,10 @@ const PieceCraftDialog: React.FC<{
                     <Checkbox
                       checked={pieceConfig.isEnPassantTarget} 
                       onCheckedChange={(isChecked: boolean) => {
-                        setPieceConfig((prevConfig: Piece) => ({
-                          ...prevConfig,
-                          isEnPassantTarget: isChecked,
-                        }));
+                        setPieceConfig({
+                          ...pieceConfig,
+                          isEnPassantCapturer: isChecked,
+                        });
                       }}
                     />
                     <h4>Can be captured by <span className="italic">en passant</span> ?</h4>
@@ -507,10 +526,10 @@ const PieceCraftDialog: React.FC<{
                   <Checkbox
                     checked={pieceConfig.isEnPassantCapturer}
                     onCheckedChange={(isChecked: boolean) => {
-                      setPieceConfig((prevConfig: Piece) => ({
-                        ...prevConfig,
+                      setPieceConfig({
+                        ...pieceConfig,
                         isEnPassantCapturer: isChecked,
-                      }));
+                      });
                     }}
                   />
                   <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>

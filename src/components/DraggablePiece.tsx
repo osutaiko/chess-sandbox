@@ -1,8 +1,13 @@
+import { Piece } from "@/lib/types";
 
-import { useEffect, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 
-const DraggablePiece = ({ piece, color, row, col }) => {
+const DraggablePiece: React.FC<{
+  piece: Piece;
+  color: number;
+  row: number | null;
+  col: number | null;
+}> = ({ piece, color, row, col }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "PIECE",
     item: { id: piece.id, color, sprite: piece.sprite, row, col },

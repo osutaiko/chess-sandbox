@@ -1,7 +1,13 @@
 import { getReachableSquares } from "@/lib/chess";
+import { Piece } from "@/lib/types";
+
 import { Circle, Play, ArrowRightFromLine } from "lucide-react";
 
-const PieceMovesBoard = ({ isCraftMode, piece, highlightedMoveIndex }) => {
+const PieceMovesBoard: React.FC<{
+  isCraftMode: boolean;
+  piece: Piece;
+  highlightedMoveIndex: number | null;
+}> = ({ isCraftMode, piece, highlightedMoveIndex }) => {
   const radius = 4;
   const width = 2 * radius + 1;
   const height = 2 * radius + 1;
@@ -10,14 +16,14 @@ const PieceMovesBoard = ({ isCraftMode, piece, highlightedMoveIndex }) => {
     radius
   );
 
-  const getColor = (canNonCapture, canCapture) => {
+  const getColor = (canNonCapture: boolean, canCapture: boolean) => {
     if (canNonCapture && canCapture) return "black";
     else if (canNonCapture) return "green";
     else if (canCapture) return "red";
-    return null;
+    return "transparent";
   };
 
-  const renderSquare = (row, col) => {
+  const renderSquare = (row: number, col: number) => {
     const isSquareDark = (row + col) % 2 === 1;
     const square = reachableSquares[row][col];
     const { onInitial, onNonInitial } = square;
@@ -40,7 +46,7 @@ const PieceMovesBoard = ({ isCraftMode, piece, highlightedMoveIndex }) => {
         {onInitial.canNonCapture === onNonInitial.canNonCapture && onInitial.canCapture === onNonInitial.canCapture ? (
           (() => {
             const color = getColor(onInitial.canNonCapture, onInitial.canCapture);
-            return color ? <Circle stroke={color} strokeWidth={2} className="w-1/2 h-1/2" /> : null;
+            return color !== "transparent" ? <Circle stroke={color} strokeWidth={2} className="w-1/2 h-1/2" /> : null;
           })()
         ) : (
           <div className="flex flex-row w-full h-full justify-center items-center">

@@ -7,7 +7,7 @@ export const resizeBoard = (variant: Variant) => {
   const newWidth = variant.width;
   const newHeight = variant.height;
 
-  const createEmptyRow = (width: number) => Array.from({ length: width }, () => ({ isValid: true, piece: null, color: null }));
+  const createEmptyRow = (width: number) => Array.from({ length: width }, () => ({ isValid: true, pieceId: null, color: null }));
   let newBoard = [...variant.board];
 
   if (newHeight > currentHeight) {
@@ -122,7 +122,7 @@ export const deletePiece = (variant: Variant, pieceId: string) => {
     board: variant.board.map(row => 
       row.map(square => ({
         ...square,
-        piece: square.piece === pieceId ? null : square.piece,
+        pieceId: square.pieceId === pieceId ? null : square.pieceId,
       }))
     ),
     pieces: variant.pieces.filter(piece => piece.id !== pieceId),
@@ -150,7 +150,7 @@ export const deletePiece = (variant: Variant, pieceId: string) => {
 export const removePieceFromBoard = (variant: Variant, rowIndex: number, colIndex: number) => {
   const updatedVariant = { ...variant };
   if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
-    updatedVariant.board[rowIndex][colIndex].piece = null;
+    updatedVariant.board[rowIndex][colIndex].pieceId = null;
   }
   return updatedVariant;
 };
@@ -160,7 +160,7 @@ export const addPieceToBoard = (variant: Variant, pieceId: string, color: number
   if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
     updatedVariant.board[rowIndex][colIndex] = {
       ...updatedVariant.board[rowIndex][colIndex],
-      piece: pieceId,
+      pieceId: pieceId,
       color: color
     };
   }

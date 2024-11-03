@@ -12,24 +12,24 @@ export const DEFAULT_VARIANT = {
   board: Array.from({ length: 8 }, (_, i) => {
     const row = [];
     for (let j = 0; j < 8; j++) {
-      let piece = null;
+      let pieceId = null;
       let color = null;
 
       if (i === 0) {
-        piece = 'RNBQKBNR'[j];
+        pieceId = 'RNBQKBNR'[j];
         color = 1;
       } else if (i === 1) {
-        piece = 'P';
+        pieceId = 'P';
         color = 1;
       } else if (i === 6) {
-        piece = 'P';
+        pieceId = 'P';
         color = 0;
       } else if (i === 7) {
-        piece = 'RNBQKBNR'[j];
+        pieceId = 'RNBQKBNR'[j];
         color = 0;
       }
 
-      row.push({ isValid: true, piece: piece ?? null, color: color ?? null });
+      row.push({ isValid: true, pieceId: pieceId ?? null, color: color ?? null });
     }
     return row;
   }),

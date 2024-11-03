@@ -48,9 +48,9 @@ export type Piece = {
 }
 
 export type Cell = {
-  isValid: boolean;     // True if a piece can land or pass here
-  piece: string | null; // The piece identifier that is currently on the cell
-  color: number | null; // The piece color that is currently on the cell
+  isValid: boolean;
+  pieceId: string | null; // The piece identifier that is currently on the cell
+  color: number | null;   // The piece color that is currently on the cell
 }
 
 export type VariantGridType = "square" | "hexagonal" | "circular";
@@ -74,9 +74,9 @@ export type Variant = {
 }
 
 export type VariantErrors = {
-  [K in keyof Variant]: string;
+  [K in keyof Variant]?: string;
 };
 
 export type PieceErrors = {
-  [K in keyof Piece]: string;
+  [K in keyof Piece]?: string;
 };

@@ -45,7 +45,7 @@ const Create = () => {
   const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState<boolean>(false);
   const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
 
-  const handleGameInputChange = (e) => {
+  const handleGameInputChange = (e: any) => {
     const { name, value } = e.target;
     const newValue = (name === "width" || name === "height") ? parseInt(value) : value;
   
@@ -79,7 +79,7 @@ const Create = () => {
   };
 
   const handleGameConfigSubmit = () => {
-    const errors = {};
+    const errors: VariantErrors = {};
 
     if (!gameConfig.name) {
         errors.name = "Variant name is required.";
@@ -99,8 +99,8 @@ const Create = () => {
     }
   };
 
-  const handlePieceConfigSubmit = (isCreateMode, pieceBeforeEditId) => {
-    const errors = {};
+  const handlePieceConfigSubmit = (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => {
+    const errors: PieceErrors = {};
 
     if (!pieceConfig.id) {
       errors.id = "One-letter piece abbreviation is required.";
@@ -112,7 +112,8 @@ const Create = () => {
       errors.sprite = "Please select a sprite for your piece.";
     }
 
-    if (isCreateMode) { // Checks only on create mode
+    if (isCreateMode) {
+      // Checks only in create mode
       variant.pieces.forEach((piece) => {
         if (piece.id === pieceConfig.id) {
           errors.id = "There is already another piece with this one-letter abbreviation.";
@@ -154,7 +155,7 @@ const Create = () => {
     }
   }
 
-  const handlePieceDelete = (pieceId) => {
+  const handlePieceDelete = (pieceId: string) => {
     const newVariant = deletePiece(variant, pieceId);
     setVariant(newVariant);
   }
@@ -221,7 +222,7 @@ const Create = () => {
                       id="isWinOnCheckmate"
                       name="isWinOnCheckmate"
                       checked={gameConfig.isWinOnCheckmate}
-                      onCheckedChange={(checked) => handleGameCheckedChange("isWinOnCheckmate", checked)}
+                      onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnCheckmate", checked)}
                     />
                     <Label htmlFor="isWinOnCheckmate">Checkmate the opponent</Label>
                   </div>
@@ -246,7 +247,7 @@ const Create = () => {
                   id="isWinOnStalemate"
                   name="isWinOnStalemate"
                   checked={gameConfig.isWinOnStalemate}
-                  onCheckedChange={(checked) => handleGameCheckedChange("isWinOnStalemate", checked)}
+                  onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", checked)}
                 />
                 <Label htmlFor="isWinOnStalemate">Stalemate the opponent</Label>
               </div>
@@ -255,7 +256,7 @@ const Create = () => {
                   id="isWinOnOpponentWipe"
                   name="isWinOnOpponentWipe"
                   checked={gameConfig.isWinOnOpponentWipe}
-                  onCheckedChange={(checked) => handleGameCheckedChange("isWinOnOpponentWipe", checked)}
+                  onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnOpponentWipe", checked)}
                 />
                 <Label htmlFor="isWinOnOpponentWipe">Capture all opponent's pieces</Label>
               </div>
@@ -267,7 +268,7 @@ const Create = () => {
                   id="isDrawOnStalemate"
                   name="isDrawOnStalemate"
                   checked={!gameConfig.isWinOnStalemate}
-                  onCheckedChange={(checked) => handleGameCheckedChange("isWinOnStalemate", !checked)}
+                  onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", !checked)}
                 />
                 <Label htmlFor="isDrawOnStalemate">Stalemate the opponent</Label>
               </div>
@@ -290,7 +291,7 @@ const Create = () => {
                     type="multiple" 
                     variant="outline" 
                     value={gameConfig.nMoveRulePieces}
-                    onValueChange={(value) => {
+                    onValueChange={(value: string[]) => {
                       setGameConfig((prev) => ({
                         ...prev,
                         nMoveRulePieces: value,
@@ -361,7 +362,7 @@ const Create = () => {
                           setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
                         }}>
                         <div className="w-[80px]">
-                          <DraggablePiece piece={piece} color={selectedPieceColor} row={undefined} col={undefined} />
+                          <DraggablePiece piece={piece} color={selectedPieceColor} row={null} col={null} />
                         </div>
                         <Button
                           variant="ghost"
@@ -391,7 +392,7 @@ const Create = () => {
                       </div>
                     </div>
                     <div className="py-4">
-                      <PieceMovesBoard isCraftMode={false} piece={piece} />
+                      <PieceMovesBoard isCraftMode={false} piece={piece} highlightedMoveIndex={null} />
                     </div>
                     <div className="flex flex-col gap-1 p-4">
                       <PieceCraftDialog
