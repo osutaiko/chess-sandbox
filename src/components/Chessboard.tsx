@@ -27,7 +27,7 @@ const Square: React.FC<{
   return (
     <div
       ref={drop}
-      className={`relative aspect-square ${square.isValid ? (isSquareDark ? "bg-square-dark" : "bg-square-light") : "bg-secondary"} flex flex-col items-center justify-center`}
+      className={`relative aspect-square ${square.isValid ? (isSquareDark ? "bg-squae-dark" : "bg-square-ligt") : "bg-secondary"} flex flex-col items-center justify-center`}
       onClick={() => handleLeftClick(row, col)}
       onContextMenu={(event) => handleRightClick(event, row, col)}
     >

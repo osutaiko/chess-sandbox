@@ -324,29 +324,31 @@ const Create = () => {
       </ScrollArea>
 
       <div className="flex flex-col gap-4 flex-none pl-8">
-        <h3>Pieces</h3>
-        <div className="flex flex-row justify-between">
-          <Tabs
-            defaultValue="0"
-            onValueChange={(value) =>setSelectedPieceColor(parseInt(value))}
-          >
-            <TabsList>
-              <TabsTrigger value="0">White</TabsTrigger>
-              <TabsTrigger value="1">Black</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <PieceCraftDialog
-            isCreateMode={true}
-            variant={variant}
-            pieceConfig={pieceConfig}
-            setPieceConfig={setPieceConfig}
-            pieceConfigErrors={pieceConfigErrors}
-            setPieceConfigErrors={setPieceConfigErrors}
-            handlePieceInputChange={handlePieceInputChange}
-            handlePieceConfigSubmit={handlePieceConfigSubmit}
-            isCreatePieceDialogOpen={isCreatePieceDialogOpen}
-            setIsCreatePieceDialogOpen={setIsCreatePieceDialogOpen}
-          />
+        <div className="flex flex-row justify-between items-center">
+          <h3>Pieces</h3>
+          <div className="flex flex-row gap-2">
+            <Tabs
+              defaultValue="0"
+              onValueChange={(value) =>setSelectedPieceColor(parseInt(value))}
+            >
+              <TabsList>
+                <TabsTrigger value="0">White</TabsTrigger>
+                <TabsTrigger value="1">Black</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <PieceCraftDialog
+              isCreateMode={true}
+              variant={variant}
+              pieceConfig={pieceConfig}
+              setPieceConfig={setPieceConfig}
+              pieceConfigErrors={pieceConfigErrors}
+              setPieceConfigErrors={setPieceConfigErrors}
+              handlePieceInputChange={handlePieceInputChange}
+              handlePieceConfigSubmit={handlePieceConfigSubmit}
+              isCreatePieceDialogOpen={isCreatePieceDialogOpen}
+              setIsCreatePieceDialogOpen={setIsCreatePieceDialogOpen}
+            />
+          </div>
         </div>
         <ScrollArea>
           <div className="flex flex-col gap-4">
