@@ -1020,10 +1020,6 @@ small {
   width: 200px;
 }
 
-.w-\[250px\] {
-  width: 250px;
-}
-
 .w-\[50px\] {
   width: 50px;
 }
@@ -1263,6 +1259,10 @@ small {
 
 .overflow-hidden {
   overflow: hidden;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
 }
 
 .whitespace-nowrap {
@@ -2318,6 +2318,10 @@ small {
     display: block;
   }
 
+  .md\:w-\[250px\] {
+    width: 250px;
+  }
+
   .md\:max-w-\[250px\] {
     max-width: 250px;
   }
@@ -2326,12 +2330,20 @@ small {
     max-width: 100%;
   }
 
+  .md\:flex-row {
+    flex-direction: row;
+  }
+
+  .md\:gap-2 {
+    gap: 0.5rem;
+  }
+
   .md\:gap-8 {
     gap: 2rem;
   }
 
-  .md\:rounded-none {
-    border-radius: 0px;
+  .md\:rounded-md {
+    border-radius: calc(var(--radius) - 2px);
   }
 
   .md\:px-0 {

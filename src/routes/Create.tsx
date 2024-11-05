@@ -203,7 +203,7 @@ const Create = () => {
                   />
                   {gameConfigErrors.description && <p className="text-destructive">{gameConfigErrors.description}</p>}
                 </Label>
-                <div className="flex flex-row gap-4">
+                <div className="flex flex-row gap-2">
                   <Label className="flex flex-col gap-2 w-full">
                     <h4>Width (# of Files)</h4>
                     <Input

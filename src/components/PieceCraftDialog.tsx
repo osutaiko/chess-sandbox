@@ -118,33 +118,33 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
       }}
     >
       <DialogTrigger asChild>
-      <Button
-        size="icon"
-        onClick={() => {
-          if (!isCreateMode) {
-            setPieceConfig(variant.pieces.find((piece: Piece) => piece.id === pieceBeforeEditId)!);
-          }
-        }}
-      >
-        {isCreateMode ? <Plus /> : <SquarePen />}
-      </Button>
+        <Button
+          size="icon"
+          onClick={() => {
+            if (!isCreateMode) {
+              setPieceConfig(variant.pieces.find((piece: Piece) => piece.id === pieceBeforeEditId)!);
+            }
+          }}
+        >
+          {isCreateMode ? <Plus /> : <SquarePen />}
+        </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-full w-[900px] gap-8">
+      <DialogContent className="max-w-full w-[95vw] md:w-[900px] h-[95vh] md:h-[90vh] gap-8">
         <DialogHeader>
           <DialogTitle>{isCreateMode ? "Create New Piece" : `Edit Piece`}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[600px]">
+        <ScrollArea>
           <div className="flex flex-col gap-8">
             {isCreateMode && 
               <div className="flex flex-col gap-4">
                 <h4>Presets</h4>
-                <div className="flex flex-row gap-1">
+                <div className="flex flex-row gap-1 w-full overflow-x-auto">
                   {PIECE_PRESETS.slice(0, 6).map((piece) => {
                     return (
                       <Button
                         key={piece.id}
                         variant="secondary"
-                        className="flex flex-col gap-1 w-[85px] h-[95px] py-2"
+                        className="flex flex-col flex-none gap-1 w-[85px] h-[95px] py-2"
                         onClick={() => setPieceConfig(piece)}
                       >
                         <img
@@ -191,7 +191,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
             }
             <div className="flex flex-col gap-4">
               {isCreateMode && <h4>Piece Configuration</h4>}
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-2">
                 <Label className="flex flex-col gap-2 w-min">
                   <Popover modal={true}>
                     <PopoverTrigger asChild>
@@ -242,29 +242,29 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                   </Popover>
                   {pieceConfigErrors.sprite && <p className="text-destructive">{pieceConfigErrors.sprite}</p>}
                 </Label>
-                <Label className="flex flex-col gap-2">
-                  <h4>Name</h4>
-                  <Input
-                    type="text"
-                    name="name"
-                    placeholder="New Piece"
-                    value={pieceConfig.name}
-                    onChange={handlePieceInputChange}
-                    className="w-[250px]"
-                  />
-                  {pieceConfigErrors.name && <p className="text-destructive">{pieceConfigErrors.name}</p>}
-                </Label>
-                <Label className="flex flex-col gap-2">
-                  <h4>Abbr.</h4>
-                  <Input
-                    type="text"
-                    name="id"
-                    value={pieceConfig.id}
-                    onChange={handlePieceInputChange}
-                    className="w-[50px]"
-                  />
-                  {pieceConfigErrors.id && <p className="text-destructive">{pieceConfigErrors.id}</p>}
-                </Label>
+                <div className="flex flex-row gap-2">
+                  <Label className="flex flex-col gap-2 w-[60px]">
+                    <h4>Abbr.</h4>
+                    <Input
+                      type="text"
+                      name="id"
+                      value={pieceConfig.id}
+                      onChange={handlePieceInputChange}
+                    />
+                    {pieceConfigErrors.id && <p className="text-destructive">{pieceConfigErrors.id}</p>}
+                  </Label>
+                  <Label className="flex flex-col gap-2 w-full md:w-[250px]">
+                    <h4>Name</h4>
+                    <Input
+                      type="text"
+                      name="name"
+                      placeholder="New Piece"
+                      value={pieceConfig.name}
+                      onChange={handlePieceInputChange}
+                    />
+                    {pieceConfigErrors.name && <p className="text-destructive">{pieceConfigErrors.name}</p>}
+                  </Label>
+                </div>
               </div>
               <Label className="flex flex-col gap-2">
                 <h4>Description</h4>
@@ -291,8 +291,8 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                     <Plus />
                   </Button>
                 </div>
-                <div className="flex flex-row gap-4">
-                  <div className="flex-none sticky top-0 h-min">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-none md:sticky top-0 h-min md:w-[300px]">
                     <PieceMovesBoard isCraftMode={true} piece={pieceConfig} highlightedMoveIndex={highlightedMoveIndex} />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
@@ -358,7 +358,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                               </div>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-6 p-4 pt-0">
-                              <div className="flex flex-row gap-8">
+                              <div className="flex flex-row gap-x-8 gap-y-4 flex-wrap">
                                 {(move.type === "slide" || move.type === "leap") && (() => {
                                   const [a, b] = move.offset;
                                   const decodedOffset =
@@ -367,60 +367,58 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                     "other";
                                   return (
                                     <>
-                                      <div className="flex flex-col gap-4">
-                                        {move.type === "slide" && 
-                                          <RadioGroup
-                                            value={decodedOffset}
-                                            onValueChange={(value) => {
-                                              const updatedMoves = [...pieceConfig.moves];
-                                              updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
-                                              setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                            }}
-                                          >
-                                            <div className="flex items-center gap-2">
-                                              <RadioGroupItem value="orthogonal" id="orthogonal" />
-                                              <Label htmlFor="orthogonal">Orthogonal</Label>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <RadioGroupItem value="diagonal" id="diagonal" />
-                                              <Label htmlFor="diagonal">Diagonal</Label>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <RadioGroupItem value="other" id="other" />
-                                              <Label htmlFor="other">Other</Label>
-                                            </div>
-                                          </RadioGroup>
-                                        }
-                                        <div className="flex flex-col gap-2">
-                                          <Label>Offset:</Label>
-                                          <div className="flex flex-row gap-1">
-                                            <Input
-                                              type="number"
-                                              name="offset-0"
-                                              value={move.offset[0]}
-                                              disabled={move.type === "slide" && decodedOffset !== "other"}
-                                              min={1}
-                                              max={4}
-                                              onChange={(e) => {
-                                                const newValue = parseInt(e.target.value, 10);
-                                                updateMoveProperty(index, "offset", [newValue, move.offset[1]]);
-                                              }}
-                                              className="w-[60px]"
-                                            />
-                                            <Input
-                                              type="number"
-                                              name="offset-1"
-                                              value={move.offset[1]}
-                                              disabled={move.type === "slide" && decodedOffset !== "other"}
-                                              min={0}
-                                              max={move.offset[0]}
-                                              onChange={(e) => {
-                                                const newValue = parseInt(e.target.value, 10);
-                                                updateMoveProperty(index, "offset", [move.offset[0], newValue]);
-                                              }}
-                                              className="w-[60px]"
-                                            />
+                                      {move.type === "slide" && 
+                                        <RadioGroup
+                                          value={decodedOffset}
+                                          onValueChange={(value) => {
+                                            const updatedMoves = [...pieceConfig.moves];
+                                            updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
+                                            setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                          }}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <RadioGroupItem value="orthogonal" id="orthogonal" />
+                                            <Label htmlFor="orthogonal">Orthogonal</Label>
                                           </div>
+                                          <div className="flex items-center gap-2">
+                                            <RadioGroupItem value="diagonal" id="diagonal" />
+                                            <Label htmlFor="diagonal">Diagonal</Label>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <RadioGroupItem value="other" id="other" />
+                                            <Label htmlFor="other">Other</Label>
+                                          </div>
+                                        </RadioGroup>
+                                      }
+                                      <div className="flex flex-col gap-2">
+                                        <Label>Offset:</Label>
+                                        <div className="flex flex-row gap-1">
+                                          <Input
+                                            type="number"
+                                            name="offset-0"
+                                            value={move.offset[0]}
+                                            disabled={move.type === "slide" && decodedOffset !== "other"}
+                                            min={1}
+                                            max={4}
+                                            onChange={(e) => {
+                                              const newValue = parseInt(e.target.value, 10);
+                                              updateMoveProperty(index, "offset", [newValue, move.offset[1]]);
+                                            }}
+                                            className="w-[60px]"
+                                          />
+                                          <Input
+                                            type="number"
+                                            name="offset-1"
+                                            value={move.offset[1]}
+                                            disabled={move.type === "slide" && decodedOffset !== "other"}
+                                            min={0}
+                                            max={move.offset[0]}
+                                            onChange={(e) => {
+                                              const newValue = parseInt(e.target.value, 10);
+                                              updateMoveProperty(index, "offset", [move.offset[0], newValue]);
+                                            }}
+                                            className="w-[60px]"
+                                          />
                                         </div>
                                       </div>
                                       <div className="flex flex-col gap-2">
@@ -443,7 +441,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                   );
                                 })()}
                                 {(move.type === "slide" || move.type === "hop") && (
-                                  <div className="flex flex-col gap-4">
+                                  <div className="flex flex-col gap-4 mb-4">
                                     <Label htmlFor="range">Range:</Label>
                                     <DualRangeSlider
                                       id="range"
