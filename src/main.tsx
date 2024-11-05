@@ -6,6 +6,8 @@ import {
 } from "react-router-dom";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { MultiBackend, TouchTransition } from 'dnd-multi-backend';
 import "./index.css";
 
 import Layout from "./components/Layout";
@@ -33,9 +35,24 @@ const router = createBrowserRouter([
   },
 ]);
 
+const HTML5toTouch = {
+  backends: [
+    {
+      backend: HTML5Backend,
+      preview: true,
+    },
+    {
+      backend: TouchBackend,
+      options: { enableMouseEvents: true },
+      preview: true,
+      transition: TouchTransition,
+    },
+  ],
+};
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={MultiBackend} options={HTML5toTouch}>
       <RouterProvider router={router} />
     </DndProvider>
   </StrictMode>,
