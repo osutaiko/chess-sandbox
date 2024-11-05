@@ -1,5 +1,7 @@
 import { Piece } from "@/lib/types";
 
+import images from "@/assets/images"
+
 import { useDrag } from "react-dnd";
 
 const DraggablePiece: React.FC<{
@@ -19,7 +21,7 @@ const DraggablePiece: React.FC<{
   return (
     <div ref={drag} className={`relative transform cursor-pointer ${isDragging ? "opacity-0" : ""} w-full`}>
       <img
-        src={`/src/assets/images/pieces/${piece.sprite}-${color}.svg`}
+        src={images[`pieces/${piece.sprite}-${color}`]}
         alt={piece.name}
         className="w-full"
       />
