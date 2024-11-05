@@ -1,8 +1,8 @@
+import { useDrag } from "react-dnd";
+
 import { Piece } from "@/lib/types";
 
 import images from "@/assets/images"
-
-import { useDrag } from "react-dnd";
 
 const DraggablePiece: React.FC<{
   piece: Piece;

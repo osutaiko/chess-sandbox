@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import images from "@/assets/images";
 import { Plus, ScanSearch, SquarePen, Trash2, Ellipsis } from "lucide-react";
 
 interface BaseProps {
@@ -147,7 +148,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                         onClick={() => setPieceConfig(piece)}
                       >
                         <img
-                          src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
+                          src={images[`pieces/${piece.sprite}-0`]}
                           alt={piece.name}
                           className="w-full"
                         />
@@ -173,7 +174,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                 onClick={() => setPieceConfig(piece)}
                               >
                                 <img
-                                  src={`/src/assets/images/pieces/${piece.sprite}-0.svg`}
+                                  src={images[`pieces/${piece.sprite}-0`]}
                                   alt={piece.name}
                                   className="w-full"
                                 />
@@ -198,11 +199,11 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                         {pieceConfig.sprite ? 
                           <>
                             <img
-                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-0.svg`}
+                              src={images[`pieces/${pieceConfig.sprite}-0`]}
                               className="w-full h-full"
                             />
                             <img
-                              src={`/src/assets/images/pieces/${pieceConfig.sprite}-1.svg`}
+                              src={images[`pieces/${pieceConfig.sprite}-1`]}
                               className="w-full h-full"
                             />
                             <SquarePen className="absolute right-1 bottom-1" />
@@ -223,12 +224,12 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                 onClick={() => setPieceConfig({ ...pieceConfig, sprite })}
                               >
                                 <img
-                                  src={`/src/assets/images/pieces/${sprite}-0.svg`}
+                                  src={images[`pieces/${sprite}-0`]}
                                   alt={`${sprite}-0}`}
                                   className="w-[50px] aspect-square"
                                 />
                                 <img
-                                  src={`/src/assets/images/pieces/${sprite}-1.svg`}
+                                  src={images[`pieces/${sprite}-1`]}
                                   alt={`${sprite}-1}`}
                                   className="w-[50px] aspect-square"
                                 />

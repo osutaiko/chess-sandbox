@@ -84,7 +84,7 @@ const Chessboard: React.FC<{
 
   return (
     <div
-      className="grid rounded-md overflow-hidden"
+      className="grid md:rounded-md overflow-hidden"
       style={{
         gridTemplateColumns: `repeat(${variant.width}, 1fr)`,
         gridTemplateRows: `repeat(${variant.height}, 1fr)`,

@@ -2330,6 +2330,10 @@ small {
     gap: 2rem;
   }
 
+  .md\:rounded-none {
+    border-radius: 0px;
+  }
+
   .md\:px-0 {
     padding-left: 0px;
     padding-right: 0px;

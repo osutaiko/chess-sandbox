@@ -2,7 +2,6 @@ import { getReachableSquares } from "@/lib/chess";
 import { Piece } from "@/lib/types";
 
 import images from "@/assets/images";
-
 import { Circle, Play, ArrowRightFromLine } from "lucide-react";
 
 const PieceMovesBoard: React.FC<{
