@@ -55,13 +55,11 @@ const Chessboard: React.FC<{
   selectedPieceColor: number | null;
 }> = ({ variant, setVariant, selectedPieceId, selectedPieceColor }) => {
   const handlePieceDrop = (item: any, row: number, col: number) => {
-    const isWithinBounds =
-      row >= 0 && row < variant.height && col >= 0 && col < variant.width;
-    if (!isWithinBounds || !variant.board[row][col].isValid) {
-      const variantWithoutPiece = removePieceFromBoard(variant, item.row, item.col);
+    const variantWithoutPiece = removePieceFromBoard(variant, item.row, item.col);
+
+    if (row === null || col === null || !variant.board[row]?.[col]?.isValid) {
       setVariant(variantWithoutPiece);
     } else {
-      const variantWithoutPiece = removePieceFromBoard(variant, item.row, item.col);
       const updatedVariant = addPieceToBoard(variantWithoutPiece, item.id, item.color, row, col);
       setVariant(updatedVariant);
     }
