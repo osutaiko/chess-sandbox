@@ -343,7 +343,8 @@ const Create = () => {
         <div className="flex flex-row justify-between gap-1 items-center px-2 md:px-0">
           <Tabs
             defaultValue="0"
-            onValueChange={(value) =>setSelectedPieceColor(parseInt(value))}
+            value={String(selectedPieceColor)}
+            onValueChange={(value) => setSelectedPieceColor(parseInt(value))}
           >
             <TabsList>
               <TabsTrigger value="0">White</TabsTrigger>
