@@ -457,11 +457,11 @@ const Create = () => {
   if (isDesktop) {
     return (
       <ResizablePanelGroup direction="horizontal" className="flex flex-row px-8 py-6 gap-6 w-full">
-        <ResizablePanel className="flex flex-col gap-2 w-full min-w-[40vw] h-[calc(100vh-110px)]">
+        <ResizablePanel minSize={20} className="flex flex-col gap-2 w-full h-[calc(100vh-110px)]">
           <ChessboardPanel />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel className="flex flex-col gap-2 w-full min-w-[180px] h-[calc(100vh-110px)]">
+        <ResizablePanel minSize={20} className="flex flex-col gap-2 w-full h-[calc(100vh-110px)]">
           <PiecesPanel />
         </ResizablePanel>
       </ResizablePanelGroup>
