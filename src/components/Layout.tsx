@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 
 const Layout = () => {
   return (
-    <div className="flex flex-col min-h-screen select-none">
-      <header className="flex flex-row px-8 py-6 justify-between items-center w-full border-b h-[72px]">
-        <Link to="/" className="flex flex-row gap-4">
+    <div className="flex flex-col items-center min-h-screen select-none">
+      <header className="flex flex-row px-4 md:px-8 py-4 justify-between items-center w-full border-b">
+        <Link to="/" className="flex flex-row items-center gap-5">
           <Castle />
           <h3 className="hidden md:block">Chess Sandbox</h3>
         </Link>
@@ -23,7 +23,7 @@ const Layout = () => {
           </Link>
         </div>
       </header>
-      <main className="flex flex-grow justify-center overflow-hidden">
+      <main className="flex flex-grow justify-center overflow-hidden max-w-screen-3xl">
         <Outlet />
       </main>
     </div>

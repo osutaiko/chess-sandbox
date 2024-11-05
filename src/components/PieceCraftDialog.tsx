@@ -94,7 +94,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
   setOpenPieceDialogId,
 }) => {
   const [highlightedMoveIndex, setHighlightedMoveIndex] = useState<number | null>(null);
-
   const slideInfStart = 9;
 
   const updateMoveProperty = (index: number, name: string, value: any) => {
@@ -138,7 +137,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
             {isCreateMode && 
               <div className="flex flex-col gap-4">
                 <h4>Presets</h4>
-                <div className="flex flex-row gap-2">
+                <div className="flex flex-row gap-1">
                   {PIECE_PRESETS.slice(0, 6).map((piece) => {
                     return (
                       <Button
@@ -317,7 +316,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                   {/* <SelectItem key="hop" value="hop">Hop</SelectItem> */}
                                 </SelectContent>
                               </Select>
-                              <div className="flex flex-row items-center gap-2">
+                              <div className="flex flex-row items-center gap-1">
                                 <Button
                                   size="icon"
                                   variant="secondary"

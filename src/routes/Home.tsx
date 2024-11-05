@@ -1,8 +1,8 @@
 
 const Home = () => {
   return (
-    <div className="">
-      <p>azDSfg</p>
+    <div className="p-8">
+      <p>aasd</p>
     </div>
   );
 };

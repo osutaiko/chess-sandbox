@@ -33,7 +33,7 @@ const PieceMovesBoard: React.FC<{
         key={`${row}-${col}`}
         className={`relative ${
           row === radius && col === radius ? "bg-destructive" : (isSquareDark ? "bg-square-dark" : "bg-square-light")
-        } flex flex-col items-center justify-center ${isCraftMode ? "w-[36px]" : "w-[20px]"} aspect-square`}
+        } flex flex-col items-center justify-center aspect-square`}
       >
         {row === radius && col === radius && piece.sprite && (
           <img
@@ -73,7 +73,7 @@ const PieceMovesBoard: React.FC<{
 
   return (
     <div
-      className="grid rounded-sm overflow-hidden w-min"
+      className="grid rounded-sm overflow-hidden w-full"
       style={{
         gridTemplateColumns: `repeat(${width}, 1fr)`,
         gridTemplateRows: `repeat(${height}, 1fr)`,
