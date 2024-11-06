@@ -31,6 +31,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 
 import { Crown, Trash2 } from "lucide-react";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -38,7 +39,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 const Create = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const [variant, setVariant] = useState<Variant>(DEFAULT_VARIANT); // Variant after form confirmation
+  const [variant, setVariant] = useState<Variant>(structuredClone(DEFAULT_VARIANT)); // Variant after form confirmation
   const [selectedPieceColor, setSelectedPieceColor] = useState<number>(0);
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
   const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState<boolean>(false);
@@ -96,7 +97,7 @@ const Create = () => {
     return (
       <>
         <ScrollArea className="flex flex-col items-center">
-          <Chessboard variant={variant} setVariant={setVariant} selectedPieceId={selectedPieceId} selectedPieceColor={selectedPieceColor} />
+          <Chessboard variant={variant} isInteractable={true} setVariant={setVariant} selectedPieceId={selectedPieceId} selectedPieceColor={selectedPieceColor} />
         </ScrollArea>
         <Dialog open={isGameConfigureDialogOpen} onOpenChange={(open) => setIsGameConfigureDialogOpen(open)}>
           <DialogTrigger asChild className="w-full">
@@ -474,10 +475,11 @@ const Create = () => {
     );
   } else {
     return (
-      <div className="flex flex-col items-center gap-8 w-full">
+      <div className="flex flex-col items-center gap-4 w-full">
         <div className="flex flex-col items-center gap-2 max-h-[80vh]">
           <ChessboardPanel />
         </div>
+        <Separator />
         <div className="flex flex-col gap-2 w-full">
           <PiecesPanel openPieceDialogId={openPieceDialogId} setOpenPieceDialogId={setOpenPieceDialogId} />
         </div>

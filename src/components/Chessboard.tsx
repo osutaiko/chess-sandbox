@@ -4,6 +4,17 @@ import { addPieceToBoard, removePieceFromBoard } from "@/lib/chess";
 import DraggablePiece from "@/components/DraggablePiece";
 import { Variant } from "@/lib/types";
 
+type ChessboardProps = {
+  variant: Variant;
+  isInteractable: true;
+  setVariant: (variant: Variant) => void;
+  selectedPieceId: string | null;
+  selectedPieceColor: number | null;
+} | {
+  variant: Variant;
+  isInteractable: false;
+};
+
 const Square: React.FC<{
   row: number;
   col: number;
@@ -48,15 +59,13 @@ const Square: React.FC<{
   );
 };
 
-const Chessboard: React.FC<{
-  variant: Variant;
-  setVariant: (variant: Variant) => void;
-  selectedPieceId: string | null;
-  selectedPieceColor: number | null;
-}> = ({ variant, setVariant, selectedPieceId, selectedPieceColor }) => {
+const Chessboard: React.FC<ChessboardProps> = ({ variant, isInteractable, setVariant, selectedPieceId, selectedPieceColor }) => {
   const handlePieceDrop = (item: any, row: number, col: number) => {
-    const variantWithoutPiece = removePieceFromBoard(variant, item.row, item.col);
+    if (!isInteractable) {
+      return;
+    }
 
+    const variantWithoutPiece = removePieceFromBoard(variant, item.row, item.col);
     if (row === null || col === null || !variant.board[row]?.[col]?.isValid) {
       setVariant(variantWithoutPiece);
     } else {
@@ -66,6 +75,10 @@ const Chessboard: React.FC<{
   };
 
   const handleLeftClick = (row: number, col: number) => {
+    if (!isInteractable) {
+      return;
+    }
+
     if (selectedPieceId && selectedPieceColor !== null) {
       const updatedVariant = addPieceToBoard(variant, selectedPieceId, selectedPieceColor, row, col);
       setVariant(updatedVariant);
@@ -73,6 +86,10 @@ const Chessboard: React.FC<{
   };
 
   const handleRightClick = (event: any, row: number, col: number) => {
+    if (!isInteractable) {
+      return;
+    }
+    
     event.preventDefault();
     if (variant.board[row][col].pieceId) {
       const updatedVariant = removePieceFromBoard(variant, row, col);

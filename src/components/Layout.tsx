@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 const Layout = () => {
   return (
     <div className="flex flex-col items-center min-h-screen select-none">
-      <header className="flex flex-row px-4 md:px-8 py-4 justify-between items-center w-full border-b">
+      <header className="flex flex-row px-4 md:px-8 py-4 justify-between items-center w-full border-b bg-secondary/30">
         <Link to="/" className="flex flex-row items-center gap-5">
           <Castle />
-          <h3 className="hidden md:block">Chess Sandbox</h3>
+          <h3 className="hidden sm:block">Chess Sandbox</h3>
         </Link>
         <div className="flex flex-row items-center gap-8">
           <Link to="/create" className="flex flex-row gap-2">
