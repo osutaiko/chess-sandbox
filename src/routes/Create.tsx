@@ -264,8 +264,11 @@ const Create = () => {
     );
   };
   
-  const PiecesPanel = () => {
-    const [pieceConfig, setPieceConfig] = useState<Piece>(EMPTY_PIECE_CONFIG);
+  const PiecesPanel: React.FC<{
+    openPieceDialogId: string | null;
+    setOpenPieceDialogId: React.Dispatch<React.SetStateAction<string | null>>;
+  }> = ({ openPieceDialogId, setOpenPieceDialogId }) => {
+    const [pieceConfig, setPieceConfig] = useState<Piece>(variant.pieces.find((piece) => openPieceDialogId === piece.id) || EMPTY_PIECE_CONFIG);
     const [pieceConfigErrors, setPieceConfigErrors] = useState<PieceErrors>({});
     
     const handlePieceInputChange = (e: any) => {
@@ -465,7 +468,7 @@ const Create = () => {
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel minSize={20} className="flex flex-col gap-2 w-full h-[calc(100vh-110px)]">
-          <PiecesPanel />
+          <PiecesPanel openPieceDialogId={openPieceDialogId} setOpenPieceDialogId={setOpenPieceDialogId} />
         </ResizablePanel>
       </ResizablePanelGroup>
     );
@@ -476,7 +479,7 @@ const Create = () => {
           <ChessboardPanel />
         </div>
         <div className="flex flex-col gap-2 w-full">
-          <PiecesPanel />
+          <PiecesPanel openPieceDialogId={openPieceDialogId} setOpenPieceDialogId={setOpenPieceDialogId} />
         </div>
       </div>
     );
