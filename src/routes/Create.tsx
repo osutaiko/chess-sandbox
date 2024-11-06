@@ -38,127 +38,12 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 const Create = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const [gameConfig, setGameConfig] = useState<Variant>(DEFAULT_VARIANT); // Variant before form confirmation
-  const [gameConfigErrors, setGameConfigErrors] = useState<VariantErrors>({});
   const [variant, setVariant] = useState<Variant>(DEFAULT_VARIANT); // Variant after form confirmation
   const [selectedPieceColor, setSelectedPieceColor] = useState<number>(0);
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
-  const [pieceConfig, setPieceConfig] = useState<Piece>(EMPTY_PIECE_CONFIG);
-  const [pieceConfigErrors, setPieceConfigErrors] = useState<PieceErrors>({});
   const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState<boolean>(false);
   const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
   const [isGameConfigureDialogOpen, setIsGameConfigureDialogOpen] = useState<boolean>(false);
-
-  const handleGameInputChange = (e: any) => {
-    const { name, value } = e.target;
-    const newValue = (name === "width" || name === "height") ? parseInt(value) : value;
-  
-    setGameConfig((prevConfig) => ({
-      ...prevConfig,
-      [name]: newValue,
-    }));
-  };
-
-  const handleGameCheckedChange = (name: string, checked: boolean) => {
-    setGameConfig((prevConfig) => ({
-      ...prevConfig,
-      [name]: checked,
-    }));
-  };
-
-  const handlePieceInputChange = (e: any) => {
-    const { name, value } = e.target;
-    let newValue = value;
-    
-    if (name === "id") {
-      const lastChar = newValue[newValue.length - 1];
-      const isAlphabet = /^[A-Za-z]*$/.test(lastChar);
-      newValue = isAlphabet ? lastChar.toUpperCase() : "";
-    }
-  
-    setPieceConfig((prevConfig) => ({
-      ...prevConfig,
-      [name]: newValue,
-    }));
-  };
-
-  const handleGameConfigSubmit = () => {
-    const errors: VariantErrors = {};
-
-    if (!gameConfig.name) {
-        errors.name = "Variant name is required.";
-    }
-    if (!(1 <= gameConfig.width && gameConfig.width <= 25)) {
-        errors.width = "Width must be between 1 and 25.";
-    }
-    if (!(2 <= gameConfig.height && gameConfig.height <= 25)) {
-        errors.height = "Height must be between 2 and 25.";
-    }
-    setGameConfigErrors(errors);
-
-    if (Object.keys(errors).length === 0) {
-      const newVariant = resizeBoard(gameConfig);
-      setVariant(newVariant);
-      setGameConfig(newVariant);
-      setIsGameConfigureDialogOpen(false);
-    }
-  };
-
-  const handlePieceConfigSubmit = (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => {
-    const errors: PieceErrors = {};
-
-    if (!pieceConfig.id) {
-      errors.id = "One-letter piece abbreviation is required.";
-    }
-    if (!pieceConfig.name) {
-      errors.name = "Piece name is required.";
-    }
-    if (!pieceConfig.sprite) {
-      errors.sprite = "Please select a sprite for your piece.";
-    }
-
-    if (isCreateMode) {
-      // Checks only in create mode
-      variant.pieces.forEach((piece) => {
-        if (piece.id === pieceConfig.id) {
-          errors.id = "There is already another piece with this one-letter abbreviation.";
-        }
-        if (piece.name === pieceConfig.name) {
-          errors.name = "There is already another piece with this name.";
-        }
-        if (piece.sprite === pieceConfig.sprite) {
-          errors.sprite = "There is already another piece using this sprite.";
-        }
-      })
-    } else { // Checks only on edit mode
-      variant.pieces.forEach((piece) => {
-        if (piece.id === pieceConfig.id && piece.id !== pieceBeforeEditId) {
-          errors.id = "There is already another piece with this one-letter abbreviation.";
-        }
-        if (piece.name === pieceConfig.name && piece.id !== pieceBeforeEditId) {
-          errors.name = "There is already another piece with this name.";
-        }
-        if (piece.sprite === pieceConfig.sprite && piece.id !== pieceBeforeEditId) {
-          errors.sprite = "There is already another piece using this sprite.";
-        }
-      })
-    }
-    setPieceConfigErrors(errors);
-
-    if (Object.keys(errors).length === 0) {
-      if (isCreateMode) {
-        setVariant({ ...variant, pieces: [...variant.pieces, pieceConfig] });
-        setIsCreatePieceDialogOpen(false);
-      } else {
-        const updatedPieces = variant.pieces.map((piece) => 
-          piece.id === pieceBeforeEditId ? pieceConfig : piece
-        );
-        setVariant({ ...variant, pieces: updatedPieces });
-        setOpenPieceDialogId(null);
-      }
-      setPieceConfig(EMPTY_PIECE_CONFIG);
-    }
-  }
 
   const handlePieceDelete = (pieceId: string) => {
     const newVariant = deletePiece(variant, pieceId);
@@ -166,6 +51,48 @@ const Create = () => {
   }
 
   const ChessboardPanel = () => {
+    const [gameConfig, setGameConfig] = useState<Variant>(DEFAULT_VARIANT); // Variant before form confirmation
+    const [gameConfigErrors, setGameConfigErrors] = useState<VariantErrors>({});
+
+    const handleGameInputChange = (e: any) => {
+      const { name, value } = e.target;
+      const newValue = (name === "width" || name === "height") ? parseInt(value) : value;
+    
+      setGameConfig((prevConfig) => ({
+        ...prevConfig,
+        [name]: newValue,
+      }));
+    };
+  
+    const handleGameCheckedChange = (name: string, checked: boolean) => {
+      setGameConfig((prevConfig) => ({
+        ...prevConfig,
+        [name]: checked,
+      }));
+    };
+
+    const handleGameConfigSubmit = () => {
+      const errors: VariantErrors = {};
+  
+      if (!gameConfig.name) {
+          errors.name = "Variant name is required.";
+      }
+      if (!(1 <= gameConfig.width && gameConfig.width <= 25)) {
+          errors.width = "Width must be between 1 and 25.";
+      }
+      if (!(2 <= gameConfig.height && gameConfig.height <= 25)) {
+          errors.height = "Height must be between 2 and 25.";
+      }
+      setGameConfigErrors(errors);
+  
+      if (Object.keys(errors).length === 0) {
+        const newVariant = resizeBoard(gameConfig);
+        setVariant(newVariant);
+        setGameConfig(newVariant);
+        setIsGameConfigureDialogOpen(false);
+      }
+    };
+
     return (
       <>
         <ScrollArea className="flex flex-col items-center">
@@ -338,6 +265,81 @@ const Create = () => {
   };
   
   const PiecesPanel = () => {
+    const [pieceConfig, setPieceConfig] = useState<Piece>(EMPTY_PIECE_CONFIG);
+    const [pieceConfigErrors, setPieceConfigErrors] = useState<PieceErrors>({});
+    
+    const handlePieceInputChange = (e: any) => {
+      const { name, value } = e.target;
+      let newValue = value;
+      
+      if (name === "id") {
+        const lastChar = newValue[newValue.length - 1];
+        const isAlphabet = /^[A-Za-z]*$/.test(lastChar);
+        newValue = isAlphabet ? lastChar.toUpperCase() : "";
+      }
+    
+      setPieceConfig((prevConfig) => ({
+        ...prevConfig,
+        [name]: newValue,
+      }));
+    };
+  
+    const handlePieceConfigSubmit = (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => {
+      const errors: PieceErrors = {};
+  
+      if (!pieceConfig.id) {
+        errors.id = "One-letter piece abbreviation is required.";
+      }
+      if (!pieceConfig.name) {
+        errors.name = "Piece name is required.";
+      }
+      if (!pieceConfig.sprite) {
+        errors.sprite = "Please select a sprite for your piece.";
+      }
+  
+      if (isCreateMode) {
+        // Checks only in create mode
+        variant.pieces.forEach((piece) => {
+          if (piece.id === pieceConfig.id) {
+            errors.id = "There is already another piece with this one-letter abbreviation.";
+          }
+          if (piece.name === pieceConfig.name) {
+            errors.name = "There is already another piece with this name.";
+          }
+          if (piece.sprite === pieceConfig.sprite) {
+            errors.sprite = "There is already another piece using this sprite.";
+          }
+        })
+      } else { // Checks only on edit mode
+        variant.pieces.forEach((piece) => {
+          if (piece.id === pieceConfig.id && piece.id !== pieceBeforeEditId) {
+            errors.id = "There is already another piece with this one-letter abbreviation.";
+          }
+          if (piece.name === pieceConfig.name && piece.id !== pieceBeforeEditId) {
+            errors.name = "There is already another piece with this name.";
+          }
+          if (piece.sprite === pieceConfig.sprite && piece.id !== pieceBeforeEditId) {
+            errors.sprite = "There is already another piece using this sprite.";
+          }
+        })
+      }
+      setPieceConfigErrors(errors);
+  
+      if (Object.keys(errors).length === 0) {
+        if (isCreateMode) {
+          setVariant({ ...variant, pieces: [...variant.pieces, pieceConfig] });
+          setIsCreatePieceDialogOpen(false);
+        } else {
+          const updatedPieces = variant.pieces.map((piece) => 
+            piece.id === pieceBeforeEditId ? pieceConfig : piece
+          );
+          setVariant({ ...variant, pieces: updatedPieces });
+          setOpenPieceDialogId(null);
+        }
+        setPieceConfig(EMPTY_PIECE_CONFIG);
+      }
+    };
+
     return (
       <>
         <div className="flex flex-row justify-between gap-1 items-center px-2 md:px-0">

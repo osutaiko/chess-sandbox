@@ -164,7 +164,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                     </PopoverTrigger>
                     <PopoverContent className="w-full h-[200px]">
                       <ScrollArea className="w-full h-full">
-                        <div className="grid grid-cols-4 gap-1">
+                        <div className="grid grid-cols-3 md:grid-cols-4 gap-1">
                           {PIECE_PRESETS.slice(6).map((piece) => {
                             return (
                               <Button
@@ -214,7 +214,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                     </PopoverTrigger>
                     <PopoverContent className="w-full h-[200px]">
                       <ScrollArea className="w-full h-full">
-                        <div className="grid grid-cols-4 gap-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1">
                           {AVAILABLE_SPRITES.map((sprite) => {
                             return (
                               <Button
