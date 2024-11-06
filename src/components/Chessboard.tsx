@@ -70,7 +70,7 @@ const Chessboard: React.FC<{
   };
 
   const handleLeftClick = (row: number, col: number) => {
-    if (!isInteractable || !setVariant || !selectedPieceColor) {
+    if (!isInteractable || !setVariant || selectedPieceColor === undefined) {
       return;
     }
 

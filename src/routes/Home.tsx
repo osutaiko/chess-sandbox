@@ -7,8 +7,6 @@ import { DEFAULT_VARIANT } from "@/lib/constants";
 
 import Chessboard from "@/components/Chessboard";
 
-import { Button } from "@/components/ui/button";
-
 const Home = () => {
   // Workaround to avoid mutating DEFAULT_VARIANT
   const [variant, setVariant] = useState<Variant>({ ...structuredClone(DEFAULT_VARIANT), pieces: PIECE_PRESETS });
@@ -47,11 +45,11 @@ const Home = () => {
   return (
     <div className="flex flex-col gap-6 md:gap-12 items-center md:px-8 py-6 md:py-12 w-full">
       <div className="flex flex-col items-center gap-2 md:gap-4">
-        <h2 className="text-base md:text-xl md:text-2xl">Welcome to Chess Sandbox</h2>
+        <h2 className="text-base sm:text-xl md:text-2xl">Welcome to Chess Sandbox</h2>
         <p className="px-4 text-center">Create, browse, and play user-made fairy chess variants</p>
       </div>
 
-      <div className="max-w-[500px] md:max-w-full w-full md:w-1/2">
+      <div className="max-w-[500px] aspect-square md:max-w-full w-full md:w-1/2">
         <Chessboard variant={variant} isInteractable={false} />
       </div>
     </div>

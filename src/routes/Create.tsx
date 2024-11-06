@@ -406,7 +406,7 @@ const Create = () => {
                       </Button>
                     </div>
                     <div className="flex flex-col gap-2 items-center">
-                    <Badge className="text-base">{piece.id}</Badge>
+                    <Badge className="text-sm aspect-square">{piece.id}</Badge>
                       <h4 className="text-center break-all line-clamp-2">
                       {piece.name}
                       </h4>
