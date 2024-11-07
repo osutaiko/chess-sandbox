@@ -385,10 +385,10 @@ const Create = () => {
                       <div className="w-[80px]">
                         <DraggablePiece piece={piece} color={selectedPieceColor} row={null} col={null} />
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute -top-3 -right-3 cursor-pointer"
+                      <Crown
+                        stroke={isRoyal ? "orange" : "gray"}
+                        fill={isRoyal ? "orange" : "transparent"}
+                        className="absolute -top-1 -right-1 cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           setVariant((prev) => ({
@@ -398,12 +398,7 @@ const Create = () => {
                               : [...prev.royals, piece.id],
                           }));
                         }}
-                      >
-                        <Crown
-                          stroke={isRoyal ? "orange" : "gray"}
-                          fill={isRoyal ? "orange" : "transparent"}
-                        />
-                      </Button>
+                      />
                     </div>
                     <div className="flex flex-col gap-2 items-center">
                     <Badge className="text-sm aspect-square">{piece.id}</Badge>

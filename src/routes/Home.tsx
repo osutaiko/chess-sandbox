@@ -8,7 +8,6 @@ import { DEFAULT_VARIANT } from "@/lib/constants";
 import Chessboard from "@/components/Chessboard";
 
 const Home = () => {
-  // Workaround to avoid mutating DEFAULT_VARIANT
   const [variant, setVariant] = useState<Variant>({ ...structuredClone(DEFAULT_VARIANT), pieces: PIECE_PRESETS });
 
   useEffect(() => {
