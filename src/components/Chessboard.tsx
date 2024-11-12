@@ -18,7 +18,7 @@ const Square: React.FC<{
   });
 
   const isSquareDark = (variant.height - row + col) % 2 === 0;
-  const square = variant.board[row][col];
+  const square = variant.initialBoard[row][col];
   const pieceObj = square.pieceId ? variant.pieces.find(p => p.id === square.pieceId) : null;
 
   const rankLabel = col === variant.width - 1 ? variant.height - row : null;
@@ -61,7 +61,7 @@ const Chessboard: React.FC<{
     }
 
     const variantWithoutPiece = removePieceFromBoard(variant, item.row, item.col);
-    if (row === null || col === null || !variant.board[row]?.[col]?.isValid) {
+    if (row === null || col === null || !variant.initialBoard[row]?.[col]?.isValid) {
       setVariant(variantWithoutPiece);
     } else {
       const updatedVariant = addPieceToBoard(variantWithoutPiece, item.id, item.color, row, col);
@@ -86,7 +86,7 @@ const Chessboard: React.FC<{
     }
     
     event.preventDefault();
-    if (variant.board[row][col].pieceId) {
+    if (variant.initialBoard[row][col].pieceId) {
       const updatedVariant = removePieceFromBoard(variant, row, col);
       setVariant(updatedVariant);
     }

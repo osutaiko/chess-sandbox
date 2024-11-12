@@ -9,7 +9,7 @@ export const DEFAULT_VARIANT = {
   height: 8,
   gridType: "square" as VariantGridType,
   playerCount: 2,
-  board: Array.from({ length: 8 }, (_, i) => {
+  initialBoard: Array.from({ length: 8 }, (_, i) => {
     const row = [];
     for (let j = 0; j < 8; j++) {
       let pieceId = null;

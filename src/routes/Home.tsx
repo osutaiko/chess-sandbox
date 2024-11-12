@@ -23,7 +23,7 @@ const Home = () => {
   
         const colIndex = Math.floor(Math.random() * updatedVariant.width);
   
-        if (prevVariant.board[0][colIndex].pieceId === 'K') {
+        if (prevVariant.initialBoard[0][colIndex].pieceId === 'K') {
           attemptPlacement();
           return prevVariant;
         }

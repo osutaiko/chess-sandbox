@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
+import { Link } from "react-router-dom";
 
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard } from "@/lib/chess";
@@ -31,7 +32,6 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
 
 import { Crown, Trash2 } from "lucide-react";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -54,6 +54,7 @@ const Create = () => {
   const ChessboardPanel = () => {
     const [gameConfig, setGameConfig] = useState<Variant>(DEFAULT_VARIANT); // Variant before form confirmation
     const [gameConfigErrors, setGameConfigErrors] = useState<VariantErrors>({});
+    const [copied, setCopied] = useState(false);
 
     const handleGameInputChange = (e: any) => {
       const { name, value } = e.target;
@@ -99,168 +100,189 @@ const Create = () => {
         <ScrollArea className="flex flex-col items-center">
           <Chessboard variant={variant} isInteractable={true} setVariant={setVariant} selectedPieceId={selectedPieceId} selectedPieceColor={selectedPieceColor} />
         </ScrollArea>
-        <Dialog open={isGameConfigureDialogOpen} onOpenChange={(open) => setIsGameConfigureDialogOpen(open)}>
-          <DialogTrigger asChild className="w-full">
-            <Button onClick={() => setIsGameConfigureDialogOpen(true)}>
-              Configure Variant
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="flex flex-col flex-none gap-4 md:gap-8">
-            <DialogHeader>
-              <DialogTitle>Variant Configuration</DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="h-[70vh]">
-              <div className="flex flex-col gap-6">
-                <Label className="flex flex-col gap-2">
-                  <h4>Variant Name</h4>
-                  <Input
-                    type="text"
-                    name="name"
-                    placeholder="New Variant"
-                    value={gameConfig.name}
-                    onChange={handleGameInputChange}
-                  />
-                  {gameConfigErrors.name && <p className="text-destructive">{gameConfigErrors.name}</p>}
-                </Label>
-                <Label className="flex flex-col gap-2">
-                  <h4>Description</h4>
-                  <Textarea
-                    name="description"
-                    value={gameConfig.description}
-                    onChange={handleGameInputChange}
-                  />
-                  {gameConfigErrors.description && <p className="text-destructive">{gameConfigErrors.description}</p>}
-                </Label>
-                <div className="flex flex-row gap-2">
-                  <Label className="flex flex-col gap-2 w-full">
-                    <h4>Width (# of Files)</h4>
+        <div className="flex flex-row gap-1 w-full px-2">
+          <Dialog open={isGameConfigureDialogOpen} onOpenChange={(open) => setIsGameConfigureDialogOpen(open)}>
+            <DialogTrigger asChild className="w-full">
+              <Button onClick={() => setIsGameConfigureDialogOpen(true)}>
+                Configure Variant
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="flex flex-col flex-none gap-4 md:gap-8">
+              <DialogHeader>
+                <DialogTitle>Variant Configuration</DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="h-[70vh]">
+                <div className="flex flex-col gap-6">
+                  <Label className="flex flex-col gap-2">
+                    <h4>Variant Name</h4>
                     <Input
-                      type="number"
-                      name="width"
-                      value={gameConfig.width}
-                      min={1}
-                      max={25}
+                      type="text"
+                      name="name"
+                      placeholder="New Variant"
+                      value={gameConfig.name}
                       onChange={handleGameInputChange}
                     />
-                    {gameConfigErrors.width && <p className="text-destructive">{gameConfigErrors.width}</p>}
+                    {gameConfigErrors.name && <p className="text-destructive">{gameConfigErrors.name}</p>}
                   </Label>
-                  <Label className="flex flex-col gap-2 w-full">
-                    <h4>Height (# of Ranks)</h4>
-                    <Input
-                      type="number"
-                      name="height"
-                      min={1}
-                      max={25}
-                      value={gameConfig.height}
+                  <Label className="flex flex-col gap-2">
+                    <h4>Description</h4>
+                    <Textarea
+                      name="description"
+                      value={gameConfig.description}
                       onChange={handleGameInputChange}
                     />
-                    {gameConfigErrors.height && <p className="text-destructive">{gameConfigErrors.height}</p>}
+                    {gameConfigErrors.description && <p className="text-destructive">{gameConfigErrors.description}</p>}
                   </Label>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h4>Win Conditions</h4>
-                  {variant.royals.length > 0 && 
-                    <>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="isWinOnCheckmate"
-                          name="isWinOnCheckmate"
-                          checked={gameConfig.isWinOnCheckmate}
-                          onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnCheckmate", checked)}
-                        />
-                        <Label htmlFor="isWinOnCheckmate">Checkmate the opponent</Label>
-                      </div>
-                      <RadioGroup
-                        value={String(gameConfig.mustCheckmateAllRoyals)}
-                        onValueChange={(value) => handleGameCheckedChange("mustCheckmateAllRoyals", value === "true")}
-                        className="ml-6 mb-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="false" id="false" />
-                          <Label htmlFor="false">... One of the royals</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="true" id="true" />
-                          <Label htmlFor="true">... the final remaining royal</Label>
-                        </div>
-                      </RadioGroup>
-                    </>
-                  }
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="isWinOnStalemate"
-                      name="isWinOnStalemate"
-                      checked={gameConfig.isWinOnStalemate}
-                      onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", checked)}
-                    />
-                    <Label htmlFor="isWinOnStalemate">Stalemate the opponent</Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="isWinOnOpponentWipe"
-                      name="isWinOnOpponentWipe"
-                      checked={gameConfig.isWinOnOpponentWipe}
-                      onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnOpponentWipe", checked)}
-                    />
-                    <Label htmlFor="isWinOnOpponentWipe">Capture all opponent's pieces</Label>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h4>Draw Conditions</h4>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="isDrawOnStalemate"
-                      name="isDrawOnStalemate"
-                      checked={!gameConfig.isWinOnStalemate}
-                      onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", !checked)}
-                    />
-                    <Label htmlFor="isDrawOnStalemate">Stalemate the opponent</Label>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <Checkbox checked={true} disabled={true} />
-                      <Label className="!cursor-default !opacity-100">N-move rule</Label>
-                    </div>
-                    <div className="flex flex-col gap-2 ml-6">
-                      <Label htmlFor="nMoveRuleCount">... on move:</Label>
+                  <div className="flex flex-row gap-2">
+                    <Label className="flex flex-col gap-2 w-full">
+                      <h4>Width (# of Files)</h4>
                       <Input
                         type="number"
-                        name="nMoveRuleCount"
-                        value={gameConfig.nMoveRuleCount}
+                        name="width"
+                        value={gameConfig.width}
+                        min={1}
+                        max={25}
                         onChange={handleGameInputChange}
-                        className="w-[100px]"
                       />
-                      <Label htmlFor="nMoveRulePieces">... resets after one of the following moves:</Label>
-                      <ToggleGroup
-                        type="multiple" 
-                        variant="outline" 
-                        value={gameConfig.nMoveRulePieces}
-                        onValueChange={(value: string[]) => {
-                          setGameConfig((prev) => ({
-                            ...prev,
-                            nMoveRulePieces: value,
-                          }));
-                        }}
-                        className="grid grid-cols-[repeat(auto-fit,minmax(36px,1fr))] gap-1 justify-items-start"
-                      >
-                        {gameConfig.pieces.map((piece) => (
-                          <ToggleGroupItem
-                            key={piece.id}
-                            value={piece.id}
-                            className="w-full h-[36px] flex items-center justify-center"
-                          >
-                            {piece.id}
-                          </ToggleGroupItem>
-                        ))}
-                      </ToggleGroup>
+                      {gameConfigErrors.width && <p className="text-destructive">{gameConfigErrors.width}</p>}
+                    </Label>
+                    <Label className="flex flex-col gap-2 w-full">
+                      <h4>Height (# of Ranks)</h4>
+                      <Input
+                        type="number"
+                        name="height"
+                        min={1}
+                        max={25}
+                        value={gameConfig.height}
+                        onChange={handleGameInputChange}
+                      />
+                      {gameConfigErrors.height && <p className="text-destructive">{gameConfigErrors.height}</p>}
+                    </Label>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <h4>Win Conditions</h4>
+                    {variant.royals.length > 0 && 
+                      <>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="isWinOnCheckmate"
+                            name="isWinOnCheckmate"
+                            checked={gameConfig.isWinOnCheckmate}
+                            onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnCheckmate", checked)}
+                          />
+                          <Label htmlFor="isWinOnCheckmate">Checkmate the opponent</Label>
+                        </div>
+                        <RadioGroup
+                          value={String(gameConfig.mustCheckmateAllRoyals)}
+                          onValueChange={(value) => handleGameCheckedChange("mustCheckmateAllRoyals", value === "true")}
+                          className="ml-6 mb-2"
+                        >
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="false" id="false" />
+                            <Label htmlFor="false">... One of the royals</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="true" id="true" />
+                            <Label htmlFor="true">... the final remaining royal</Label>
+                          </div>
+                        </RadioGroup>
+                      </>
+                    }
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="isWinOnStalemate"
+                        name="isWinOnStalemate"
+                        checked={gameConfig.isWinOnStalemate}
+                        onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", checked)}
+                      />
+                      <Label htmlFor="isWinOnStalemate">Stalemate the opponent</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="isWinOnOpponentWipe"
+                        name="isWinOnOpponentWipe"
+                        checked={gameConfig.isWinOnOpponentWipe}
+                        onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnOpponentWipe", checked)}
+                      />
+                      <Label htmlFor="isWinOnOpponentWipe">Capture all opponent's pieces</Label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <h4>Draw Conditions</h4>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="isDrawOnStalemate"
+                        name="isDrawOnStalemate"
+                        checked={!gameConfig.isWinOnStalemate}
+                        onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", !checked)}
+                      />
+                      <Label htmlFor="isDrawOnStalemate">Stalemate the opponent</Label>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Checkbox checked={true} disabled={true} />
+                        <Label className="!cursor-default !opacity-100">N-move rule</Label>
+                      </div>
+                      <div className="flex flex-col gap-2 ml-6">
+                        <Label htmlFor="nMoveRuleCount">... on move:</Label>
+                        <Input
+                          type="number"
+                          name="nMoveRuleCount"
+                          value={gameConfig.nMoveRuleCount}
+                          onChange={handleGameInputChange}
+                          className="w-[100px]"
+                        />
+                        <Label htmlFor="nMoveRulePieces">... resets after one of the following moves:</Label>
+                        <ToggleGroup
+                          type="multiple" 
+                          variant="outline" 
+                          value={gameConfig.nMoveRulePieces}
+                          onValueChange={(value: string[]) => {
+                            setGameConfig((prev) => ({
+                              ...prev,
+                              nMoveRulePieces: value,
+                            }));
+                          }}
+                          className="grid grid-cols-[repeat(auto-fit,minmax(36px,1fr))] gap-1 justify-items-start"
+                        >
+                          {gameConfig.pieces.map((piece) => (
+                            <ToggleGroupItem
+                              key={piece.id}
+                              value={piece.id}
+                              className="w-full h-[36px] flex items-center justify-center"
+                            >
+                              {piece.id}
+                            </ToggleGroupItem>
+                          ))}
+                        </ToggleGroup>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </ScrollArea>
-            <Button onClick={handleGameConfigSubmit}>Apply</Button>
-          </DialogContent>
-        </Dialog>
+              </ScrollArea>
+              <Button onClick={handleGameConfigSubmit}>Apply</Button>
+            </DialogContent>
+          </Dialog>
+          <Button
+            onClick={() => {
+              const jsonString = JSON.stringify(variant);
+              navigator.clipboard.writeText(jsonString)
+                .then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                })
+                .catch((error) => {
+                  console.error("Failed to copy JSON: ", error);
+                });
+            }}
+          >
+            Copy JSON
+          </Button>
+
+          <Link to="/play" state={{ variant }}>
+            <Button>Play!</Button>
+          </Link>
+        </div>
       </>
     );
   };
@@ -474,7 +496,6 @@ const Create = () => {
         <div className="flex flex-col items-center gap-2 max-h-[80vh]">
           <ChessboardPanel />
         </div>
-        <Separator />
         <div className="flex flex-col gap-2 w-full">
           <PiecesPanel openPieceDialogId={openPieceDialogId} setOpenPieceDialogId={setOpenPieceDialogId} />
         </div>

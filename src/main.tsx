@@ -14,6 +14,7 @@ import Layout from "./components/Layout";
 import Home from "./routes/Home";
 import Create from "./routes/Create";
 import Browse from "./routes/Browse";
+import Play from "./routes/Play";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: "/browse",
         element: <Browse />,
+      },
+      {
+        path: "/play",
+        element: <Play />,
       },
     ],
   },

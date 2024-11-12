@@ -62,7 +62,7 @@ export type Variant = {
   height: number;                                 // Board height (number of ranks)
   gridType: VariantGridType;                      // Grid layout
   playerCount: number;                            // Player count
-  board: Cell[][];                                // A 2D array representing the board
+  initialBoard: Cell[][];                         // A 2D array representing the initial board setup
   pieces: Piece[];                                // Array of Piece objects
   royals: string[];                               // Array of royal piece identifiers (e.g., ['K'])
   isWinOnCheckmate: boolean;                      // True if the game is won on checkmate
@@ -79,4 +79,14 @@ export type VariantErrors = {
 
 export type PieceErrors = {
   [K in keyof Piece]?: string;
+};
+
+export type Move = {
+  from: { row: number; col: number };
+  to: { row: number; col: number };
+};
+
+export type Game = Variant & {
+  currentBoard: Cell[][];
+  history: Move[];
 };

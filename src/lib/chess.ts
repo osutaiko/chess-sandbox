@@ -1,14 +1,14 @@
-import { Variant, PieceMove } from "@/lib/types";
+import { Variant, PieceMove, Game } from "@/lib/types";
 
 export const resizeBoard = (variant: Variant) => {
-  const currentWidth = variant.board[0].length;
-  const currentHeight = variant.board.length;
+  const currentWidth = variant.initialBoard[0].length;
+  const currentHeight = variant.initialBoard.length;
 
   const newWidth = variant.width;
   const newHeight = variant.height;
 
   const createEmptyRow = (width: number) => Array.from({ length: width }, () => ({ isValid: true, pieceId: null, color: null }));
-  let newBoard = [...variant.board];
+  let newBoard = [...variant.initialBoard];
 
   if (newHeight > currentHeight) {
     const topHalf = newBoard.slice(0, Math.ceil(currentHeight / 2));
@@ -45,7 +45,7 @@ export const resizeBoard = (variant: Variant) => {
     return row;
   });
 
-  return { ...variant, width: newWidth, height: newHeight, board: newBoard };
+  return { ...variant, width: newWidth, height: newHeight, initialBoard: newBoard };
 };
 
 
@@ -119,7 +119,7 @@ export const getReachableSquares = (moves: PieceMove[], radius: number) => {
 export const deletePiece = (variant: Variant, pieceId: string) => {
   const newVariant = {
     ...variant,
-    board: variant.board.map(row => 
+    initialBoard: variant.initialBoard.map(row => 
       row.map(square => ({
         ...square,
         pieceId: square.pieceId === pieceId ? null : square.pieceId,
@@ -149,20 +149,110 @@ export const deletePiece = (variant: Variant, pieceId: string) => {
 
 export const removePieceFromBoard = (variant: Variant, rowIndex: number, colIndex: number) => {
   const updatedVariant = { ...variant };
-  if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
-    updatedVariant.board[rowIndex][colIndex].pieceId = null;
+  if (updatedVariant.initialBoard[rowIndex] && updatedVariant.initialBoard[rowIndex][colIndex]) {
+    updatedVariant.initialBoard[rowIndex][colIndex].pieceId = null;
   }
   return updatedVariant;
 };
 
 export const addPieceToBoard = (variant: Variant, pieceId: string, color: number, rowIndex: number, colIndex: number) => {
   const updatedVariant = { ...variant };
-  if (updatedVariant.board[rowIndex] && updatedVariant.board[rowIndex][colIndex]) {
-    updatedVariant.board[rowIndex][colIndex] = {
-      ...updatedVariant.board[rowIndex][colIndex],
+  if (updatedVariant.initialBoard[rowIndex] && updatedVariant.initialBoard[rowIndex][colIndex]) {
+    updatedVariant.initialBoard[rowIndex][colIndex] = {
+      ...updatedVariant.initialBoard[rowIndex][colIndex],
       pieceId: pieceId,
       color: color
     };
   }
   return updatedVariant;
+};
+
+const isInitialMove = (game: Game, row: number, col: number): boolean => {
+  const initialPieceId = game.initialBoard[row][col]?.pieceId;
+  const currentPieceId = game.currentBoard[row][col]?.pieceId;
+  if (!initialPieceId) {
+    return false;
+  }
+
+  if (initialPieceId !== currentPieceId) {
+    return false;
+  }
+
+  return !game.history.some((move) => move.from.row === row && move.from.col === col);
+};
+
+export const getValidDestinations = (game: Game, row: number, col: number): { row: number; col: number }[] => {
+  const square = game.currentBoard[row][col];
+  const pieceObj = square.pieceId ? game.pieces.find((p) => p.id === square.pieceId) : null;
+  
+  if (!pieceObj) return [];
+  
+  const validDestinations: { row: number; col: number }[] = [];
+  const colorAdjustedDy = game.currentBoard[row][col].color === 0 ? 1 : -1;
+
+  pieceObj.moves.forEach((move) => {
+    if (move.isInitialOnly && !isInitialMove(game, row, col)) {
+      return;
+    }
+
+    if (move.type === "slide") {
+      const ofs0 = move.offset[0] * colorAdjustedDy;
+      const ofs1 = move.offset[1];
+
+      const slideInDirection = (colOffset: number, rowOffset: number) => {
+        let steps = 1;
+
+        while (steps <= move.range.to) {
+          const newRow = row - rowOffset * steps;
+          const newCol = col + colOffset * steps;
+
+          if (newRow < 0 || newRow >= game.width || newCol < 0 || newCol >= game.height) {
+            break;
+          }
+
+          const destinationSquare = game.currentBoard[newRow][newCol];
+
+          if (steps >= move.range.from) {
+            if ((move.canNonCapture && !destinationSquare.pieceId)
+              || (move.canCapture && game.currentBoard[newRow][newCol].pieceId && game.currentBoard[row][col].color !== game.currentBoard[newRow][newCol].color)) {
+              validDestinations.push({ row: newRow, col: newCol });
+            }
+          }
+
+          if (game.currentBoard[newRow][newCol].pieceId) {
+            break;
+          }
+          steps++;
+        }
+      };
+
+      if (ofs1 === 0) {
+        if (move.canForward) {
+          slideInDirection(ofs1, ofs0);
+        }
+        if (move.canBackward) {
+          slideInDirection(ofs1, -ofs0);
+        }
+        if (move.canSideways) {
+          slideInDirection(ofs0, ofs1);
+          slideInDirection(-ofs0, ofs1);
+        }
+      } else {
+        if (move.canForward) {
+          slideInDirection(ofs0, ofs1);
+          slideInDirection(-ofs0, ofs1);
+          slideInDirection(ofs1, ofs0);
+          slideInDirection(-ofs1, ofs0);
+        }
+        if (move.canBackward) {
+          slideInDirection(ofs0, -ofs1);
+          slideInDirection(-ofs0, -ofs1);
+          slideInDirection(ofs1, -ofs0);
+          slideInDirection(-ofs1, -ofs0);
+        }
+      }
+    }
+  });
+
+  return validDestinations;
 };
