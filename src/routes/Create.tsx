@@ -33,7 +33,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { Crown, Trash2 } from "lucide-react";
+import { Check, Crown, Trash2 } from "lucide-react";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 const Create = () => {
@@ -275,8 +275,10 @@ const Create = () => {
                   console.error("Failed to copy JSON: ", error);
                 });
             }}
+            className="relative"
           >
             Copy JSON
+            {copied && <Check stroke="yellow" strokeWidth={5} className="absolute -top-1 -right-1" />}
           </Button>
 
           <Link to="/play" state={{ variant }}>
