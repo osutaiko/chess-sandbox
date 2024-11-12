@@ -199,7 +199,7 @@ export const getValidDestinations = (game: Game, row: number, col: number): { ro
       const ofs0 = move.offset[0] * colorAdjustedDy;
       const ofs1 = move.offset[1];
 
-      const slideInDirection = (colOffset: number, rowOffset: number) => {
+      const trySlideInDirection = (colOffset: number, rowOffset: number) => {
         let steps = 1;
 
         while (steps <= move.range.to) {
@@ -228,27 +228,83 @@ export const getValidDestinations = (game: Game, row: number, col: number): { ro
 
       if (ofs1 === 0) {
         if (move.canForward) {
-          slideInDirection(ofs1, ofs0);
+          trySlideInDirection(ofs1, ofs0);
         }
         if (move.canBackward) {
-          slideInDirection(ofs1, -ofs0);
+          trySlideInDirection(ofs1, -ofs0);
         }
         if (move.canSideways) {
-          slideInDirection(ofs0, ofs1);
-          slideInDirection(-ofs0, ofs1);
+          trySlideInDirection(ofs0, ofs1);
+          trySlideInDirection(-ofs0, ofs1);
         }
       } else {
         if (move.canForward) {
-          slideInDirection(ofs0, ofs1);
-          slideInDirection(-ofs0, ofs1);
-          slideInDirection(ofs1, ofs0);
-          slideInDirection(-ofs1, ofs0);
+          trySlideInDirection(ofs0, ofs1);
+          trySlideInDirection(-ofs0, ofs1);
+          trySlideInDirection(ofs1, ofs0);
+          trySlideInDirection(-ofs1, ofs0);
         }
         if (move.canBackward) {
-          slideInDirection(ofs0, -ofs1);
-          slideInDirection(-ofs0, -ofs1);
-          slideInDirection(ofs1, -ofs0);
-          slideInDirection(-ofs1, -ofs0);
+          trySlideInDirection(ofs0, -ofs1);
+          trySlideInDirection(-ofs0, -ofs1);
+          trySlideInDirection(ofs1, -ofs0);
+          trySlideInDirection(-ofs1, -ofs0);
+        }
+      }
+    } else if (move.type === "leap") {
+      const ofs0 = move.offset[0] * colorAdjustedDy;
+      const ofs1 = move.offset[1];
+
+      const tryLeap = (colOffset: number, rowOffset: number) => {
+        let steps = 1;
+
+        while (steps <= move.range.to) {
+          const newRow = row - rowOffset * steps;
+          const newCol = col + colOffset * steps;
+
+          if (newRow < 0 || newRow >= game.width || newCol < 0 || newCol >= game.height) {
+            break;
+          }
+
+          const destinationSquare = game.currentBoard[newRow][newCol];
+
+          if (steps >= move.range.from) {
+            if ((move.canNonCapture && !destinationSquare.pieceId)
+              || (move.canCapture && game.currentBoard[newRow][newCol].pieceId && game.currentBoard[row][col].color !== game.currentBoard[newRow][newCol].color)) {
+              validDestinations.push({ row: newRow, col: newCol });
+            }
+          }
+
+          if (game.currentBoard[newRow][newCol].pieceId) {
+            break;
+          }
+          steps++;
+        }
+      };
+
+      if (ofs1 === 0) {
+        if (move.canForward) {
+          tryLeap(ofs1, ofs0);
+        }
+        if (move.canBackward) {
+          tryLeap(ofs1, -ofs0);
+        }
+        if (move.canSideways) {
+          tryLeap(ofs0, ofs1);
+          tryLeap(-ofs0, ofs1);
+        }
+      } else {
+        if (move.canForward) {
+          tryLeap(ofs0, ofs1);
+          tryLeap(-ofs0, ofs1);
+          tryLeap(ofs1, ofs0);
+          tryLeap(-ofs1, ofs0);
+        }
+        if (move.canBackward) {
+          tryLeap(ofs0, -ofs1);
+          tryLeap(-ofs0, -ofs1);
+          tryLeap(ofs1, -ofs0);
+          tryLeap(-ofs1, -ofs0);
         }
       }
     }
