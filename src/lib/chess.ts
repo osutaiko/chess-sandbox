@@ -171,6 +171,9 @@ const isInitialMove = (game: Game, row: number, col: number): boolean => {
   if (!game.currentBoard[row][col].pieceId) {
     return false;
   }
+  if (game.initialBoard[row][col].pieceId !== game.currentBoard[row][col].pieceId) {
+    return false;
+  }
   return !game.history.some((move) => move.from.row === row && move.from.col === col);
 };
 
@@ -199,7 +202,7 @@ export const getValidDestinations = (game: Game, row: number, col: number): { ro
           const newRow = row - rowOffset * steps;
           const newCol = col + colOffset * steps;
 
-          if (newRow < 0 || newRow >= game.width || newCol < 0 || newCol >= game.height) {
+          if (newRow < 0 || newRow >= game.height || newCol < 0 || newCol >= game.width) {
             break;
           }
 
@@ -255,10 +258,10 @@ export const getValidDestinations = (game: Game, row: number, col: number): { ro
           const newRow = row - rowOffset * steps;
           const newCol = col + colOffset * steps;
 
-          if (newRow < 0 || newRow >= game.width || newCol < 0 || newCol >= game.height) {
+          if (newRow < 0 || newRow >= game.height || newCol < 0 || newCol >= game.width) {
             break;
           }
-
+          console.log(game.width,game.height)
           const destinationSquare = game.currentBoard[newRow][newCol];
 
           if (steps >= move.range.from) {
@@ -316,6 +319,15 @@ export const playMove = (game: Game, move: Move) => {
   }
 
   if (game.history.length % game.playerCount !== color) {
+    return;
+  }
+
+  const validDestinations = getValidDestinations(game, from.row, from.col);
+  const isValidMove = validDestinations.some(
+    (dest) => dest.row === to.row && dest.col === to.col
+  );
+
+  if (!isValidMove) {
     return;
   }
 

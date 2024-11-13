@@ -91,16 +91,12 @@ const PlayChessboard: React.FC<{
       setValidDestinations([]);
     }
   };
-console.log(game.history)
+
   const handlePieceDrop = (item: any, row: number, col: number) => {
     const from = { row: item.row, col: item.col };
     const to = { row, col };
     
     playMove(game, { from, to });
-    
-    if (setGame) {
-      setGame({ ...game });
-    }
 
     setSelectedSquare(null);
     setValidDestinations([]);
