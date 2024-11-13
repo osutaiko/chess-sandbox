@@ -1,6 +1,7 @@
 import { useDrop } from "react-dnd";
 
-import { getValidDestinations } from "@/lib/chess";
+import { getValidDestinations, playMove } from "@/lib/chess";
+
 import DraggablePiece from "@/components/DraggablePiece";
 import { Game } from "@/lib/types";
 import { useState } from "react";
@@ -90,11 +91,17 @@ const PlayChessboard: React.FC<{
       setValidDestinations([]);
     }
   };
-
+console.log(game.history)
   const handlePieceDrop = (item: any, row: number, col: number) => {
-    const isValidMove = validDestinations.some((dest) => dest.row === row && dest.col === col);
-    if (isValidMove) {
+    const from = { row: item.row, col: item.col };
+    const to = { row, col };
+    
+    playMove(game, { from, to });
+    
+    if (setGame) {
+      setGame({ ...game });
     }
+
     setSelectedSquare(null);
     setValidDestinations([]);
   };

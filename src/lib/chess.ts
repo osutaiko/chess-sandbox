@@ -1,4 +1,4 @@
-import { Variant, PieceMove, Game } from "@/lib/types";
+import { Variant, PieceMove, Game, Move } from "@/lib/types";
 
 export const resizeBoard = (variant: Variant) => {
   const currentWidth = variant.initialBoard[0].length;
@@ -168,16 +168,9 @@ export const addPieceToBoard = (variant: Variant, pieceId: string, color: number
 };
 
 const isInitialMove = (game: Game, row: number, col: number): boolean => {
-  const initialPieceId = game.initialBoard[row][col]?.pieceId;
-  const currentPieceId = game.currentBoard[row][col]?.pieceId;
-  if (!initialPieceId) {
+  if (!game.currentBoard[row][col].pieceId) {
     return false;
   }
-
-  if (initialPieceId !== currentPieceId) {
-    return false;
-  }
-
   return !game.history.some((move) => move.from.row === row && move.from.col === col);
 };
 
@@ -311,4 +304,32 @@ export const getValidDestinations = (game: Game, row: number, col: number): { ro
   });
 
   return validDestinations;
+};
+
+export const playMove = (game: Game, move: Move) => {
+  const { from, to } = move;
+  const pieceId = game.currentBoard[from.row][from.col].pieceId;
+  const color = game.currentBoard[from.row][from.col].color;
+
+  if (!pieceId) {
+    return;
+  }
+
+  if (game.history.length % game.playerCount !== color) {
+    return;
+  }
+
+  game.currentBoard[to.row][to.col] = {
+    ...game.currentBoard[to.row][to.col],
+    pieceId: pieceId,
+    color: color,
+  };
+
+  game.currentBoard[from.row][from.col] = {
+    ...game.currentBoard[from.row][from.col],
+    pieceId: null,
+    color: null,
+  };
+
+  game.history.push(move);
 };
