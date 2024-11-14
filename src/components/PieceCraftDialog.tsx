@@ -33,7 +33,6 @@ import {
   CardContent,
   CardHeader,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -520,18 +519,20 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                     <h4>Can be captured by <span className="italic">en passant</span> ?</h4>
                   </Label>
                 }
-                <Label className="flex flex-row items-center gap-2">
-                  <Checkbox
-                    checked={pieceConfig.isEnPassantCapturer}
-                    onCheckedChange={(isChecked: boolean) => {
-                      setPieceConfig({
-                        ...pieceConfig,
-                        isEnPassantCapturer: isChecked,
-                      });
-                    }}
-                  />
-                  <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>
-                </Label>
+                {pieceConfig.moves.some((move) => move.canCapture) &&
+                  <Label className="flex flex-row items-center gap-2">
+                    <Checkbox
+                      checked={pieceConfig.isEnPassantCapturer}
+                      onCheckedChange={(isChecked: boolean) => {
+                        setPieceConfig({
+                          ...pieceConfig,
+                          isEnPassantCapturer: isChecked,
+                        });
+                      }}
+                    />
+                    <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>
+                  </Label>
+                }
               </div>
             </div>
           </div>

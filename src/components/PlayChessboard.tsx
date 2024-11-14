@@ -1,11 +1,13 @@
+
+import { useEffect, useMemo, useState } from "react";
 import { useDrop } from "react-dnd";
 
-import { getValidDestinations, playMove } from "@/lib/chess";
+import { getLegalMoves, playMove } from "@/lib/chess";
+import { Game, Move } from "@/lib/types";
 
 import DraggablePiece from "@/components/DraggablePiece";
-import { Game } from "@/lib/types";
-import { useState } from "react";
-import { Circle, Dot, X } from "lucide-react";
+
+import { Circle, X } from "lucide-react";
 
 const Square: React.FC<{
   row: number;
@@ -80,12 +82,18 @@ const PlayChessboard: React.FC<{
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
+  const legalMoves = useMemo(() => getLegalMoves(game), [game, game.history.length])
+
   const handleLeftClick = (row: number, col: number) => {
     const square = game.currentBoard[row][col];
-    if (square.pieceId) {
+    if (square.pieceId && (game.history.length % game.playerCount === square.color)) {
       setSelectedSquare({ row, col });
-      const validMoves = getValidDestinations(game, row, col);
-      setValidDestinations(validMoves);
+
+      setValidDestinations(
+        legalMoves
+          .filter((move: Move) => move.from.row === row && move.from.col === col)
+          .map((move: Move) => move.to)
+      );
     } else {
       setSelectedSquare(null);
       setValidDestinations([]);
@@ -96,7 +104,17 @@ const PlayChessboard: React.FC<{
     const from = { row: item.row, col: item.col };
     const to = { row, col };
     
-    playMove(game, { from, to });
+    const isLegalMove = legalMoves.some(
+      (move) => move.from.row === from.row && move.from.col === from.col && move.to.row === to.row && move.to.col === to.col
+    );
+
+    if (isLegalMove) {
+      playMove(game, { from, to });
+
+      if (setGame) {
+        setGame({ ...game });
+      }
+    }
 
     setSelectedSquare(null);
     setValidDestinations([]);

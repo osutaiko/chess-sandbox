@@ -21,16 +21,15 @@ export type SingleMove = {
   isInitialOnly: boolean;                        // Can only be used as an initial move
 }
 
-/* export type CastleMove = {
+export type CastleMove = {
   type: "castle";
   targetPieces: string[];
   canNonCapture: boolean;                        // Can move without capturing
   canCapture: boolean;                           // Can capture
   isInitialOnly: boolean;                        // Can only be used as an initial move
-} */
+}
 
-/* export type PieceMove = SingleMove | CastleMove; */
-export type PieceMove = SingleMove;
+export type PieceMove = SingleMove | CastleMove;
 
 export type PiecePromotion = {
   squares: [number, number][];
