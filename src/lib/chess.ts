@@ -261,7 +261,7 @@ export const getValidDestinations = (game: Game, row: number, col: number): { ro
           if (newRow < 0 || newRow >= game.height || newCol < 0 || newCol >= game.width) {
             break;
           }
-          console.log(game.width,game.height)
+          
           const destinationSquare = game.currentBoard[newRow][newCol];
 
           if (steps >= move.range.from) {

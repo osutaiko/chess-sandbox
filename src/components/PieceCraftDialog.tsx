@@ -496,11 +496,11 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                         );
                       }
                     })}
-                    {pieceConfig.moves.some((move) => move.type === "castle") && (
+                    {/* {pieceConfig.moves.some((move) => move.type === "castle") && (
                       <Card className="p-2">
                         <Badge>Castle</Badge>
                       </Card>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
