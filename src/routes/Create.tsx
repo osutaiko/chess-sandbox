@@ -100,7 +100,7 @@ const Create = () => {
         <ScrollArea className="flex flex-col items-center">
           <Chessboard variant={variant} isInteractable={true} setVariant={setVariant} selectedPieceId={selectedPieceId} selectedPieceColor={selectedPieceColor} />
         </ScrollArea>
-        <div className="flex flex-row gap-1 w-full px-2">
+        <div className="flex flex-row gap-1 w-full px-2 md:px-0">
           <Dialog open={isGameConfigureDialogOpen} onOpenChange={(open) => setIsGameConfigureDialogOpen(open)}>
             <DialogTrigger asChild className="w-full">
               <Button onClick={() => setIsGameConfigureDialogOpen(true)}>

@@ -505,7 +505,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
               </div>
               <h3>Advanced</h3>
               <div className="flex flex-col gap-2">
-                {pieceConfig.moves.some((move) => move.isInitialOnly) &&
+                {/* {pieceConfig.moves.some((move) => move.isInitialOnly) &&
                   <Label className="flex flex-row items-center gap-2">
                     <Checkbox
                       checked={pieceConfig.isEnPassantTarget} 
@@ -532,7 +532,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                     />
                     <h4>Can capture other pieces via <span className="italic">en passant</span> ?</h4>
                   </Label>
-                }
+                } */}
               </div>
             </div>
           </div>

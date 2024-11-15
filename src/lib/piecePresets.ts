@@ -38,8 +38,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'P',
@@ -94,8 +94,8 @@ export const PIECE_PRESETS: Piece[] = [
       squares: [[0, 7], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7]],
       becomes: ['n', 'b', 'r', 'q'],
     }],
-    isEnPassantTarget: true,
-    isEnPassantCapturer: true,
+    /* isEnPassantTarget: true,
+    isEnPassantCapturer: true, */
   },
   {
     id: 'N',
@@ -119,8 +119,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'B',
@@ -144,8 +144,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'R',
@@ -169,8 +169,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'Q',
@@ -208,8 +208,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'H',
@@ -247,8 +247,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'E',
@@ -286,8 +286,8 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
   {
     id: 'A',
@@ -339,7 +339,7 @@ export const PIECE_PRESETS: Piece[] = [
       },
     ],
     promotions: [],
-    isEnPassantTarget: false,
-    isEnPassantCapturer: false,
+    /* isEnPassantTarget: false,
+    isEnPassantCapturer: false, */
   },
 ];

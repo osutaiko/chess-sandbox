@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDrop } from "react-dnd";
 
 import { getLegalMoves, playMove } from "@/lib/chess";
@@ -78,17 +78,30 @@ const PlayChessboard: React.FC<{
   game: Game;
   setGame?: (game: Game) => void;
   selectedPieceId?: string | null;
-}> = ({ game, setGame, selectedPieceId }) => {
+}> = ({ game, setGame }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
-  const legalMoves = useMemo(() => getLegalMoves(game), [game, game.history.length])
+  const legalMoves = useMemo(() => getLegalMoves(game), [game, game.history.length]);
 
   const handleLeftClick = (row: number, col: number) => {
     const square = game.currentBoard[row][col];
-    if (square.pieceId && (game.history.length % game.playerCount === square.color)) {
+    
+    if (selectedSquare && validDestinations.some(dest => dest.row === row && dest.col === col)) {
+      const from = selectedSquare;
+      const to = { row, col };
+  
+      playMove(game, { from, to });
+  
+      if (setGame) {
+        setGame({ ...game });
+      }
+  
+      setSelectedSquare(null);
+      setValidDestinations([]);
+    } 
+    else if (square.pieceId && (game.history.length % game.playerCount === square.color)) {
       setSelectedSquare({ row, col });
-
       setValidDestinations(
         legalMoves
           .filter((move: Move) => move.from.row === row && move.from.col === col)

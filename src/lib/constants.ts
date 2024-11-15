@@ -78,8 +78,8 @@ export const EMPTY_PIECE_CONFIG = {
   sprite: "",
   moves: [],
   promotions: [],
-  isEnPassantTarget: false,
-  isEnPassantCapturer: false,
+  /* isEnPassantTarget: false,
+  isEnPassantCapturer: false, */
 };
 
 export const EMPTY_MOVE_PROPERTY = (

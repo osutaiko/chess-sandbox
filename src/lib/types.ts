@@ -43,8 +43,8 @@ export type Piece = {
   sprite: string;
   moves: PieceMove[];
   promotions: PiecePromotion[];
-  isEnPassantTarget: boolean;
-  isEnPassantCapturer: boolean;
+  /* isEnPassantTarget: boolean;
+  isEnPassantCapturer: boolean; */
 }
 
 export type Cell = {
