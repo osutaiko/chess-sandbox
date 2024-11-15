@@ -134,6 +134,7 @@ const PlayChessboard: React.FC<{
   };
 
   const handleRightClick = (event: any, row: number, col: number) => {
+    console.log(event, row, col);
   };
 
   return (

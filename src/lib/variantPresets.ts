@@ -9,7 +9,7 @@ export const VARIANT_PRESETS: Variant[] = [
     height: 8,
     gridType: "square" as VariantGridType,
     playerCount: 2,
-    board: Array.from({ length: 8 }, (_, i) => {
+    initialBoard: Array.from({ length: 8 }, (_, i) => {
       const row = [];
       for (let j = 0; j < 8; j++) {
         let pieceId = null;
@@ -49,7 +49,7 @@ export const VARIANT_PRESETS: Variant[] = [
     height: 8,
     gridType: "square" as VariantGridType,
     playerCount: 2,
-    board: Array.from({ length: 8 }, (_, i) => {
+    initialBoard: Array.from({ length: 8 }, (_, i) => {
       const row = [];
       for (let j = 0; j < 10; j++) {
         let pieceId = null;
@@ -89,7 +89,7 @@ export const VARIANT_PRESETS: Variant[] = [
     height: 6,
     gridType: "square" as VariantGridType,
     playerCount: 2,
-    board: Array.from({ length: 6 }, (_, i) => {
+    initialBoard: Array.from({ length: 6 }, (_, i) => {
       const row = [];
       for (let j = 0; j < 8; j++) {
         let pieceId = null;

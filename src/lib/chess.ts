@@ -177,6 +177,26 @@ const isInitialMove = (game: Game, row: number, col: number): boolean => {
   return !game.history.some((move) => move.from.row === row && move.from.col === col);
 };
 
+/* const remainingRoyalCount = (game: Game, color: number) => {
+  let count = 0;
+
+  for (let row = 0; row < game.height; row++) {
+    for (let col = 0; col < game.width; col++) {
+      const square = game.currentBoard[row][col];
+
+      if (square.pieceId && square.color === color && game.royals.includes(square.pieceId)) {
+        count++;
+      }
+    }
+  }
+
+  return count;
+} */
+
+/* const isAttacked = (game: Game, row: number, col: number) => {
+  
+} */
+
 export const getLegalMoves = (game: Game): Move[] => {
   const legalMoves: Move[] = [];
 
