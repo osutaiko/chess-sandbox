@@ -23,7 +23,7 @@ const Layout = () => {
           </Link>
         </div>
       </header>
-      <main className="flex flex-grow justify-center overflow-hidden max-w-screen-3xl">
+      <main className="flex flex-grow justify-center overflow-hidden w-full max-w-screen-2xl">
         <Outlet />
       </main>
     </div>

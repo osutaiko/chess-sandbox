@@ -1,5 +1,6 @@
 import * as path from "path";
 import react from "@vitejs/plugin-react";
+import svgr from "vite-plugin-svgr";
 import { defineConfig } from "vite";
 import Unfonts from "unplugin-fonts/vite";
  
@@ -16,6 +17,7 @@ export default defineConfig({
         ],
       },
     }),
+    svgr(),
   ],
   resolve: {
     alias: {

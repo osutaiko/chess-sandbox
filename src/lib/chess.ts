@@ -379,3 +379,11 @@ export const playMove = (game: Game, move: Move) => {
 
   game.history.push(move);
 };
+
+export const historyToAlgebraics = (game: Game) => {
+  const algebraics: string[] = [];
+  game.history.map((move) => {
+    algebraics.push(String(getSquareName(game.width, game.height, move.to.row, move.to.col)));
+  })
+  return algebraics;
+};

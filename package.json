@@ -53,6 +53,7 @@
     "unplugin-fonts": "^1.1.1",
     "usehooks-ts": "^3.1.0",
     "vaul": "^1.1.1",
+    "vite-plugin-svgr": "^4.3.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

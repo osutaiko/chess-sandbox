@@ -15,7 +15,7 @@ const Square: React.FC<{
   game: Game;
   handlePieceDrop: (item: any, row: number, col: number) => void;
   handleLeftClick: (row: number, col: number) => void;
-  handleRightClick: (event: any, row: number, col: number) => void;
+  handleRightClick: (event: React.MouseEvent, row: number, col: number) => void;
   isValidDestination: boolean;
   isSelected: boolean;
 }> = ({ row, col, game, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected }) => {
@@ -49,7 +49,7 @@ const Square: React.FC<{
   return (
     <div
       ref={drop}
-      className={`relative md:max-w-full aspect-square ${squareBgColor()} flex flex-col items-center justify-center`}
+      className={`relative aspect-square ${squareBgColor()} flex flex-col items-center justify-center`}
       onMouseDown={() => handleLeftClick(row, col)}
       onContextMenu={(event) => handleRightClick(event, row, col)}
     >
@@ -133,7 +133,8 @@ const PlayChessboard: React.FC<{
     setValidDestinations([]);
   };
 
-  const handleRightClick = (event: any, row: number, col: number) => {
+  const handleRightClick = (event: React.MouseEvent, row: number, col: number) => {
+    event.preventDefault();
     console.log(event, row, col);
   };
 
