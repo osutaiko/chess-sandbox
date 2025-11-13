@@ -1,8 +1,7 @@
 import { useDrop } from "react-dnd";
 
-import { addPieceToBoard, removePieceFromBoard } from "@/lib/chess";
+import { addPieceToBoard, removePieceFromBoard, Variant } from "common";
 import DraggablePiece from "@/components/DraggablePiece";
-import { Variant } from "@/lib/types";
 
 const Square: React.FC<{
   row: number;

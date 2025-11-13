@@ -1,5 +1,4 @@
-import { getReachableSquares } from "@/lib/chess";
-import { Piece } from "@/lib/types";
+import { getReachableSquares, Piece } from "common";
 
 import images from "@/assets/images";
 import { Circle, Play, ArrowRightFromLine } from "lucide-react";

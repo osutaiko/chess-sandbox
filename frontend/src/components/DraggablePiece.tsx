@@ -9,17 +9,19 @@ const DraggablePiece: React.FC<{
   color: number;
   row: number | null;
   col: number | null;
-}> = ({ piece, color, row, col }) => {
+  draggable?: boolean;
+}> = ({ piece, color, row, col, draggable = true }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "PIECE",
     item: { id: piece.id, color, sprite: piece.sprite, row, col },
+    canDrag: draggable,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   });
 
   return (
-    <div ref={drag} className={`relative transform cursor-pointer ${isDragging ? "opacity-0" : ""} w-full`}>
+    <div ref={drag} className={`relative transform ${draggable ? 'cursor-pointer' : 'cursor-default'} ${isDragging ? "opacity-0" : ""} w-full`}>
       <img
         src={images[`pieces/${piece.sprite}-${color}`]}
         alt={piece.name}

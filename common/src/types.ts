@@ -89,6 +89,7 @@ export type Move = {
 export type Game = Variant & {
   currentBoard: Cell[][];
   history: Move[];
+  turn: number;
 };
 
 export type GameEndResult = {

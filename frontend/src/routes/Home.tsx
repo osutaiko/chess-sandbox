@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Variant } from "@/lib/types";
-import { addPieceToBoard } from "@/lib/chess";
+import { Variant, addPieceToBoard } from "common";
 import { PIECE_PRESETS } from "@/lib/piecePresets";
 import { DEFAULT_VARIANT } from "@/lib/constants";
 

@@ -1,4 +1,4 @@
-import { Variant, PieceMove, Game, Move } from "@/lib/types";
+import { Variant, PieceMove, Game, Move, Cell, Piece } from "./types";
 
 export const resizeBoard = (variant: Variant) => {
   const currentWidth = variant.initialBoard[0].length;
@@ -119,24 +119,24 @@ export const getReachableSquares = (moves: PieceMove[], radius: number) => {
 export const deletePiece = (variant: Variant, pieceId: string) => {
   const newVariant = {
     ...variant,
-    initialBoard: variant.initialBoard.map(row => 
-      row.map(square => ({
+    initialBoard: variant.initialBoard.map((row: Cell[]) => 
+      row.map((square: Cell) => ({
         ...square,
         pieceId: square.pieceId === pieceId ? null : square.pieceId,
       }))
     ),
-    pieces: variant.pieces.filter(piece => piece.id !== pieceId),
+    pieces: variant.pieces.filter((piece: Piece) => piece.id !== pieceId),
   };
 
-  newVariant.pieces = newVariant.pieces.map(piece => {
-    const updatedMoves = piece.moves.map(move => {
+  newVariant.pieces = newVariant.pieces.map((piece: Piece) => {
+    const updatedMoves = piece.moves.map((move: PieceMove) => {
       if (move.type === "castle") {
-        return { ...move, targetPieces: move.targetPieces.filter(targetId => targetId !== pieceId) };
+        return { ...move, targetPieces: move.targetPieces.filter((targetId: string) => targetId !== pieceId) };
       } else {
         return move;
       }
     })
-    .filter(move => !(move.type === "castle" && move.targetPieces.length === 0));
+    .filter((move: PieceMove) => !(move.type === "castle" && move.targetPieces.length === 0));
 
     return {
       ...piece,
@@ -174,7 +174,7 @@ const isInitialMove = (game: Game, row: number, col: number): boolean => {
   if (game.initialBoard[row][col].pieceId !== game.currentBoard[row][col].pieceId) {
     return false;
   }
-  return !game.history.some((move) => move.from.row === row && move.from.col === col);
+  return !game.history.some((move: Move) => move.from.row === row && move.from.col === col);
 };
 
 /* const remainingRoyalCount = (game: Game, color: number) => {
@@ -203,16 +203,15 @@ export const getLegalMoves = (game: Game): Move[] => {
   for (let row = 0; row < game.height; row++) {
     for (let col = 0; col < game.width; col++) {
       const square = game.currentBoard[row][col];
-      const pieceObj = square.pieceId ? game.pieces.find((p) => p.id === square.pieceId) : null;
+      const pieceObj = square.pieceId ? game.pieces.find((p: Piece) => p.id === square.pieceId) : null;
+          
+            if (!pieceObj || (game.turn !== square.color)) {
+              continue;
+            }
       
-      if (!pieceObj || (game.history.length % game.playerCount !== square.color)) {
-        continue;
-      }
-
-      const colorAdjustedDy = square.color === 0 ? 1 : -1;
-
-      pieceObj.moves.forEach((move) => {
-        if (move.isInitialOnly && !isInitialMove(game, row, col)) {
+            const colorAdjustedDy = square.color === 0 ? 1 : -1;
+      
+            pieceObj.moves.forEach((move: PieceMove) => {        if (move.isInitialOnly && !isInitialMove(game, row, col)) {
           return;
         }
 
@@ -347,43 +346,49 @@ export const getLegalMoves = (game: Game): Move[] => {
   return legalMoves;
 };
 
-export const playMove = (game: Game, move: Move) => {
+export const playMove = (game: Game, move: Move): Game => {
   const { from, to } = move;
   const pieceId = game.currentBoard[from.row][from.col].pieceId;
   const color = game.currentBoard[from.row][from.col].color;
 
   if (!pieceId) {
-    return;
+    return game;
   }
 
   const legalMoves = getLegalMoves(game);
   const isLegalMove = legalMoves.some(
-    (move) => move.to.row === to.row && move.to.col === to.col
+    (legalMove) => legalMove.to.row === to.row && legalMove.to.col === to.col && legalMove.from.row === from.row && legalMove.from.col === from.col
   );
 
   if (!isLegalMove) {
-    return;
+    return game;
   }
 
-  game.currentBoard[to.row][to.col] = {
-    ...game.currentBoard[to.row][to.col],
+  const newBoard = JSON.parse(JSON.stringify(game.currentBoard));
+  newBoard[to.row][to.col] = {
+    ...newBoard[to.row][to.col],
     pieceId: pieceId,
     color: color,
   };
-
-  game.currentBoard[from.row][from.col] = {
-    ...game.currentBoard[from.row][from.col],
+  newBoard[from.row][from.col] = {
+    ...newBoard[from.row][from.col],
     pieceId: null,
     color: null,
   };
 
-  game.history.push(move);
+  const newHistory = [...game.history, move];
+
+  return {
+    ...game,
+    currentBoard: newBoard,
+    history: newHistory,
+    turn: (game.turn + 1) % game.playerCount,
+  };
 };
 
 export const historyToAlgebraics = (game: Game) => {
   const algebraics: string[] = [];
-  game.history.map((move) => {
+  game.history.map((move: Move) => {
     algebraics.push(String(getSquareName(game.width, game.height, move.to.row, move.to.col)));
-  })
-  return algebraics;
-};
+  }); // Added semicolon here
+  return algebraics;};

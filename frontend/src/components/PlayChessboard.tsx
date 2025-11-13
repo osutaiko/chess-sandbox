@@ -1,9 +1,9 @@
 
 import { useMemo, useState } from "react";
 import { useDrop } from "react-dnd";
+import { Socket } from "socket.io-client";
 
-import { getLegalMoves, playMove } from "@/lib/chess";
-import { Game, Move } from "@/lib/types";
+import { getLegalMoves, playMove, Game, Move } from "common";
 
 import DraggablePiece from "@/components/DraggablePiece";
 
@@ -13,12 +13,13 @@ const Square: React.FC<{
   row: number;
   col: number;
   game: Game;
+  isMyTurn: boolean;
   handlePieceDrop: (item: any, row: number, col: number) => void;
   handleLeftClick: (row: number, col: number) => void;
   handleRightClick: (event: React.MouseEvent, row: number, col: number) => void;
   isValidDestination: boolean;
   isSelected: boolean;
-}> = ({ row, col, game, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected }) => {
+}> = ({ row, col, game, isMyTurn, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected }) => {
   const [, drop] = useDrop({
     accept: "PIECE",
     drop: (item) => handlePieceDrop(item, row, col),
@@ -54,7 +55,7 @@ const Square: React.FC<{
       onContextMenu={(event) => handleRightClick(event, row, col)}
     >
       {pieceObj && square.color !== null && (
-        <DraggablePiece piece={pieceObj} color={square.color} row={row} col={col} />
+        <DraggablePiece piece={pieceObj} color={square.color} row={row} col={col} draggable={isMyTurn && game.turn === square.color} />
       )}
       {rankLabel && (
         <span className={`absolute top-0.5 right-1 text-xs font-semibold ${square.isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
@@ -77,30 +78,36 @@ const Square: React.FC<{
 const PlayChessboard: React.FC<{
   game: Game;
   setGame?: (game: Game) => void;
-  selectedPieceId?: string | null;
-}> = ({ game, setGame }) => {
+  socket?: Socket | null;
+  roomId?: string;
+  isMyTurn: boolean;
+}> = ({ game, setGame, socket, roomId, isMyTurn }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
   const legalMoves = useMemo(() => getLegalMoves(game), [game, game.history.length]);
 
   const handleLeftClick = (row: number, col: number) => {
+    if (!isMyTurn) return;
+
     const square = game.currentBoard[row][col];
     
     if (selectedSquare && validDestinations.some(dest => dest.row === row && dest.col === col)) {
       const from = selectedSquare;
       const to = { row, col };
   
-      playMove(game, { from, to });
+      const move: Move = { from, to };
+      const newGame = playMove(game, move);
   
       if (setGame) {
-        setGame({ ...game });
+        setGame(newGame);
       }
+      socket?.emit('chessMove', { roomId, move });
   
       setSelectedSquare(null);
       setValidDestinations([]);
     } 
-    else if (square.pieceId && (game.history.length % game.playerCount === square.color)) {
+    else if (square.pieceId && (game.turn === square.color)) {
       setSelectedSquare({ row, col });
       setValidDestinations(
         legalMoves
@@ -114,6 +121,8 @@ const PlayChessboard: React.FC<{
   };
 
   const handlePieceDrop = (item: any, row: number, col: number) => {
+    if (!isMyTurn) return;
+
     const from = { row: item.row, col: item.col };
     const to = { row, col };
     
@@ -122,11 +131,13 @@ const PlayChessboard: React.FC<{
     );
 
     if (isLegalMove) {
-      playMove(game, { from, to });
+      const move: Move = { from, to };
+      const newGame = playMove(game, move);
 
       if (setGame) {
-        setGame({ ...game });
+        setGame(newGame);
       }
+      socket?.emit('chessMove', { roomId, move });
     }
 
     setSelectedSquare(null);
@@ -153,6 +164,7 @@ const PlayChessboard: React.FC<{
             row={row}
             col={col}
             game={game}
+            isMyTurn={isMyTurn}
             handlePieceDrop={handlePieceDrop}
             handleLeftClick={handleLeftClick}
             handleRightClick={handleRightClick}

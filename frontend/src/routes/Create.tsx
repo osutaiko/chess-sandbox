@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
-import { deletePiece, resizeBoard } from "@/lib/chess";
-import { Piece, PieceErrors, Variant, VariantErrors } from "@/lib/types";
+import { deletePiece, resizeBoard, Piece, PieceErrors, Variant, VariantErrors } from "common";
 
 import Chessboard from "@/components/Chessboard";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
@@ -38,6 +37,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 
 const Create = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const navigate = useNavigate();
 
   const [variant, setVariant] = useState<Variant>(structuredClone(DEFAULT_VARIANT)); // Variant after form confirmation
   const [selectedPieceColor, setSelectedPieceColor] = useState<number>(0);
@@ -45,16 +45,59 @@ const Create = () => {
   const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState<boolean>(false);
   const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
   const [isGameConfigureDialogOpen, setIsGameConfigureDialogOpen] = useState<boolean>(false);
+  const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);
+  const [gameLink, setGameLink] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
   const handlePieceDelete = (pieceId: string) => {
     const newVariant = deletePiece(variant, pieceId);
     setVariant(newVariant);
   }
 
+  const createGame = async () => {
+    setIsCreatingGame(true);
+    setGameLink(null);
+    setCopySuccess(false);
+    try {
+      const response = await fetch('http://localhost:3001/api/rooms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ variant }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const { roomId } = await response.json();
+      const link = `${window.location.origin}/play/${roomId}`;
+      setGameLink(link);
+      console.log('Game created with link:', link);
+    } catch (error: any) {
+      console.error('Error creating game:', error);
+    } finally {
+      setIsCreatingGame(false);
+    }
+  };
+
+  const copyGameLink = () => {
+    if (gameLink) {
+      navigator.clipboard.writeText(gameLink)
+        .then(() => {
+          setCopySuccess(true);
+          setTimeout(() => setCopySuccess(false), 2000);
+        })
+        .catch((error) => {
+          console.error("Failed to copy game link: ", error);
+        });
+    }
+  };
+
   const ChessboardPanel = () => {
-    const [gameConfig, setGameConfig] = useState<Variant>(DEFAULT_VARIANT); // Variant before form confirmation
+    const [gameConfig, setGameConfig] = useState<Variant>(variant); // Use current variant as initial config
     const [gameConfigErrors, setGameConfigErrors] = useState<VariantErrors>({});
-    const [copied, setCopied] = useState(false);
 
     const handleGameInputChange = (e: any) => {
       const { name, value } = e.target;
@@ -263,27 +306,31 @@ const Create = () => {
               <Button onClick={handleGameConfigSubmit}>Apply</Button>
             </DialogContent>
           </Dialog>
-          <Button
-            onClick={() => {
-              const jsonString = JSON.stringify(variant);
-              navigator.clipboard.writeText(jsonString)
-                .then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                })
-                .catch((error) => {
-                  console.error("Failed to copy JSON: ", error);
-                });
-            }}
-            className="relative"
-          >
-            Copy JSON
-            {copied && <Check stroke="yellow" strokeWidth={5} className="absolute -top-1 -right-1" />}
+          <Button onClick={createGame} disabled={isCreatingGame} className="relative">
+            {isCreatingGame ? 'Creating Game...' : 'Create Game'}
           </Button>
 
-          <Link to="/play" state={{ variant }}>
-            <Button>Play!</Button>
-          </Link>
+          {gameLink && (
+            <Dialog defaultOpen={true}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share Game Link</DialogTitle>
+                  <DialogDescription>
+                    Share this link with your opponent to start the game!
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center space-x-2">
+                  <Input value={gameLink} readOnly />
+                  <Button onClick={copyGameLink} className="relative">
+                    {copySuccess ? <Check className="h-4 w-4" /> : "Copy"}
+                  </Button>
+                </div>
+                <DialogFooter>
+                  <Button onClick={() => navigate(new URL(gameLink).pathname)}>Play Now</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </>
     );

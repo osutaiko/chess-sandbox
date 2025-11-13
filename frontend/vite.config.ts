@@ -12,7 +12,7 @@ export default defineConfig({
         families: [
           {
             name: "Geist",
-            src: "./src/assets/fonts/geist/*.tff",
+            src: "./src/assets/fonts/*.ttf",
           },
         ],
       },
