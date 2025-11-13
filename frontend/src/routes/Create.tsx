@@ -45,21 +45,19 @@ const Create = () => {
   const [isCreatePieceDialogOpen, setIsCreatePieceDialogOpen] = useState<boolean>(false);
   const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
   const [isGameConfigureDialogOpen, setIsGameConfigureDialogOpen] = useState<boolean>(false);
-  const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);
-  const [gameLink, setGameLink] = useState<string | null>(null);
-  const [copySuccess, setCopySuccess] = useState<boolean>(false);
+  const [isSavingVariant, setIsSavingVariant] = useState<boolean>(false);
+  const [savedVariantId, setSavedVariantId] = useState<string | null>(null);
 
   const handlePieceDelete = (pieceId: string) => {
     const newVariant = deletePiece(variant, pieceId);
     setVariant(newVariant);
   }
 
-  const createGame = async () => {
-    setIsCreatingGame(true);
-    setGameLink(null);
-    setCopySuccess(false);
+  const saveVariant = async () => {
+    setIsSavingVariant(true);
+    setSavedVariantId(null);
     try {
-      const response = await fetch('http://localhost:3001/api/rooms', {
+      const response = await fetch('http://localhost:3001/api/variants', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,27 +69,14 @@ const Create = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const { roomId } = await response.json();
-      const link = `${window.location.origin}/play/${roomId}`;
-      setGameLink(link);
-      console.log('Game created with link:', link);
+      const { variantId } = await response.json();
+      setSavedVariantId(variantId);
+      console.log('Variant saved with ID:', variantId);
+      navigate(`/browse?variantId=${variantId}`);
     } catch (error: any) {
-      console.error('Error creating game:', error);
+      console.error('Error saving variant:', error);
     } finally {
-      setIsCreatingGame(false);
-    }
-  };
-
-  const copyGameLink = () => {
-    if (gameLink) {
-      navigator.clipboard.writeText(gameLink)
-        .then(() => {
-          setCopySuccess(true);
-          setTimeout(() => setCopySuccess(false), 2000);
-        })
-        .catch((error) => {
-          console.error("Failed to copy game link: ", error);
-        });
+      setIsSavingVariant(false);
     }
   };
 
@@ -306,31 +291,9 @@ const Create = () => {
               <Button onClick={handleGameConfigSubmit}>Apply</Button>
             </DialogContent>
           </Dialog>
-          <Button onClick={createGame} disabled={isCreatingGame} className="relative">
-            {isCreatingGame ? 'Creating Game...' : 'Create Game'}
+          <Button onClick={saveVariant} disabled={isSavingVariant} className="relative">
+            {isSavingVariant ? 'Saving Variant...' : 'Save Variant'}
           </Button>
-
-          {gameLink && (
-            <Dialog defaultOpen={true}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Share Game Link</DialogTitle>
-                  <DialogDescription>
-                    Share this link with your opponent to start the game!
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex items-center space-x-2">
-                  <Input value={gameLink} readOnly />
-                  <Button onClick={copyGameLink} className="relative">
-                    {copySuccess ? <Check className="h-4 w-4" /> : "Copy"}
-                  </Button>
-                </div>
-                <DialogFooter>
-                  <Button onClick={() => navigate(new URL(gameLink).pathname)}>Play Now</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
         </div>
       </>
     );

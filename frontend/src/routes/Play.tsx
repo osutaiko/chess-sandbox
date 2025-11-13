@@ -159,7 +159,7 @@ const Play = () => {
       </Card>
       <div className="w-1/2">
         {game ? (
-          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex} />
+          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex} playerIndex={playerIndex} />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-secondary rounded-md">
             <p>Waiting for game to start...</p>

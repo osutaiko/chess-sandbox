@@ -21,6 +21,7 @@ interface GameRoom {
   players: { [socketId: string]: number }; // socketId -> player index
   variant: Variant;
   game?: Game;
+  creatorPreferredSide?: number; // -1 for random, 0 for White, 1 for Black
 }
 
 const app = express();
@@ -35,13 +36,38 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-
-// In-memory storage for game rooms
 const gameRooms: { [key: string]: GameRoom } = {};
+const variants: { [variantId: string]: Variant } = {};
 
 // API Routes
-app.post('/api/rooms', (req, res) => {
+app.post('/api/variants', (req, res) => {
   const variant = req.body.variant as Variant;
+  if (!variant) {
+    return res.status(400).json({ message: "Variant data is required" });
+  }
+  const variantId = generateRoomId();
+  const newVariant = { ...variant, id: variantId };
+  variants[variantId] = newVariant;
+  console.log(`Variant ${variantId} saved: "${newVariant.name}"`);
+  res.status(201).json({ variantId });
+});
+
+app.get('/api/variants/:variantId', (req, res) => {
+  const { variantId } = req.params;
+  const variant = variants[variantId];
+  if (variant) {
+    res.json(variant);
+  } else {
+    res.status(404).json({ message: "Variant not found" });
+  }
+});
+
+app.get('/api/variants', (req, res) => {
+  res.json(Object.values(variants));
+});
+
+app.post('/api/rooms', (req, res) => {
+  const { variant, preferredSide } = req.body as { variant: Variant; preferredSide?: number };
   if (!variant) {
     return res.status(400).json({ message: "Variant data is required" });
   }
@@ -50,8 +76,10 @@ app.post('/api/rooms', (req, res) => {
     id: roomId,
     players: {},
     variant: variant,
+    // Store preferredSide for the room creator
+    creatorPreferredSide: preferredSide !== undefined ? preferredSide : -1, // -1 for random
   };
-  console.log(`Room ${roomId} created with variant "${variant.name}". Player count: ${variant.playerCount}`);
+  console.log(`Room ${roomId} created with variant "${variant.name}". Player count: ${variant.playerCount}. Creator preferred side: ${gameRooms[roomId].creatorPreferredSide}`);
   res.status(201).json({ roomId });
 });
 
@@ -85,8 +113,27 @@ io.on('connection', (socket) => {
       return;
     }
 
+    let playerIndex: number;
+    if (numPlayersBeforeJoin === 0) { // First player joining (creator)
+      if (room.creatorPreferredSide === 0 || room.creatorPreferredSide === -1) { // White or Random
+        playerIndex = 0;
+      } else { // Black
+        playerIndex = 1;
+      }
+    } else { // Second player joining
+      const existingPlayerIndex = Object.values(room.players)[0];
+      playerIndex = 1 - existingPlayerIndex; // Assign the other side
+    }
+
+    if (Object.values(room.players).includes(playerIndex)) {
+      playerIndex = 1 - playerIndex;
+      if (Object.values(room.players).includes(playerIndex)) {
+        socket.emit('error', 'No available player slots with preferred side.');
+        return;
+      }
+    }
+
     socket.join(roomId);
-    const playerIndex = numPlayersBeforeJoin;
     room.players[socket.id] = playerIndex;
 
     const numPlayersAfterJoin = Object.keys(room.players).length;

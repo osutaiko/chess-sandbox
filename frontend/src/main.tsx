@@ -36,16 +36,9 @@ const router = createBrowserRouter([
         path: "/play/:variantId",
         element: <Play />,
       },
-      {
-        path: "/test-params/:paramId", // New test route
-        element: <TestParams />,
-      },
     ],
   },
 ]);
-
-// Import TestParams
-import TestParams from "./routes/TestParams";
 
 const HTML5toTouch = {
   backends: [

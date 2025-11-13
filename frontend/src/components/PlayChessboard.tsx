@@ -19,7 +19,8 @@ const Square: React.FC<{
   handleRightClick: (event: React.MouseEvent, row: number, col: number) => void;
   isValidDestination: boolean;
   isSelected: boolean;
-}> = ({ row, col, game, isMyTurn, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected }) => {
+  isFlipped: boolean; // Add isFlipped prop
+}> = ({ row, col, game, isMyTurn, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected, isFlipped }) => {
   const [, drop] = useDrop({
     accept: "PIECE",
     drop: (item) => handlePieceDrop(item, row, col),
@@ -27,10 +28,15 @@ const Square: React.FC<{
 
   const square = game.currentBoard[row][col];
   const pieceObj = square.pieceId ? game.pieces.find((p) => p.id === square.pieceId) : null;
-  const isSquareDark = (game.height - row + col) % 2 === 0;
+  
+  const isSquareDark = isFlipped ? (row + col) % 2 === 1 : (game.height - row + col) % 2 === 0;
 
-  const rankLabel = col === game.width - 1 ? game.height - row : null;
-  const fileLabel = row === game.height - 1 ? String.fromCharCode(97 + col) : null;
+  const rankLabel = isFlipped
+    ? (col === 0 ? row + 1 : null)
+    : (col === game.width - 1 ? game.height - row : null);
+  const fileLabel = isFlipped
+    ? (row === 0 ? String.fromCharCode(97 + (game.width - 1 - col)) : null)
+    : (row === game.height - 1 ? String.fromCharCode(97 + col) : null);
 
   const squareBgColor = () => {
     if (square.isValid) {
@@ -81,7 +87,8 @@ const PlayChessboard: React.FC<{
   socket?: Socket | null;
   roomId?: string;
   isMyTurn: boolean;
-}> = ({ game, setGame, socket, roomId, isMyTurn }) => {
+  playerIndex: number | null; // Add playerIndex prop
+}> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
@@ -151,28 +158,33 @@ const PlayChessboard: React.FC<{
 
   return (
     <div
-      className="grid md:rounded-md overflow-hidden"
+      className="grid md:rounded-md overflow-hidden" // Removed rotate-180
       style={{
         gridTemplateColumns: `repeat(${game.width}, 1fr)`,
         gridTemplateRows: `repeat(${game.height}, 1fr)`,
       }}
     >
-      {Array.from({ length: game.height }).map((_, row) =>
-        Array.from({ length: game.width }).map((_, col) => (
-          <Square
-            key={`${row}-${col}`}
-            row={row}
-            col={col}
-            game={game}
-            isMyTurn={isMyTurn}
-            handlePieceDrop={handlePieceDrop}
-            handleLeftClick={handleLeftClick}
-            handleRightClick={handleRightClick}
-            isValidDestination={validDestinations.some((dest) => dest.row === row && dest.col === col)}
-            isSelected={selectedSquare?.row === row && selectedSquare?.col === col}
-          />
-        ))
-      )}
+      {Array.from({ length: game.height }).map((_, rowIndex) => {
+        const displayRow = playerIndex === 1 ? game.height - 1 - rowIndex : rowIndex; // Display row for rendering
+        return Array.from({ length: game.width }).map((_, colIndex) => {
+          const displayCol = playerIndex === 1 ? game.width - 1 - colIndex : colIndex; // Display col for rendering
+          return (
+            <Square
+              key={`${displayRow}-${displayCol}`}
+              row={displayRow}
+              col={displayCol}
+              game={game}
+              isMyTurn={isMyTurn}
+              handlePieceDrop={handlePieceDrop}
+              handleLeftClick={handleLeftClick}
+              handleRightClick={handleRightClick}
+              isValidDestination={validDestinations.some((dest) => dest.row === displayRow && dest.col === displayCol)}
+              isSelected={selectedSquare?.row === displayRow && selectedSquare?.col === displayCol}
+              isFlipped={playerIndex === 1} // Pass isFlipped prop
+            />
+          );
+        });
+      })}
     </div>
   );
 };

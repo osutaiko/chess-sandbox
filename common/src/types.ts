@@ -56,6 +56,7 @@ export type Cell = {
 export type VariantGridType = "square" | "hexagonal" | "circular";
 
 export type Variant = {
+  id?: string; // Add optional ID
   name: string;                                   // Variant name
   description: string;                            // Variant description
   width: number;                                  // Board width (number of files)
