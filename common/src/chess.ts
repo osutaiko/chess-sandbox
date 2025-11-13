@@ -1,4 +1,4 @@
-import { Variant, PieceMove, Game, Move, Cell, Piece } from "./types";
+import { Variant, PieceMove, Game, Move, Cell, Piece, SingleMove } from "./types";
 
 export const resizeBoard = (variant: Variant) => {
   const currentWidth = variant.initialBoard[0].length;
@@ -177,25 +177,85 @@ const isInitialMove = (game: Game, row: number, col: number): boolean => {
   return !game.history.some((move: Move) => move.from.row === row && move.from.col === col);
 };
 
-/* const remainingRoyalCount = (game: Game, color: number) => {
-  let count = 0;
 
-  for (let row = 0; row < game.height; row++) {
-    for (let col = 0; col < game.width; col++) {
-      const square = game.currentBoard[row][col];
 
-      if (square.pieceId && square.color === color && game.royals.includes(square.pieceId)) {
-        count++;
-      }
-    }
+
+
+// Helper function to generate all possible directions for a slide move
+const generateSlideDirections = (
+  move: SingleMove,
+  colorAdjustedDy: number
+): [number, number][] => {
+  const [a, b] = move.offset;
+  const baseDirections: [number, number][] = [];
+
+  // This is the exact logic from getReachableSquares for generating directions
+  if (b === 0) {
+    if (move.canForward) baseDirections.push([0, a]);
+    if (move.canBackward) baseDirections.push([0, -a]);
+    if (move.canSideways) baseDirections.push([a, 0], [-a, 0]);
+  } else {
+    if (move.canForward) baseDirections.push([a, b], [-a, b], [b, a], [-b, a]);
+    if (move.canBackward) baseDirections.push([a, -b], [-a, -b], [b, -a], [-b, -a]);
   }
 
-  return count;
-} */
+  // Apply colorAdjustedDy to the row component of each base direction
+  const finalDirections = baseDirections.map(([dx, dy]) => {
+    return [dx, dy * colorAdjustedDy];
+  });
 
-/* const isAttacked = (game: Game, row: number, col: number) => {
-  
-} */
+  // Remove duplicates
+  const uniqueDirections: [number, number][] = [];
+  const seenDirections = new Set<string>();
+
+  finalDirections.forEach(dir => {
+    const dirString = `${dir[0]},${dir[1]}`;
+    if (!seenDirections.has(dirString)) {
+      seenDirections.add(dirString);
+      uniqueDirections.push(dir as [number, number]);
+    }
+  });
+
+  return uniqueDirections;
+};
+
+// Helper function to generate all possible directions for a leap move
+const generateLeapDirections = (
+  move: SingleMove,
+  colorAdjustedDy: number
+): [number, number][] => {
+  const [a, b] = move.offset;
+  const baseDirections: [number, number][] = [];
+
+  // Logic directly from getReachableSquares for generating directions
+  if (b === 0) {
+    if (move.canForward) baseDirections.push([0, a]);
+    if (move.canBackward) baseDirections.push([0, -a]);
+    if (move.canSideways) baseDirections.push([a, 0], [-a, 0]);
+  } else {
+    if (move.canForward) baseDirections.push([a, b], [-a, b], [b, a], [-b, a]);
+    if (move.canBackward) baseDirections.push([a, -b], [-a, -b], [b, -a], [-b, -a]);
+  }
+
+  // Apply colorAdjustedDy to the row component of each base direction
+  const finalDirections = baseDirections.map(([dx, dy]) => {
+    return [dx, dy * colorAdjustedDy];
+  });
+
+  // Remove duplicates
+  const uniqueDirections: [number, number][] = [];
+  const seenDirections = new Set<string>();
+
+  finalDirections.forEach(dir => {
+    const dirString = `${dir[0]},${dir[1]}`;
+    if (!seenDirections.has(dirString)) {
+      seenDirections.add(dirString);
+      uniqueDirections.push(dir as [number, number]);
+    }
+  });
+
+  return uniqueDirections;
+};
 
 export const getLegalMoves = (game: Game): Move[] => {
   const legalMoves: Move[] = [];
@@ -205,34 +265,46 @@ export const getLegalMoves = (game: Game): Move[] => {
       const square = game.currentBoard[row][col];
       const pieceObj = square.pieceId ? game.pieces.find((p: Piece) => p.id === square.pieceId) : null;
           
-            if (!pieceObj || (game.turn !== square.color)) {
-              continue;
-            }
+      if (!pieceObj || (game.turn !== square.color)) {
+        continue;
+      }
       
-            const colorAdjustedDy = square.color === 0 ? 1 : -1;
+
+
+      const colorAdjustedDy = square.color === 0 ? 1 : -1;
       
-            pieceObj.moves.forEach((move: PieceMove) => {        if (move.isInitialOnly && !isInitialMove(game, row, col)) {
+      pieceObj.moves.forEach((move: PieceMove) => {
+
+        if (move.isInitialOnly && !isInitialMove(game, row, col)) {
+  
           return;
         }
 
         if (move.type === "slide") {
-          const ofs0 = move.offset[0] * colorAdjustedDy;
-          const ofs1 = move.offset[1];
+          const uniqueDirections = generateSlideDirections(move, colorAdjustedDy);
 
-          const trySlideInDirection = (colOffset: number, rowOffset: number) => {
+
+          uniqueDirections.forEach(([colOffset, rowOffset]) => {
             let steps = 1;
 
-            while (steps <= move.range.to) {
+            while (steps <= (move.range.to ?? game.width)) {
+
               const newRow = row - rowOffset * steps;
               const newCol = col + colOffset * steps;
 
               if (newRow < 0 || newRow >= game.height || newCol < 0 || newCol >= game.width) {
+
                 break;
               }
 
+              if (!game.currentBoard[newRow] || !game.currentBoard[newRow][newCol]) {
+  
+                break;
+              }
               const destinationSquare = game.currentBoard[newRow][newCol];
 
               if (steps >= move.range.from) {
+
                 if (
                   (move.canNonCapture && !destinationSquare.pieceId) ||
                   (move.canCapture && destinationSquare.pieceId && square.color !== destinationSquare.color)
@@ -240,53 +312,38 @@ export const getLegalMoves = (game: Game): Move[] => {
                   const moveToAdd = { from: { row, col }, to: { row: newRow, col: newCol } };
                   
                   const moveExists = legalMoves.some(existingMove =>
-                    JSON.stringify(existingMove) === JSON.stringify(moveToAdd)
+                    existingMove.from.row === moveToAdd.from.row &&
+                    existingMove.from.col === moveToAdd.from.col &&
+                    existingMove.to.row === moveToAdd.to.row &&
+                    existingMove.to.col === moveToAdd.to.col
                   );
 
                   if (!moveExists) {
+  
                     legalMoves.push(moveToAdd);
                   }
                 }
               }
 
+
               if (destinationSquare.pieceId) {
-                break;
+                if (move.canCapture && square.color !== destinationSquare.color) {
+  
+                  break;
+                } else {
+  
+                  break;
+                }
               }
 
               steps++;
             }
-          };
-
-          if (ofs1 === 0) {
-            if (move.canForward) {
-              trySlideInDirection(ofs1, ofs0);
-            }
-            if (move.canBackward) {
-              trySlideInDirection(ofs1, -ofs0);
-            }
-            if (move.canSideways) {
-              trySlideInDirection(ofs0, ofs1);
-              trySlideInDirection(-ofs0, ofs1);
-            }
-          } else {
-            if (move.canForward) {
-              trySlideInDirection(ofs0, ofs1);
-              trySlideInDirection(-ofs0, ofs1);
-              trySlideInDirection(ofs1, ofs0);
-              trySlideInDirection(-ofs1, ofs0);
-            }
-            if (move.canBackward) {
-              trySlideInDirection(ofs0, -ofs1);
-              trySlideInDirection(-ofs0, -ofs1);
-              trySlideInDirection(ofs1, -ofs0);
-              trySlideInDirection(-ofs1, -ofs0);
-            }
-          }
+          });
         } else if (move.type === "leap") {
-          const ofs0 = move.offset[0] * colorAdjustedDy;
-          const ofs1 = move.offset[1];
+          const uniqueDirections = generateLeapDirections(move, colorAdjustedDy);
 
-          const tryLeap = (colOffset: number, rowOffset: number) => {
+
+          uniqueDirections.forEach(([colOffset, rowOffset]) => {
             const newRow = row - rowOffset;
             const newCol = col + colOffset;
 
@@ -303,46 +360,25 @@ export const getLegalMoves = (game: Game): Move[] => {
                 const moveToAdd = { from: { row, col }, to: { row: newRow, col: newCol } };
 
                 const moveExists = legalMoves.some(existingMove =>
-                  JSON.stringify(existingMove) === JSON.stringify(moveToAdd)
+                  existingMove.from.row === moveToAdd.from.row &&
+                  existingMove.from.col === moveToAdd.from.col &&
+                  existingMove.to.row === moveToAdd.to.row &&
+                  existingMove.to.col === moveToAdd.to.col
                 );
 
                 if (!moveExists) {
+
                   legalMoves.push(moveToAdd);
                 }
               }
             }
-          };
-
-          if (ofs1 === 0) {
-            if (move.canForward) {
-              tryLeap(ofs1, ofs0);
-            }
-            if (move.canBackward) {
-              tryLeap(ofs1, -ofs0);
-            }
-            if (move.canSideways) {
-              tryLeap(ofs0, ofs1);
-              tryLeap(-ofs0, ofs1);
-            }
-          } else {
-            if (move.canForward) {
-              tryLeap(ofs0, ofs1);
-              tryLeap(-ofs0, ofs1);
-              tryLeap(ofs1, ofs0);
-              tryLeap(-ofs1, ofs0);
-            }
-            if (move.canBackward) {
-              tryLeap(ofs0, -ofs1);
-              tryLeap(-ofs0, -ofs1);
-              tryLeap(ofs1, -ofs0);
-              tryLeap(-ofs1, -ofs0);
-            }
-          }
+          });
         }
       });
     }
   }
   
+
   return legalMoves;
 };
 
