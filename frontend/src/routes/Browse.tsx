@@ -2,18 +2,15 @@ import { useEffect, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
-import { deletePiece, resizeBoard, Piece, PieceErrors, Variant, VariantErrors } from "common";
+import { Variant } from "common";
 
 import Chessboard from "@/components/Chessboard";
-import PieceCraftDialog from "@/components/PieceCraftDialog";
 import { PieceCard } from "@/components/PieceCard";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -74,8 +71,6 @@ const Browse = () => {
 
 
   const [isGameConfigureDialogOpen, setIsGameConfigureDialogOpen] = useState<boolean>(false);
-
-  const [selectedSide, setSelectedSide] = useState<number>(-1); // -1 for random, 0 for White, 1 for Black
 
   const createGame = async (variantToPlay: Variant, preferredSide: number) => {
     try {
@@ -366,7 +361,7 @@ const Browse = () => {
           <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
             {variants.map((variant) => (
               <div key={variant.id} className="p-4 transition-shadow cursor-pointer flex flex-col items-center">
-                <h2 className="text-xl font-semibold mb-2 text-center truncate w-[300px]">{variant.name}</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center truncate w-[300px]">{variant.name}</h2>
                 <Link to={`/browse?variantId=${variant.id}`}>
                   <div className="w-[300px] h-[300px] flex items-center justify-center">
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

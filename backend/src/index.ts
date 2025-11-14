@@ -115,10 +115,12 @@ io.on('connection', (socket) => {
 
     let playerIndex: number;
     if (numPlayersBeforeJoin === 0) { // First player joining (creator)
-      if (room.creatorPreferredSide === 0 || room.creatorPreferredSide === -1) { // White or Random
+      if (room.creatorPreferredSide === 0) { // White
         playerIndex = 0;
-      } else { // Black
+      } else if (room.creatorPreferredSide === 1) { // Black
         playerIndex = 1;
+      } else { // Random (-1)
+        playerIndex = Math.floor(Math.random() * 2); // Randomly assign 0 or 1
       }
     } else { // Second player joining
       const existingPlayerIndex = Object.values(room.players)[0];
