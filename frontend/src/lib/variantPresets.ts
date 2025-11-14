@@ -3,6 +3,7 @@ import { PIECE_PRESETS } from "@/lib/piecePresets";
 
 export const VARIANT_PRESETS: Variant[] = [
   {
+    id: 'std',
     name: "Standard Chess",
     description: "The standard chess variant.",
     width: 8,
@@ -43,7 +44,8 @@ export const VARIANT_PRESETS: Variant[] = [
     nMoveRulePieces: ['P'],
   },
   {
-    name: "Capablanca Chess",
+    id: 'capa',
+    name: "Capablanca",
     description: "A chess variant featuring archbishops and chancellors, by José Capablanca.",
     width: 10,
     height: 8,
@@ -83,7 +85,8 @@ export const VARIANT_PRESETS: Variant[] = [
     nMoveRulePieces: ['P'],
   },
   {
-    name: "Los Alamos Chess",
+    id: 'alamos',
+    name: "Los Alamos",
     description: "Chess played on a 6x6 board; the first chess-like game played by a computer.",
     width: 6,
     height: 6,

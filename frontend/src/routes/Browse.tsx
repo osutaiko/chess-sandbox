@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { VARIANT_PRESETS } from "@/lib/variantPresets";
 
 import { Variant } from "common";
 
@@ -22,6 +23,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
@@ -37,17 +39,22 @@ const Browse = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchVariants = async () => {
+    const fetchOrFindVariant = async () => {
       setIsLoading(true);
       setError(null);
       try {
         if (variantId) {
-          const response = await fetch(`http://localhost:3001/api/variants/${variantId}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          const officialVariant = VARIANT_PRESETS.find(v => v.id === variantId);
+          if (officialVariant) {
+            setVariant(officialVariant);
+          } else {
+            const response = await fetch(`http://localhost:3001/api/variants/${variantId}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data: Variant = await response.json();
+            setVariant(data);
           }
-          const data: Variant = await response.json();
-          setVariant(data);
         } else {
           const response = await fetch('http://localhost:3001/api/variants');
           if (!response.ok) {
@@ -63,7 +70,7 @@ const Browse = () => {
       }
     };
 
-    fetchVariants();
+    fetchOrFindVariant();
   }, [variantId]);
 
 
@@ -351,15 +358,15 @@ const Browse = () => {
     }
   } else { // List view
     return (
-      <div className="p-4 w-full">
-        {variants.length === 0 ? (
-          <p>No variants available. Create one!</p>
-        ) : (
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {variants.map((variant) => (
-              <div key={variant.id} className="p-4 transition-shadow cursor-pointer flex flex-col items-center">
-                <h2 className="text-xl font-semibold mb-4 text-center truncate w-[300px]">{variant.name}</h2>
-                <Link to={`/browse?variantId=${variant.id}`}>
+        <div className="w-full px-4 md:px-8 py-6 md:py-8">
+          {/* Official Variants Section */}
+          <h2 className="text-2xl font-bold mb-4">Official Variants</h2>
+          <ScrollArea className="w-full whitespace-nowrap rounded-md border-none">
+            <div className="flex w-max space-x-4 p-4">
+            {VARIANT_PRESETS.map((variant) => (
+              <Link to={`/browse?variantId=${variant.id}`} key={variant.id}>
+                <div className="p-4 transition-shadow cursor-pointer flex flex-col items-center">
+                  <h2 className="text-xl font-normal mb-4 text-center truncate w-[300px]">{variant.name}</h2>
                   <div className="w-[300px] h-[300px] flex items-center justify-center">
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ maxWidth: '100%', maxHeight: '100%', aspectRatio: `${variant.width} / ${variant.height}` }}>
@@ -367,12 +374,37 @@ const Browse = () => {
                       </div>
                     </div>
                   </div>
-                </Link>
-              </div>
+                </div>
+              </Link>
             ))}
-          </div>
-        )}
-      </div>
+            </div>
+          </ScrollArea>
+
+          <Separator className="my-8 h-[0.5px]" />
+
+          {/* User Variants Section */}
+          <h2 className="text-2xl font-bold mb-4 mt-8">User Variants</h2>
+          {variants.length === 0 ? (
+            <p>No user-created variants available. Create one!</p>
+          ) : (
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+              {variants.map((variant) => (
+                <Link to={`/browse?variantId=${variant.id}`} key={variant.id}>
+                  <div className="p-4 transition-shadow cursor-pointer flex flex-col items-center">
+                    <h2 className="text-xl font-semibold mb-4 text-center truncate w-[300px]">{variant.name}</h2>
+                    <div className="w-[300px] h-[300px] flex items-center justify-center">
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ maxWidth: '100%', maxHeight: '100%', aspectRatio: `${variant.width} / ${variant.height}` }}>
+                          <Chessboard variant={variant} isInteractable={false} showLabels={false} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+            ))}
+            </div>
+          )}
+        </div>
     );
   }
 };

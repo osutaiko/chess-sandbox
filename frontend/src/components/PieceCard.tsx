@@ -62,7 +62,7 @@ export function PieceCard({
   showEditButton = true,
 }: PieceCardProps) {
   return (
-    <Card key={piece.id} className="flex flex-row justify-between gap-4 p-4 items-center bg-secondary">
+    <Card key={piece.id} className="flex flex-row min-w-[300px] justify-between gap-4 p-4 items-center bg-secondary">
       <div className="flex flex-col items-center gap-2 w-[120px]">
         <div
           className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}

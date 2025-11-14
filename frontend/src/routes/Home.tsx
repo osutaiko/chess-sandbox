@@ -8,7 +8,7 @@ import Chessboard from "@/components/Chessboard";
 import { Button } from "@/components/ui/button";
 
 const Home = () => {
-  const [variant, setVariant] = useState<Variant>(
+  const [variant] = useState<Variant>(
     structuredClone(VARIANT_PRESETS[Math.floor(Math.random() * VARIANT_PRESETS.length)])
   );
 

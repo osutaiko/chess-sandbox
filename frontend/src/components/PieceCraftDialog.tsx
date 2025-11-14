@@ -518,7 +518,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                   </div>
                 </div>
               </div>
-              <h3>Advanced</h3>
+              {/* <h3>Advanced</h3> */}
               <div className="flex flex-col gap-2">
                 {/* {pieceConfig.moves.some((move) => move.isInitialOnly) &&
                   <Label className="flex flex-row items-center gap-2">

@@ -25,8 +25,8 @@ export const EMPTY_VARIANT = {
 // Standard chess variant specifications
 export const DEFAULT_VARIANT = {
   ...structuredClone(EMPTY_VARIANT), // Start with an empty board
-  name: "Standard Chess",
-  description: "The classic game of chess.",
+  name: "New Variant",
+  description: "",
   pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
   royals: ['K'],
   initialBoard: Array.from({ length: 8 }, (_, i) => {
