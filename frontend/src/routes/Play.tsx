@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Game, Move, historyToAlgebraics } from "common";
+import { Game, historyToAlgebraics } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
@@ -138,6 +138,8 @@ const Play = () => {
     };
   }, []);
 
+  const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
+
   const handlePlyNavigation = (direction: "start" | "left" | "right" | "end") => {
     if (!game) return;
     const maxPly = game.history.length;
@@ -168,13 +170,14 @@ const Play = () => {
                   const isRoyal = game.royals.includes(piece.id);
                   return (
                     <PieceCard
+                      key={piece.id}
                       piece={piece}
                       selectedPieceId={null}
                       setSelectedPieceId={() => {}}
                       selectedPieceColor={0}
                       isRoyal={isRoyal}
                       setVariant={() => {}}
-                      variant={{} as any} 
+                      variant={game} 
                       isEditable={false}
                       pieceConfig={piece}
                       setPieceConfig={() => {}}
@@ -182,8 +185,8 @@ const Play = () => {
                       setPieceConfigErrors={() => {}}
                       handlePieceInputChange={() => {}}
                       handlePieceConfigSubmit={() => {}}
-                      openPieceDialogId={null}
-                      setOpenPieceDialogId={() => {}}
+                      openPieceDialogId={openPieceDialogId}
+                      setOpenPieceDialogId={setOpenPieceDialogId}
                       handlePieceDelete={() => {}}
                       showCrown={true}
                       showEditButton={true}

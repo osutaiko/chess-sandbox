@@ -1,6 +1,6 @@
 import { useDrag } from "react-dnd";
 
-import { Piece } from "@/lib/types";
+import { Piece } from "common/types";
 
 import images from "@/assets/images"
 

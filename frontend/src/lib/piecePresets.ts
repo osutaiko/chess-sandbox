@@ -1,4 +1,4 @@
-import { Piece } from "@/lib/types";
+import { Piece } from "common/types";
 
 // Piece templates for creating new pieces
 export const PIECE_PRESETS: Piece[] = [
@@ -40,6 +40,8 @@ export const PIECE_PRESETS: Piece[] = [
         type: "castle",
         targetPieces: ['R'],
         royalMoveDistance: 2,
+        canNonCapture: false,
+        canCapture: false,
         isInitialOnly: true,
       },
     ],

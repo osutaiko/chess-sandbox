@@ -1,4 +1,4 @@
-import { Variant, VariantGridType } from "@/lib/types";
+import { Variant, VariantGridType } from "common/types";
 import { PIECE_PRESETS } from "@/lib/piecePresets";
 
 export const VARIANT_PRESETS: Variant[] = [

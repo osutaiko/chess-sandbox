@@ -14,10 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -103,7 +100,7 @@ const Browse = () => {
   }
 
   const ChessboardPanel = () => {
-    const [gameConfig, setGameConfig] = useState<Variant>(variant!); // Use current variant as initial config
+    const [gameConfig] = useState<Variant>(variant!); // Use current variant as initial config
   
     return (
       <>

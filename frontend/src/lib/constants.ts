@@ -1,5 +1,5 @@
 import { PIECE_PRESETS } from "@/lib/piecePresets";
-import { MoveType, PieceMove, VariantGridType } from "@/lib/types";
+import { MoveType, PieceMove, VariantGridType } from "common/types";
 
 // Standard chess variant specifications
 export const DEFAULT_VARIANT = {

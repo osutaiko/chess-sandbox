@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { AVAILABLE_SPRITES, EMPTY_MOVE_PROPERTY, EMPTY_PIECE_CONFIG } from "@/lib/constants";
 import { PIECE_PRESETS } from "@/lib/piecePresets";
-import { MoveType, Piece, PieceMove, Variant } from "@/lib/types";
+import { MoveType, Piece, PieceMove, Variant } from "common/types";
 
 import PieceMovesBoard from "@/components/PieceMovesBoard";
 
@@ -306,7 +306,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                     <PieceMovesBoard isCraftMode={true} piece={pieceConfig} highlightedMoveIndex={highlightedMoveIndex} />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
-                    {pieceConfig.moves.map((move: PieceMove, index) => {
+                    {pieceConfig.moves.map((move: PieceMove, index: number) => {
                       if (move.type !== "castle") {
                         return (
                           <Card key={index}>
@@ -358,7 +358,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                     <DialogFooter>
                                       <DialogClose asChild>
                                         <Button variant="destructive" onClick={() => {
-                                          const updatedMoves = pieceConfig.moves.filter((_, i: number) => i !== index);
+                                          const updatedMoves = pieceConfig.moves.filter((_: any, i: number) => i !== index);
                                           setPieceConfig({ ...pieceConfig, moves: updatedMoves });
                                         }} disabled={!isEditable}>
                                           Delete

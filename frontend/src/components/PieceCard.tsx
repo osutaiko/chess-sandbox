@@ -1,5 +1,5 @@
 import { Crown, Trash2 } from "lucide-react";
-import { Piece } from "../../common/src/types";
+import { Piece } from "common/types";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -16,7 +16,7 @@ import {
 import DraggablePiece from "./DraggablePiece";
 import PieceCraftDialog from "./PieceCraftDialog";
 import PieceMovesBoard from "./PieceMovesBoard";
-import { Variant } from "../../common/src/chess";
+import { Variant } from "common/types";
 
 interface PieceCardProps {
   piece: Piece;
@@ -25,16 +25,16 @@ interface PieceCardProps {
   selectedPieceColor?: number;
   isRoyal: boolean;
   setVariant?: React.Dispatch<React.SetStateAction<Variant>>;
-  variant?: Variant;
+  variant: Variant;=
   isEditable: boolean;
-  pieceConfig?: Piece;
+  pieceConfig: Piece;=
   setPieceConfig?: React.Dispatch<React.SetStateAction<Piece>>;
   pieceConfigErrors?: Record<string, string>;
   setPieceConfigErrors?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   handlePieceInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePieceConfigSubmit?: (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => void;
-  openPieceDialogId?: string | null;
-  setOpenPieceDialogId?: React.Dispatch<React.SetStateAction<string | null>>;
+  openPieceDialogId: string | null;=
+  setOpenPieceDialogId: React.Dispatch<React.SetStateAction<string | null>>;=
   handlePieceDelete?: (id: string) => void;
   showCrown?: boolean;
   showEditButton?: boolean;
@@ -82,10 +82,10 @@ export function PieceCard({
               onClick={(e) => {
                 if (isEditable && setVariant) {
                   e.stopPropagation();
-                  setVariant((prev) => ({
+                  setVariant((prev: Variant) => ({
                     ...prev,
                     royals: isRoyal
-                      ? prev.royals.filter((id) => id !== piece.id)
+                      ? prev.royals.filter((id: string) => id !== piece.id)
                       : [...prev.royals, piece.id],
                   }));
                 }
@@ -115,7 +115,7 @@ export function PieceCard({
             pieceBeforeEditId={piece.id}
             openPieceDialogId={openPieceDialogId}
             setOpenPieceDialogId={setOpenPieceDialogId!}
-            isEditable={isEditable} // Pass isEditable to PieceCraftDialog
+            isEditable={isEditable}
           />
           {isEditable && (
             <Dialog>

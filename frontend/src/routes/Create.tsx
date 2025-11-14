@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard, Piece, PieceErrors, Variant, VariantErrors } from "common";
@@ -17,10 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -42,7 +39,6 @@ const Create = () => {
   const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
   const [isGameConfigureDialogOpen, setIsGameConfigureDialogOpen] = useState<boolean>(false);
   const [isSavingVariant, setIsSavingVariant] = useState<boolean>(false);
-  const [savedVariantId, setSavedVariantId] = useState<string | null>(null);
 
   const handlePieceDelete = (pieceId: string) => {
     const newVariant = deletePiece(variant, pieceId);
@@ -51,7 +47,6 @@ const Create = () => {
 
   const saveVariant = async () => {
     setIsSavingVariant(true);
-    setSavedVariantId(null);
     try {
       const response = await fetch('http://localhost:3001/api/variants', {
         method: 'POST',
@@ -66,7 +61,6 @@ const Create = () => {
       }
 
       const { variantId } = await response.json();
-      setSavedVariantId(variantId);
       console.log('Variant saved with ID:', variantId);
       navigate(`/browse?variantId=${variantId}`);
     } catch (error: any) {
@@ -398,6 +392,7 @@ const Create = () => {
             handlePieceConfigSubmit={handlePieceConfigSubmit}
             isCreatePieceDialogOpen={isCreatePieceDialogOpen}
             setIsCreatePieceDialogOpen={setIsCreatePieceDialogOpen}
+            isEditable={true}
           />
         </div>
         <ScrollArea>
@@ -419,7 +414,7 @@ const Create = () => {
                   pieceConfigErrors={pieceConfigErrors}
                   setPieceConfigErrors={setPieceConfigErrors}
                   handlePieceInputChange={handlePieceInputChange}
-                  handlePieceConfigSubmit={(e) => handlePieceConfigSubmit(false, piece.id)}
+                  handlePieceConfigSubmit={() => handlePieceConfigSubmit(false, piece.id)}
                   openPieceDialogId={openPieceDialogId}
                   setOpenPieceDialogId={setOpenPieceDialogId}
                   handlePieceDelete={handlePieceDelete}

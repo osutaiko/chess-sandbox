@@ -19,7 +19,7 @@ const Square: React.FC<{
   handleRightClick: (event: React.MouseEvent, row: number, col: number) => void;
   isValidDestination: boolean;
   isSelected: boolean;
-  isFlipped: boolean; // Add isFlipped prop
+  isFlipped: boolean;
 }> = ({ row, col, game, isMyTurn, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected, isFlipped }) => {
   const [, drop] = useDrop({
     accept: "PIECE",
@@ -85,9 +85,9 @@ const PlayChessboard: React.FC<{
   game: Game;
   setGame?: (game: Game) => void;
   socket?: Socket | null;
-  roomId?: string;
+  roomId?: string | null;
   isMyTurn: boolean;
-  playerIndex: number | null; // Add playerIndex prop
+  playerIndex: number | null;
 }> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);

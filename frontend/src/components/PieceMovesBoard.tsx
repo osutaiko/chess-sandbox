@@ -13,9 +13,7 @@ const PieceMovesBoard: React.FC<{
   const height = 2 * radius + 1;
   const reachableSquares = getReachableSquares(
     (isCraftMode && (highlightedMoveIndex !== null)) ? [piece.moves[highlightedMoveIndex]] : piece.moves,
-    radius,
-    width,
-    height
+    radius
   );
 
   const getColor = (canNonCapture: boolean, canCapture: boolean) => {
