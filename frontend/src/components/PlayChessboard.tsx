@@ -103,7 +103,12 @@ const PlayChessboard: React.FC<{
       const from = selectedSquare;
       const to = { row, col };
   
-      const move: Move = { from, to };
+      const move = legalMoves.find(
+        (m) => m.from.row === from.row && m.from.col === from.col && m.to.row === to.row && m.to.col === col
+      );
+
+      if (!move) return;
+  
       const newGame = playMove(game, move);
   
       if (setGame) {
@@ -133,12 +138,11 @@ const PlayChessboard: React.FC<{
     const from = { row: item.row, col: item.col };
     const to = { row, col };
     
-    const isLegalMove = legalMoves.some(
-      (move) => move.from.row === from.row && move.from.col === from.col && move.to.row === to.row && move.to.col === to.col
+    const move = legalMoves.find(
+      (m) => m.from.row === from.row && m.from.col === from.col && m.to.row === to.row && m.to.col === to.col
     );
 
-    if (isLegalMove) {
-      const move: Move = { from, to };
+    if (move) {
       const newGame = playMove(game, move);
 
       if (setGame) {

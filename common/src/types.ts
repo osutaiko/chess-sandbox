@@ -7,26 +7,28 @@ export type MoveProperties = {
 export type MoveType = "slide" | "leap" | "hop" | "castle";
 
 export type SingleMove = {
-  type: "slide" | "leap" | "hop";                // Type of move
-  offset: [number, number];                      // Offset for the move: [x, y] => x Right, y forward
+  type: "slide" | "leap" | "hop";           // Type of move
+  offset: [number, number];                 // Offset for the move: [x, y] => x Right, y forward
   range: {
-    from: number;                                // Minimum range
-    to: number;                                  // Maximum range
+    from: number;                           // Minimum range
+    to: number;                             // Maximum range
   };
-  canForward: boolean;                           // Can move forward
-  canBackward: boolean;                          // Can move backward
-  canSideways: boolean;                          // Can move sideways
-  canNonCapture: boolean;                        // Can move without capturing
-  canCapture: boolean;                           // Can capture
-  isInitialOnly: boolean;                        // Can only be used as an initial move
+  canForward: boolean;                      // Can move forward
+  canBackward: boolean;                     // Can move backward
+  canSideways: boolean;                     // Can move sideways
+  canNonCapture: boolean;                   // Can move without capturing
+  canCapture: boolean;                      // Can capture
+  isInitialOnly: boolean;                   // Can only be used as an initial move
 }
 
 export type CastleMove = {
   type: "castle";
   targetPieces: string[];
-  canNonCapture: boolean;                        // Can move without capturing
-  canCapture: boolean;                           // Can capture
-  isInitialOnly: boolean;                        // Can only be used as an initial move
+  royalMoveDistance: number;                // How many squares the royal moves when castling
+                                            // e.g. Standard: 2, Capablanca: 3
+  canNonCapture: boolean;                   // Can move without capturing
+  canCapture: boolean;                      // Can capture
+  isInitialOnly: boolean;                   // Can only be used as an initial move
 }
 
 export type PieceMove = SingleMove | CastleMove;
@@ -56,7 +58,7 @@ export type Cell = {
 export type VariantGridType = "square" | "hexagonal" | "circular";
 
 export type Variant = {
-  id?: string; // Add optional ID
+  id?: string;                                    // Optional ID, when uploaded
   name: string;                                   // Variant name
   description: string;                            // Variant description
   width: number;                                  // Board width (number of files)
@@ -85,12 +87,16 @@ export type PieceErrors = {
 export type Move = {
   from: { row: number; col: number };
   to: { row: number; col: number };
+  targetPieceFrom?: { row: number; col: number };
+  targetPieceTo?: { row: number; col: number };
+  isCastle?: boolean;
 };
 
 export type Game = Variant & {
   currentBoard: Cell[][];
   history: Move[];
   turn: number;
+  gameEndResult?: GameEndResult | null;
 };
 
 export type GameEndResult = {

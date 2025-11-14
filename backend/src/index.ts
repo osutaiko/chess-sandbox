@@ -162,7 +162,7 @@ io.on('connection', (socket) => {
     if (room && room.game) {
       const newGame = playMove(room.game, move);
       room.game = newGame;
-      socket.to(roomId).emit('opponentMove', move);
+      io.to(roomId).emit('gameUpdated', newGame);
     }
   });
 

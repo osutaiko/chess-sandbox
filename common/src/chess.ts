@@ -1,4 +1,4 @@
-import { Variant, PieceMove, Game, Move, Cell, Piece, SingleMove } from "./types";
+import { Variant, PieceMove, Game, Move, Cell, Piece, SingleMove, GameEndResult } from "./types";
 
 export const resizeBoard = (variant: Variant) => {
   const currentWidth = variant.initialBoard[0].length;
@@ -257,8 +257,81 @@ const generateLeapDirections = (
   return uniqueDirections;
 };
 
+// Helper function to check if a square is attacked by a given color
+const isSquareAttacked = (game: Game, row: number, col: number, attackingColor: number): boolean => {
+  // Temporarily change the turn to the attacking color to use getLegalMoves
+  const tempGame: Game = { ...game, turn: attackingColor };
+
+  // Iterate through all pieces on the board
+  for (let r = 0; r < tempGame.height; r++) {
+    for (let c = 0; c < tempGame.width; c++) {
+      const square = tempGame.currentBoard[r][c];
+      const pieceObj = square.pieceId ? tempGame.pieces.find((p: Piece) => p.id === square.pieceId) : null;
+
+      // If there's a piece of the attacking color
+      if (pieceObj && square.color === attackingColor) {
+        // Generate all possible moves for this piece
+        // We need a modified getLegalMoves that doesn't filter by turn,
+        // or we can manually check moves that can capture the target square.
+        // For simplicity, let's manually check for now.
+
+        // This is a simplified check and might need to be more robust
+        // depending on how complex piece moves can be.
+        // For now, it will check if any piece of attackingColor can "reach"
+        // the target square (row, col) as a capture.
+
+        const colorAdjustedDy = square.color === 0 ? 1 : -1;
+
+        for (const move of pieceObj.moves) {
+          if (move.type === "slide") {
+            const uniqueDirections = generateSlideDirections(move as SingleMove, colorAdjustedDy);
+            for (const [colOffset, rowOffset] of uniqueDirections) {
+              let steps = 1;
+              while (steps <= (move.range?.to ?? tempGame.width)) {
+                const newRow = r - rowOffset * steps;
+                const newCol = c + colOffset * steps;
+
+                if (newRow < 0 || newRow >= tempGame.height || newCol < 0 || newCol >= tempGame.width) {
+                  break;
+                }
+
+                if (newRow === row && newCol === col) {
+                  // This piece can attack the target square
+                  if (move.canCapture) {
+                    return true;
+                  }
+                }
+
+                if (tempGame.currentBoard[newRow][newCol].pieceId !== null) {
+                  // Blocked by another piece
+                  break;
+                }
+                steps++;
+              }
+            }
+          } else if (move.type === "leap") {
+            const uniqueDirections = generateLeapDirections(move as SingleMove, colorAdjustedDy);
+            for (const [colOffset, rowOffset] of uniqueDirections) {
+              const newRow = r - rowOffset;
+              const newCol = c + colOffset;
+
+              if (newRow === row && newCol === col) {
+                if (move.canCapture) {
+                  return true;
+                }
+              }
+            }
+          }
+          // Castle moves don't attack squares in the traditional sense
+        }
+      }
+    }
+  }
+  return false;
+};
+
 export const getLegalMoves = (game: Game): Move[] => {
-  const legalMoves: Move[] = [];
+  const pseudoLegalMoves: Move[] = [];
 
   for (let row = 0; row < game.height; row++) {
     for (let col = 0; col < game.width; col++) {
@@ -274,44 +347,37 @@ export const getLegalMoves = (game: Game): Move[] => {
       const colorAdjustedDy = square.color === 0 ? 1 : -1;
       
       pieceObj.moves.forEach((move: PieceMove) => {
-
         if (move.isInitialOnly && !isInitialMove(game, row, col)) {
-  
           return;
         }
 
         if (move.type === "slide") {
           const uniqueDirections = generateSlideDirections(move, colorAdjustedDy);
 
-
           uniqueDirections.forEach(([colOffset, rowOffset]) => {
             let steps = 1;
 
             while (steps <= (move.range.to ?? game.width)) {
-
               const newRow = row - rowOffset * steps;
               const newCol = col + colOffset * steps;
 
               if (newRow < 0 || newRow >= game.height || newCol < 0 || newCol >= game.width) {
-
                 break;
               }
 
               if (!game.currentBoard[newRow] || !game.currentBoard[newRow][newCol]) {
-  
                 break;
               }
               const destinationSquare = game.currentBoard[newRow][newCol];
 
               if (steps >= move.range.from) {
-
                 if (
                   (move.canNonCapture && !destinationSquare.pieceId) ||
                   (move.canCapture && destinationSquare.pieceId && square.color !== destinationSquare.color)
                 ) {
                   const moveToAdd = { from: { row, col }, to: { row: newRow, col: newCol } };
                   
-                  const moveExists = legalMoves.some(existingMove =>
+                  const moveExists = pseudoLegalMoves.some(existingMove =>
                     existingMove.from.row === moveToAdd.from.row &&
                     existingMove.from.col === moveToAdd.from.col &&
                     existingMove.to.row === moveToAdd.to.row &&
@@ -319,19 +385,15 @@ export const getLegalMoves = (game: Game): Move[] => {
                   );
 
                   if (!moveExists) {
-  
-                    legalMoves.push(moveToAdd);
+                    pseudoLegalMoves.push(moveToAdd);
                   }
                 }
               }
 
-
               if (destinationSquare.pieceId) {
                 if (move.canCapture && square.color !== destinationSquare.color) {
-  
                   break;
                 } else {
-  
                   break;
                 }
               }
@@ -341,7 +403,6 @@ export const getLegalMoves = (game: Game): Move[] => {
           });
         } else if (move.type === "leap") {
           const uniqueDirections = generateLeapDirections(move, colorAdjustedDy);
-
 
           uniqueDirections.forEach(([colOffset, rowOffset]) => {
             const newRow = row - rowOffset;
@@ -359,7 +420,7 @@ export const getLegalMoves = (game: Game): Move[] => {
               ) {
                 const moveToAdd = { from: { row, col }, to: { row: newRow, col: newCol } };
 
-                const moveExists = legalMoves.some(existingMove =>
+                const moveExists = pseudoLegalMoves.some(existingMove =>
                   existingMove.from.row === moveToAdd.from.row &&
                   existingMove.from.col === moveToAdd.from.col &&
                   existingMove.to.row === moveToAdd.to.row &&
@@ -367,8 +428,115 @@ export const getLegalMoves = (game: Game): Move[] => {
                 );
 
                 if (!moveExists) {
+                  pseudoLegalMoves.push(moveToAdd);
+                }
+              }
+            }
+          });
+        } else if (move.type === "castle") {
+          // Non-royals can't castle
+          if (!game.royals.includes(pieceObj.id)) {
+            return;
+          }
 
-                  legalMoves.push(moveToAdd);
+          // Royal that already moved can't castle
+          if (move.isInitialOnly && !isInitialMove(game, row, col)) {
+            return;
+          }
+
+          game.pieces.forEach((targetPiece) => {
+            if (move.targetPieces.includes(targetPiece.id)) {
+              // Iterate through the board to find instances of the target piece
+              for (let targetRow = 0; targetRow < game.height; targetRow++) {
+                for (let targetCol = 0; targetCol < game.width; targetCol++) {
+                  const targetSquare = game.currentBoard[targetRow][targetCol];
+
+                  if ( // Can castle only on the same rank
+                    targetSquare.pieceId === targetPiece.id &&
+                    targetSquare.color === square.color &&
+                    targetRow === row 
+                  ) {
+                    // Check if the target piece has moved
+                    if (move.isInitialOnly && !isInitialMove(game, targetRow, targetCol)) {
+                      continue;
+                    }
+
+                    // Determine direction (horizontal only for now)
+                    const direction = targetCol > col ? 1 : -1;
+
+                    // Path must be clear
+                    let pathClear = true;
+                    for (let c = col + direction; c !== targetCol; c += direction) {
+                      if (game.currentBoard[row][c].pieceId !== null) {
+                        pathClear = false;
+                        break;
+                      }
+                    }
+
+                    if (pathClear) {
+                      // Calculate new positions
+                      const newRoyalCol = col + direction * move.royalMoveDistance;
+                      const newTargetPieceCol = newRoyalCol - direction;
+
+                      // Validate new positions (within bounds)
+                      if (
+                        newRoyalCol >= 0 && newRoyalCol < game.width &&
+                        newTargetPieceCol >= 0 && newTargetPieceCol < game.width
+                      ) {
+                        // Ensure destination squares are empty
+                        const royalDestSquare = game.currentBoard[row][newRoyalCol];
+                        const targetPieceDestSquare = game.currentBoard[row][newTargetPieceCol];
+
+                        if (
+                          !royalDestSquare.pieceId &&
+                          !targetPieceDestSquare.pieceId
+                        ) {
+                          const currentColor = square.color;
+                          if (currentColor === null) {
+                            return; // Should not happen due to earlier checks, but for type safety
+                          }
+                          const opponentColor = 1 - currentColor;
+
+                          // 1. Royal piece not in check (current position)
+                          if (isSquareAttacked(game, row, col, opponentColor)) {
+                            continue;
+                          }
+
+                          // 2. Squares passed through not attacked
+                          let attackedPath = false;
+                          for (let c = col; c !== newRoyalCol + direction; c += direction) { // Include current and destination squares
+                            if (isSquareAttacked(game, row, c, opponentColor)) {
+                              attackedPath = true;
+                              break;
+                            }
+                          }
+                          if (attackedPath) { // Can't castle through check
+                            continue;
+                          }
+
+                          const moveToAdd = {
+                            from: { row, col },
+                            to: { row: row, col: newRoyalCol },
+                            targetPieceFrom: { row: targetRow, col: targetCol },
+                            targetPieceTo: { row: row, col: newTargetPieceCol },
+                            isCastle: true,
+                          };
+
+                          const moveExists = pseudoLegalMoves.some(existingMove =>
+                            existingMove.from.row === moveToAdd.from.row &&
+                            existingMove.from.col === moveToAdd.from.col &&
+                            existingMove.to.row === moveToAdd.to.row &&
+                            existingMove.to.col === moveToAdd.to.col &&
+                            existingMove.isCastle === true
+                          );
+
+                          if (!moveExists) {
+                            pseudoLegalMoves.push(moveToAdd);
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -378,12 +546,34 @@ export const getLegalMoves = (game: Game): Move[] => {
     }
   }
   
+  const legalMoves = pseudoLegalMoves.filter(move => {
+    const tempGame = playMove(game, move, false);
+    const royalPieces = tempGame.royals.map(royalId => {
+      for (let r = 0; r < tempGame.height; r++) {
+        for (let c = 0; c < tempGame.width; c++) {
+          const square = tempGame.currentBoard[r][c];
+          if (square.pieceId === royalId && square.color === game.turn) {
+            return { row: r, col: c };
+          }
+        }
+      }
+      return null;
+    }).filter(r => r !== null);
+
+    const opponentColor = (game.turn + 1) % game.playerCount;
+    for (const royal of royalPieces) {
+      if (royal && isSquareAttacked(tempGame, royal.row, royal.col, opponentColor)) {
+        return false;
+      }
+    }
+    return true;
+  });
 
   return legalMoves;
 };
 
-export const playMove = (game: Game, move: Move): Game => {
-  const { from, to } = move;
+export const playMove = (game: Game, move: Move, checkLegality = true): Game => {
+  const { from, to, targetPieceFrom, targetPieceTo, isCastle } = move;
   const pieceId = game.currentBoard[from.row][from.col].pieceId;
   const color = game.currentBoard[from.row][from.col].color;
 
@@ -391,14 +581,26 @@ export const playMove = (game: Game, move: Move): Game => {
     return game;
   }
 
-  const legalMoves = getLegalMoves(game);
-  const isLegalMove = legalMoves.some(
-    (legalMove) => legalMove.to.row === to.row && legalMove.to.col === to.col && legalMove.from.row === from.row && legalMove.from.col === from.col
-  );
+  if (checkLegality) {
+    const legalMoves = getLegalMoves(game);
+    const isLegalMove = legalMoves.some(
+      (legalMove) =>
+        legalMove.from.row === from.row &&
+        legalMove.from.col === from.col &&
+        legalMove.to.row === to.row &&
+        legalMove.to.col === to.col &&
+        legalMove.isCastle === isCastle &&
+        legalMove.targetPieceFrom?.row === targetPieceFrom?.row &&
+        legalMove.targetPieceFrom?.col === targetPieceFrom?.col &&
+        legalMove.targetPieceTo?.row === targetPieceTo?.row &&
+        legalMove.targetPieceTo?.col === targetPieceTo?.col
+    );
 
-  if (!isLegalMove) {
-    return game;
+    if (!isLegalMove) {
+      return game;
+    }
   }
+
 
   const newBoard = JSON.parse(JSON.stringify(game.currentBoard));
   newBoard[to.row][to.col] = {
@@ -412,19 +614,90 @@ export const playMove = (game: Game, move: Move): Game => {
     color: null,
   };
 
+  // If it's a castle move, move the target piece as well
+  if (isCastle && targetPieceFrom && targetPieceTo) {
+    const targetPieceId = game.currentBoard[targetPieceFrom.row][targetPieceFrom.col].pieceId;
+    const targetPieceColor = game.currentBoard[targetPieceFrom.row][targetPieceFrom.col].color;
+
+    if (targetPieceId) {
+      newBoard[targetPieceTo.row][targetPieceTo.col] = {
+        ...newBoard[targetPieceTo.row][targetPieceTo.col],
+        pieceId: targetPieceId,
+        color: targetPieceColor,
+      };
+      newBoard[targetPieceFrom.row][targetPieceFrom.col] = {
+        ...newBoard[targetPieceFrom.row][targetPieceFrom.col],
+        pieceId: null,
+        color: null,
+      };
+    }
+  }
+
   const newHistory = [...game.history, move];
 
-  return {
+  const newGame = {
     ...game,
     currentBoard: newBoard,
     history: newHistory,
     turn: (game.turn + 1) % game.playerCount,
   };
+
+  if (checkLegality) {
+    newGame.gameEndResult = getGameEndResult(newGame);
+  }
+
+  return newGame;
 };
+
+export const getGameEndResult = (game: Game): GameEndResult | null => {
+  if (!game.isWinOnCheckmate) {
+    return null;
+  }
+
+  const opponentColor = game.turn;
+  const opponentLegalMoves = getLegalMoves({ ...game, turn: opponentColor });
+
+  if (opponentLegalMoves.length > 0) {
+    return null;
+  }
+
+  const opponentRoyalPieces = game.royals.map(royalId => {
+    for (let r = 0; r < game.height; r++) {
+      for (let c = 0; c < game.width; c++) {
+        const square = game.currentBoard[r][c];
+        if (square.pieceId === royalId && square.color === opponentColor) {
+          return { row: r, col: c };
+        }
+      }
+    }
+    return null;
+  }).filter(r => r !== null);
+
+  const attackingColor = (opponentColor + 1) % game.playerCount;
+  const checkedRoyalPieces = opponentRoyalPieces.filter(royal => royal && isSquareAttacked(game, royal.row, royal.col, attackingColor));
+
+  if (checkedRoyalPieces.length > 0) {
+    if (game.mustCheckmateAllRoyals) {
+      if (checkedRoyalPieces.length === opponentRoyalPieces.length) {
+        return { winners: [attackingColor], reason: "Checkmate" };
+      }
+    } else {
+      return { winners: [attackingColor], reason: "Checkmate" };
+    }
+  }
+
+  if (game.isWinOnStalemate) {
+    return { winners: [attackingColor], reason: "Stalemate" };
+  } else {
+    return { winners: [], reason: "Stalemate (Draw)" };
+  }
+};
+
 
 export const historyToAlgebraics = (game: Game) => {
   const algebraics: string[] = [];
   game.history.map((move: Move) => {
     algebraics.push(String(getSquareName(game.width, game.height, move.to.row, move.to.col)));
-  }); // Added semicolon here
-  return algebraics;};
+  });
+  return algebraics;
+};

@@ -36,6 +36,12 @@ export const PIECE_PRESETS: Piece[] = [
         canCapture: true,
         isInitialOnly: false,
       },
+      {
+        type: "castle",
+        targetPieces: ['R'],
+        royalMoveDistance: 2,
+        isInitialOnly: true,
+      },
     ],
     promotions: [],
     /* isEnPassantTarget: false,

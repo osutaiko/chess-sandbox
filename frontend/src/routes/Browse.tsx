@@ -4,14 +4,12 @@ import { Variant } from "common";
 
 import Chessboard from "@/components/Chessboard";
 import PieceMovesBoard from "@/components/PieceMovesBoard";
-import DraggablePiece from "@/components/DraggablePiece";
+import { PieceCard } from "@/components/PieceCard";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { Crown } from "lucide-react";
 
 const Browse = () => {
   const [searchParams] = useSearchParams();
@@ -137,31 +135,25 @@ const Browse = () => {
               {selectedVariant.pieces.map((piece) => {
                 const isRoyal = selectedVariant.royals.includes(piece.id);
                 return (
-                  <Card key={piece.id} className="flex flex-row justify-between gap-4 p-4 items-center bg-secondary">
-                    <div className="flex flex-col items-center gap-2 w-[120px]">
-                      <div className="relative rounded-md">
-                        <div className="w-[80px]">
-                          <DraggablePiece piece={piece} color={0} row={null} col={null} />
-                        </div>
-                        {isRoyal && (
-                          <Crown
-                            stroke="orange"
-                            fill="orange"
-                            className="absolute -top-1 -right-1"
-                          />
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-2 items-center">
-                        <Badge className="text-sm aspect-square">{piece.id}</Badge>
-                        <h4 className="text-center break-all line-clamp-2">
-                          {piece.name}
-                        </h4>
-                      </div>
-                    </div>
-                    <div className="md:max-w-[250px]">
-                      <PieceMovesBoard isCraftMode={false} piece={piece} highlightedMoveIndex={null} />
-                    </div>
-                  </Card>
+                  <PieceCard
+                    piece={piece}
+                    selectedPieceId={null}
+                    setSelectedPieceId={() => {}}
+                    selectedPieceColor={0}
+                    isRoyal={isRoyal}
+                    setVariant={() => {}}
+                    variant={{} as any}
+                    isEditable={false}
+                    pieceConfig={{} as any}
+                    setPieceConfig={() => {}}
+                    pieceConfigErrors={{}} 
+                    setPieceConfigErrors={() => {}} 
+                    handlePieceInputChange={() => {}}
+                    handlePieceConfigSubmit={() => {}} 
+                    openPieceDialogId={null}
+                    setOpenPieceDialogId={() => {}}
+                    handlePieceDelete={() => {}}
+                  />
                 );
               })}
             </div>

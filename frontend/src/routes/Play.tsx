@@ -4,11 +4,14 @@ import { Game, Move, historyToAlgebraics } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
+import PieceMovesBoard from "@/components/PieceMovesBoard";
+import { PieceCard } from "@/components/PieceCard";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
@@ -24,6 +27,19 @@ const Play = () => {
 
   const plyIndexRef = useRef<HTMLParagraphElement>(null);
   const playerIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (game?.gameEndResult) {
+      const { winners, reason } = game.gameEndResult;
+      if (winners.length > 1) {
+        setMessage(`Game over: ${reason}. Winners: ${winners.join(", ")}`);
+      } else if (winners.length === 1) {
+        setMessage(`Game over: ${reason}. Winner: ${winners[0]}`);
+      } else {
+        setMessage(`Game over: ${reason}.`);
+      }
+    }
+  }, [game]);
 
   useEffect(() => {
     if (plyIndexRef.current) {
@@ -92,21 +108,9 @@ const Play = () => {
       setMessage("Game started! It's White's turn.");
     });
 
-    newSocket.on('opponentMove', (move: Move) => {
-      console.log('Play.tsx: Received opponentMove:', move);
-      setGame(prevGame => {
-        if (!prevGame) return null;
-        const newBoard = JSON.parse(JSON.stringify(prevGame.currentBoard));
-        const piece = newBoard[move.from.row][move.from.col];
-        newBoard[move.to.row][move.to.col] = piece;
-        newBoard[move.from.row][move.from.col] = { isValid: true, pieceId: null, color: null };
-        return {
-          ...prevGame,
-          currentBoard: newBoard,
-          history: [...prevGame.history, move],
-          turn: (prevGame.turn + 1) % prevGame.playerCount
-        };
-      });
+    newSocket.on('gameUpdated', (updatedGame: Game) => {
+      console.log('Play.tsx: Received gameUpdated:', updatedGame);
+      setGame(updatedGame);
     });
 
     newSocket.on('playerLeft', (data) => {
@@ -151,15 +155,50 @@ const Play = () => {
 
   return (
     <div className="w-full flex flex-row gap-6 px-4 md:px-8 py-6 h-[calc(100vh-62px)]">
-      <Card className="w-1/4 p-4">
+      <Card className="w-1/4 p-4 flex flex-col gap-4">
         <h2 className="text-lg font-semibold mb-2">Game Info</h2>
-        {game && <p className="mb-2"><span className="font-semibold">Variant:</span> {game.name}</p>}
+        {game && (
+          <>
+            <p className="mb-2"><span className="font-semibold">Variant:</span> {game.name}</p>
+
+            <Separator />
+            <h3 className="text-lg font-semibold">Pieces</h3>
+            <ScrollArea className="flex-grow">
+              <div className="grid gap-2 grid-cols-1">
+                {game.pieces.map((piece) => {
+                  const isRoyal = game.royals.includes(piece.id);
+                  return (
+                    <PieceCard
+                      piece={piece}
+                      selectedPieceId={null}
+                      setSelectedPieceId={() => {}}
+                      selectedPieceColor={0}
+                      isRoyal={isRoyal}
+                      setVariant={() => {}}
+                      variant={{} as any} 
+                      isEditable={false}
+                      pieceConfig={{} as any}
+                      setPieceConfig={() => {}}
+                      pieceConfigErrors={{}} 
+                      setPieceConfigErrors={() => {}}
+                      handlePieceInputChange={() => {}}
+                      handlePieceConfigSubmit={() => {}}
+                      openPieceDialogId={null}
+                      setOpenPieceDialogId={() => {}}
+                      handlePieceDelete={() => {}}
+                    />
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </>
+        )}
         {playerIndex !== null && <p className="mb-2"><span className="font-semibold">You are:</span> {playerIndex === 0 ? "White" : "Black"}</p>}
         <p>{message}</p>
       </Card>
       <div className="w-1/2">
         {game ? (
-          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex} playerIndex={playerIndex} />
+          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex && !game.gameEndResult} playerIndex={playerIndex} />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-secondary rounded-md">
             <p>Waiting for game to start...</p>

@@ -6,17 +6,14 @@ import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
 import { deletePiece, resizeBoard, Piece, PieceErrors, Variant, VariantErrors } from "common";
 
 import Chessboard from "@/components/Chessboard";
-import PieceMovesBoard from "@/components/PieceMovesBoard";
-import DraggablePiece from "@/components/DraggablePiece";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
+import { PieceCard } from "@/components/PieceCard";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -32,7 +29,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { Check, Crown, Trash2 } from "lucide-react";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 const Create = () => {
@@ -409,79 +405,25 @@ const Create = () => {
             {variant.pieces.map((piece) => {
               const isRoyal = variant.royals.includes(piece.id);
               return (
-                <Card key={piece.id} className="flex flex-row justify-between gap-4 p-4 items-center bg-secondary">
-                  <div className="flex flex-col items-center gap-2 w-[120px]">
-                    <div
-                      className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
-                      onClick={() => {
-                        setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
-                      }}>
-                      <div className="w-[80px]">
-                        <DraggablePiece piece={piece} color={selectedPieceColor} row={null} col={null} />
-                      </div>
-                      <Crown
-                        stroke={isRoyal ? "orange" : "gray"}
-                        fill={isRoyal ? "orange" : "transparent"}
-                        className="absolute -top-1 -right-1 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setVariant((prev) => ({
-                            ...prev,
-                            royals: isRoyal
-                              ? prev.royals.filter((id) => id !== piece.id)
-                              : [...prev.royals, piece.id],
-                          }));
-                        }}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2 items-center">
-                    <Badge className="text-sm aspect-square">{piece.id}</Badge>
-                      <h4 className="text-center break-all line-clamp-2">
-                      {piece.name}
-                      </h4>
-                    </div>
-                  </div>
-                  <div className="md:max-w-[250px]">
-                    <PieceMovesBoard isCraftMode={false} piece={piece} highlightedMoveIndex={null} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <PieceCraftDialog
-                      isCreateMode={false}
-                      variant={variant}
-                      pieceConfig={pieceConfig}
-                      setPieceConfig={setPieceConfig}
-                      pieceConfigErrors={pieceConfigErrors}
-                      setPieceConfigErrors={setPieceConfigErrors}
-                      handlePieceInputChange={handlePieceInputChange}
-                      handlePieceConfigSubmit={handlePieceConfigSubmit}
-                      pieceBeforeEditId={piece.id}
-                      openPieceDialogId={openPieceDialogId}
-                      setOpenPieceDialogId={setOpenPieceDialogId}
-                    />
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="destructive" size="icon">
-                          <Trash2 />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Deleting {piece.name}</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to delete this piece?
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button variant="destructive" onClick={() => handlePieceDelete(piece.id)}>
-                              Delete
-                            </Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </Card>
+                <PieceCard
+                  piece={piece}
+                  selectedPieceId={selectedPieceId}
+                  setSelectedPieceId={setSelectedPieceId}
+                  selectedPieceColor={selectedPieceColor}
+                  isRoyal={isRoyal}
+                  setVariant={setVariant}
+                  variant={variant}
+                  isEditable={true}
+                  pieceConfig={pieceConfig}
+                  setPieceConfig={setPieceConfig}
+                  pieceConfigErrors={pieceConfigErrors}
+                  setPieceConfigErrors={setPieceConfigErrors}
+                  handlePieceInputChange={handlePieceInputChange}
+                  handlePieceConfigSubmit={(e) => handlePieceConfigSubmit(false, piece.id)}
+                  openPieceDialogId={openPieceDialogId}
+                  setOpenPieceDialogId={setOpenPieceDialogId}
+                  handlePieceDelete={handlePieceDelete}
+                />
               );
             })}
           </div>
