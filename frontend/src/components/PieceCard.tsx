@@ -20,29 +20,31 @@ import { Variant } from "../../common/src/chess";
 
 interface PieceCardProps {
   piece: Piece;
-  selectedPieceId: string | null;
-  setSelectedPieceId: (id: string | null) => void;
-  selectedPieceColor: number;
+  selectedPieceId?: string | null;
+  setSelectedPieceId?: (id: string | null) => void;
+  selectedPieceColor?: number;
   isRoyal: boolean;
-  setVariant: React.Dispatch<React.SetStateAction<Variant>>;
-  variant: Variant;
+  setVariant?: React.Dispatch<React.SetStateAction<Variant>>;
+  variant?: Variant;
   isEditable: boolean;
-  pieceConfig: Piece;
-  setPieceConfig: React.Dispatch<React.SetStateAction<Piece>>;
-  pieceConfigErrors: Record<string, string>;
-  setPieceConfigErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  handlePieceInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handlePieceConfigSubmit: (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => void;
-  openPieceDialogId: string | null;
-  setOpenPieceDialogId: React.Dispatch<React.SetStateAction<string | null>>;
-  handlePieceDelete: (id: string) => void;
+  pieceConfig?: Piece;
+  setPieceConfig?: React.Dispatch<React.SetStateAction<Piece>>;
+  pieceConfigErrors?: Record<string, string>;
+  setPieceConfigErrors?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  handlePieceInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handlePieceConfigSubmit?: (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => void;
+  openPieceDialogId?: string | null;
+  setOpenPieceDialogId?: React.Dispatch<React.SetStateAction<string | null>>;
+  handlePieceDelete?: (id: string) => void;
+  showCrown?: boolean;
+  showEditButton?: boolean;
 }
 
 export function PieceCard({
   piece,
   selectedPieceId,
   setSelectedPieceId,
-  selectedPieceColor,
+  selectedPieceColor = 0, // Default to 0 (white)
   isRoyal,
   setVariant,
   variant,
@@ -56,6 +58,8 @@ export function PieceCard({
   openPieceDialogId,
   setOpenPieceDialogId,
   handlePieceDelete,
+  showCrown = true,
+  showEditButton = true,
 }: PieceCardProps) {
   return (
     <Card key={piece.id} className="flex flex-row justify-between gap-4 p-4 items-center bg-secondary">
@@ -63,26 +67,28 @@ export function PieceCard({
         <div
           className={`relative ${selectedPieceId === piece.id ? "bg-primary" : ""} rounded-md`}
           onClick={() => {
-            if (isEditable) {
+            if (isEditable && setSelectedPieceId) {
               setSelectedPieceId(selectedPieceId === piece.id ? null : piece.id);
             }
           }}>
           <div className="w-[80px]">
             <DraggablePiece piece={piece} color={selectedPieceColor} row={null} col={null} />
           </div>
-          {isEditable && (
+          {showCrown && (
             <Crown
               stroke={isRoyal ? "orange" : "gray"}
               fill={isRoyal ? "orange" : "transparent"}
-              className="absolute -top-1 -right-1 cursor-pointer"
+              className={`absolute -top-1 -right-1 ${isEditable && setVariant ? "cursor-pointer" : ""}`}
               onClick={(e) => {
-                e.stopPropagation();
-                setVariant((prev) => ({
-                  ...prev,
-                  royals: isRoyal
-                    ? prev.royals.filter((id) => id !== piece.id)
-                    : [...prev.royals, piece.id],
-                }));
+                if (isEditable && setVariant) {
+                  e.stopPropagation();
+                  setVariant((prev) => ({
+                    ...prev,
+                    royals: isRoyal
+                      ? prev.royals.filter((id) => id !== piece.id)
+                      : [...prev.royals, piece.id],
+                  }));
+                }
               }}
             />
           )}
@@ -95,41 +101,44 @@ export function PieceCard({
       <div className="md:max-w-[250px]">
         <PieceMovesBoard isCraftMode={false} piece={piece} highlightedMoveIndex={null} />
       </div>
-      {isEditable && (
+      {showEditButton && (
         <div className="flex flex-col gap-1">
           <PieceCraftDialog
             isCreateMode={false}
-            variant={variant}
-            pieceConfig={pieceConfig}
-            setPieceConfig={setPieceConfig}
-            pieceConfigErrors={pieceConfigErrors}
-            setPieceConfigErrors={setPieceConfigErrors}
-            handlePieceInputChange={handlePieceInputChange}
-            handlePieceConfigSubmit={(isCreateMode, pieceBeforeEditId) => handlePieceConfigSubmit(isCreateMode, pieceBeforeEditId)}
+            variant={variant!}
+            pieceConfig={pieceConfig!}
+            setPieceConfig={setPieceConfig!}
+            pieceConfigErrors={pieceConfigErrors!}
+            setPieceConfigErrors={setPieceConfigErrors!}
+            handlePieceInputChange={handlePieceInputChange!}
+            handlePieceConfigSubmit={(isCreateMode, pieceBeforeEditId) => handlePieceConfigSubmit!(isCreateMode, pieceBeforeEditId)}
             pieceBeforeEditId={piece.id}
             openPieceDialogId={openPieceDialogId}
-            setOpenPieceDialogId={setOpenPieceDialogId}
+            setOpenPieceDialogId={setOpenPieceDialogId!}
+            isEditable={isEditable} // Pass isEditable to PieceCraftDialog
           />
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="icon">
-                <Trash2 />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Deleting {piece.name}</DialogTitle>
-                <DialogDescription>Are you sure you want to delete this piece?</DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="destructive" onClick={() => handlePieceDelete(piece.id)}>
-                    Delete
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          {isEditable && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="icon">
+                  <Trash2 />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Deleting {piece.name}</DialogTitle>
+                  <DialogDescription>Are you sure you want to delete this piece?</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="destructive" onClick={() => handlePieceDelete!(piece.id)}>
+                      Delete
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       )}
     </Card>

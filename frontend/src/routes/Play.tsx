@@ -1,22 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Game, Move, historyToAlgebraics } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
-import PieceMovesBoard from "@/components/PieceMovesBoard";
 import { PieceCard } from "@/components/PieceCard";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 const Play = () => {
-  const { variantId: roomId } = useParams<{ variantId: string }>();
+  const [searchParams] = useSearchParams();
+  const roomId = searchParams.get('roomId');
   console.log('Play.tsx: Component rendered. roomId:', roomId);
   
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -177,7 +176,7 @@ const Play = () => {
                       setVariant={() => {}}
                       variant={{} as any} 
                       isEditable={false}
-                      pieceConfig={{} as any}
+                      pieceConfig={piece}
                       setPieceConfig={() => {}}
                       pieceConfigErrors={{}} 
                       setPieceConfigErrors={() => {}}
@@ -186,6 +185,8 @@ const Play = () => {
                       openPieceDialogId={null}
                       setOpenPieceDialogId={() => {}}
                       handlePieceDelete={() => {}}
+                      showCrown={true}
+                      showEditButton={true}
                     />
                   );
                 })}

@@ -33,7 +33,7 @@ const router = createBrowserRouter([
         element: <Browse />,
       },
       {
-        path: "/play/:variantId",
+        path: "/play",
         element: <Play />,
       },
     ],

@@ -10,7 +10,8 @@ const Square: React.FC<{
   handlePieceDrop: (item: any, row: number, col: number) => void;
   handleLeftClick: (row: number, col: number) => void;
   handleRightClick: (event: any, row: number, col: number) => void;
-}> = ({ row, col, variant, handlePieceDrop, handleLeftClick, handleRightClick }) => {
+  showLabels: boolean;
+}> = ({ row, col, variant, handlePieceDrop, handleLeftClick, handleRightClick, showLabels }) => {
   const [, drop] = useDrop({
     accept: "PIECE",
     drop: (item) => handlePieceDrop(item, row, col),
@@ -33,12 +34,12 @@ const Square: React.FC<{
       {pieceObj && square.color !== null && (
         <DraggablePiece piece={pieceObj} color={square.color} row={row} col={col} />
       )}
-      {rankLabel && (
+      {showLabels && rankLabel && (
         <span className={`absolute top-0.5 right-1 text-xs font-semibold ${square.isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
           {rankLabel}
         </span>
       )}
-      {fileLabel && (
+      {showLabels && fileLabel && (
         <span className={`absolute bottom-0 left-1 text-xs font-semibold ${square.isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
           {fileLabel}
         </span>
@@ -53,7 +54,8 @@ const Chessboard: React.FC<{
   setVariant?: (variant: Variant) => void;
   selectedPieceId?: string | null;
   selectedPieceColor?: number | null;
-}> = ({ variant, isInteractable, setVariant, selectedPieceId, selectedPieceColor }) => {
+  showLabels?: boolean;
+}> = ({ variant, isInteractable, setVariant, selectedPieceId, selectedPieceColor, showLabels = true }) => {
   const handlePieceDrop = (item: any, row: number, col: number) => {
     if (!isInteractable || !setVariant) {
       return;
@@ -93,7 +95,7 @@ const Chessboard: React.FC<{
 
   return (
     <div
-      className="grid md:rounded-md overflow-hidden"
+      className="grid rounded-md overflow-hidden"
       style={{
         gridTemplateColumns: `repeat(${variant.width}, 1fr)`,
         gridTemplateRows: `repeat(${variant.height}, 1fr)`,
@@ -109,6 +111,7 @@ const Chessboard: React.FC<{
             handlePieceDrop={handlePieceDrop}
             handleLeftClick={handleLeftClick} 
             handleRightClick={handleRightClick} 
+            showLabels={showLabels}
           />
         ))
       )}
