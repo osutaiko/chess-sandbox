@@ -1,14 +1,34 @@
 import { PIECE_PRESETS } from "@/lib/piecePresets";
 import { MoveType, PieceMove, VariantGridType } from "common/types";
 
-// Standard chess variant specifications
-export const DEFAULT_VARIANT = {
-  name: "New Variant",
-  description: "",
+// Empty chess variant specifications
+export const EMPTY_VARIANT = {
+  name: "Empty Variant",
+  description: "An empty 8x8 board.",
   width: 8,
   height: 8,
   gridType: "square" as VariantGridType,
   playerCount: 2,
+  initialBoard: Array.from({ length: 8 }, () =>
+    Array.from({ length: 8 }, () => ({ isValid: true, pieceId: null, color: null }))
+  ),
+  pieces: [],
+  royals: [],
+  isWinOnCheckmate: true,
+  mustCheckmateAllRoyals: true,
+  isWinOnStalemate: false,
+  isWinOnOpponentWipe: false,
+  nMoveRuleCount: 50,
+  nMoveRulePieces: ['P'],
+};
+
+// Standard chess variant specifications
+export const DEFAULT_VARIANT = {
+  ...structuredClone(EMPTY_VARIANT), // Start with an empty board
+  name: "Standard Chess",
+  description: "The classic game of chess.",
+  pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
+  royals: ['K'],
   initialBoard: Array.from({ length: 8 }, (_, i) => {
     const row = [];
     for (let j = 0; j < 8; j++) {
@@ -33,14 +53,6 @@ export const DEFAULT_VARIANT = {
     }
     return row;
   }),
-  pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
-  royals: ['K'],
-  isWinOnCheckmate: true,
-  mustCheckmateAllRoyals: true,
-  isWinOnStalemate: false,
-  isWinOnOpponentWipe: false,
-  nMoveRuleCount: 50,
-  nMoveRulePieces: ['P'],
 };
 
 export const AVAILABLE_SPRITES = [

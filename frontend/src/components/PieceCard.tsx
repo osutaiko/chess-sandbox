@@ -25,16 +25,16 @@ interface PieceCardProps {
   selectedPieceColor?: number;
   isRoyal: boolean;
   setVariant?: React.Dispatch<React.SetStateAction<Variant>>;
-  variant: Variant;=
+  variant: Variant;
   isEditable: boolean;
-  pieceConfig: Piece;=
+  pieceConfig: Piece;
   setPieceConfig?: React.Dispatch<React.SetStateAction<Piece>>;
   pieceConfigErrors?: Record<string, string>;
   setPieceConfigErrors?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   handlePieceInputChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handlePieceConfigSubmit?: (isCreateMode: boolean, pieceBeforeEditId: string | null | undefined) => void;
-  openPieceDialogId: string | null;=
-  setOpenPieceDialogId: React.Dispatch<React.SetStateAction<string | null>>;=
+  openPieceDialogId: string | null;
+  setOpenPieceDialogId: React.Dispatch<React.SetStateAction<string | null>>;
   handlePieceDelete?: (id: string) => void;
   showCrown?: boolean;
   showEditButton?: boolean;
