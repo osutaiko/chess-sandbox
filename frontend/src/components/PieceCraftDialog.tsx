@@ -462,7 +462,11 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                       label={(value) => value === slideInfStart ? "∞" : String(value)}
                                       labelPosition="bottom"
                                       value={[move.range.from === Infinity ? slideInfStart : move.range.from, move.range.to === Infinity ? slideInfStart : move.range.to]}
-                                      onValueChange={(value) => updateMoveProperty(index, "range", { from: value[0], to: value[1] })}
+                                      onValueChange={(value) => {
+                                        const from = value[0] === slideInfStart ? Infinity : value[0];
+                                        const to = value[1] === slideInfStart ? Infinity : value[1];
+                                        updateMoveProperty(index, "range", { from, to });
+                                      }}
                                       disabled={!isEditable}
                                     />
                                   </div>
