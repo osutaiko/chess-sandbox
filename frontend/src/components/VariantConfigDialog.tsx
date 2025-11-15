@@ -100,8 +100,8 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
   return (
     <Dialog open={isGameConfigureDialogOpen} onOpenChange={setIsGameConfigureDialogOpen}>
       <DialogTrigger asChild className="w-full">
-        <Button variant="secondary" onClick={() => setIsGameConfigureDialogOpen(true)} disabled={!isEditable}>
-          Configure Variant
+        <Button variant="secondary" onClick={() => setIsGameConfigureDialogOpen(true)}>
+          {isEditable? "Configure Variant" : "Variant Details"}
         </Button>
       </DialogTrigger>
       <DialogContent className="flex flex-col flex-none gap-4 md:gap-8">

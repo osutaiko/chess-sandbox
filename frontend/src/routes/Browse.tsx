@@ -21,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import images from "@/assets/images";
 
 const Browse = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -119,14 +120,38 @@ const Browse = () => {
             <DialogTrigger asChild>
               <Button>Play!</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="w-[300px]">
               <DialogHeader>
                 <DialogTitle>Choose Your Side</DialogTitle>
               </DialogHeader>
-              <div className="flex justify-center gap-4">
-                <Button onClick={() => createGame(variant!, 0)}>White</Button>
-                <Button onClick={() => createGame(variant!, 1)}>Black</Button>
-                <Button onClick={() => createGame(variant!, -1)}>Random</Button>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-center gap-1">
+                  <Button 
+                    onClick={() => createGame(variant!, 0)}
+                    variant="secondary"
+                    className="flex flex-col gap-1 min-w-[90px] h-[95px] py-2"
+                  >
+                    <img
+                      src={images['pieces/king-0']}
+                      alt="White King"
+                      className="w-[60px] h-[60px]"
+                    />
+                    <p>White</p>
+                  </Button>
+                  <Button 
+                    onClick={() => createGame(variant!, 1)}
+                    variant="secondary"
+                    className="flex flex-col gap-1 min-w-[90px] h-[95px] py-2"
+                  >
+                    <img
+                      src={images['pieces/king-1']}
+                      alt="Black King"
+                      className="w-[60px] h-[60px]"
+                    />
+                    <p>Black</p>
+                  </Button>
+                </div>
+                {/* <Button onClick={() => createGame(variant!, -1)}>Random</Button> */}
               </div>
             </DialogContent>
           </Dialog>
@@ -239,7 +264,7 @@ const Browse = () => {
               {variants.map((variant) => (
                 <Link to={`/browse?variantId=${variant.id}`} key={variant.id}>
                   <div className="p-4 transition-shadow cursor-pointer flex flex-col items-center">
-                    <h2 className="text-xl font-semibold mb-4 text-center truncate w-[300px]">{variant.name}</h2>
+                    <h2 className="text-xl font-normal mb-4 text-center truncate w-[300px]">{variant.name}</h2>
                     <div className="w-[300px] h-[300px] flex items-center justify-center">
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ maxWidth: '100%', maxHeight: '100%', aspectRatio: `${variant.width} / ${variant.height}` }}>
