@@ -20,7 +20,8 @@ const Square: React.FC<{
   isValidDestination: boolean;
   isSelected: boolean;
   isFlipped: boolean;
-}> = ({ row, col, game, isMyTurn, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected, isFlipped }) => {
+  lastMove: Move | null; // Add lastMove to Square props
+}> = ({ row, col, game, isMyTurn, handlePieceDrop, handleLeftClick, handleRightClick, isValidDestination, isSelected, isFlipped, lastMove }) => {
   const [, drop] = useDrop({
     accept: "PIECE",
     drop: (item) => handlePieceDrop(item, row, col),
@@ -40,6 +41,12 @@ const Square: React.FC<{
   const squareBgColor = () => {
     if (isSelected) {
       return "bg-primary";
+    }
+    if (lastMove && 
+        ((lastMove.from.row === row && lastMove.from.col === col) || 
+         (lastMove.to.row === row && lastMove.to.col === col))) {
+      // Use highlighted colors based on whether the square is dark or light
+      return isSquareDark ? "bg-square-dark-highlight" : "bg-square-light-highlight";
     }
     if (square.isValid) {
       return isSquareDark ? "bg-square-dark" : "bg-square-light";
@@ -84,7 +91,8 @@ const PlayChessboard: React.FC<{
   isMyTurn: boolean;
   playerIndex: number | null;
   onMoveMade: (move: Move) => void;
-}> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex, onMoveMade }) => {
+  lastMove: Move | null; // Add lastMove to PlayChessboard props
+}> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex, onMoveMade, lastMove }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
@@ -180,6 +188,7 @@ const PlayChessboard: React.FC<{
               isValidDestination={validDestinations.some((dest) => dest.row === displayRow && dest.col === displayCol)}
               isSelected={selectedSquare?.row === displayRow && selectedSquare?.col === displayCol}
               isFlipped={playerIndex === 1}
+              lastMove={lastMove} // Pass lastMove to Square
             />
           );
         });

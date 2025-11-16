@@ -269,7 +269,16 @@ const Play = () => {
       </Card>
       <div className="w-1/2">
         {game ? (
-          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex && !game.gameEndResult} playerIndex={playerIndex} onMoveMade={handleChessMove} />
+          <PlayChessboard
+            game={game}
+            setGame={setGame}
+            socket={socket}
+            roomId={roomId}
+            isMyTurn={game.turn === playerIndex && !game.gameEndResult}
+            playerIndex={playerIndex}
+            onMoveMade={handleChessMove}
+            lastMove={game && game.history.length > 0 ? game.history[game.history.length - 1] : null}
+          />
         ) : (
           <CopyableLink shareUrl={`${window.location.origin}/play/${roomId}`} />
         )}

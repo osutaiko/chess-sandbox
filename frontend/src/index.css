@@ -577,6 +577,8 @@ video {
   --radius: 0.5rem;
   --square-light: 27 35% 55%;
   --square-dark: 38 66% 82%;
+  --square-light-highlight: 58 40% 45%;
+  --square-dark-highlight: 64 40% 60%;
 }
 
 * {

@@ -52,7 +52,9 @@ module.exports = {
   			},
   			square: {
   				dark: 'hsl(var(--square-dark))',
-  				light: 'hsl(var(--square-light))'
+  				light: 'hsl(var(--square-light))',
+                'dark-highlight': 'hsl(var(--square-dark-highlight))',
+                'light-highlight': 'hsl(var(--square-light-highlight))'
   			}
   		},
   		borderRadius: {
