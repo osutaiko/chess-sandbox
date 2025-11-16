@@ -11,7 +11,7 @@ export type SingleMove = {
   offset: [number, number];                 // Offset for the move: [x, y] => x Right, y forward
   range: {
     from: number;                           // Minimum range
-    to: number;                             // Maximum range
+    to: number | "Infinity";                // Maximum range
   };
   canForward: boolean;                      // Can move forward
   canBackward: boolean;                     // Can move backward

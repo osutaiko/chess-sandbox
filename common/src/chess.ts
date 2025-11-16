@@ -91,7 +91,7 @@ export const getReachableSquares = (moves: PieceMove[], radius: number) => {
       }
 
       directions.forEach(([dx, dy]) => {
-        for (let i = range.from; i <= range.to; i++) {
+        for (let i = range.from; i <= (range.to === 'Infinity' ? radius : range.to); i++) {
           const x = radius + dx * i;
           const y = radius - dy * i;
 
@@ -287,7 +287,7 @@ const isSquareAttacked = (game: Game, row: number, col: number, attackingColor: 
             const uniqueDirections = generateSlideDirections(move as SingleMove, colorAdjustedDy);
             for (const [colOffset, rowOffset] of uniqueDirections) {
               let steps = 1;
-              while (steps <= (move.range?.to ?? tempGame.width)) {
+              while (steps <= (move.range.to === 'Infinity' ? Math.max(tempGame.width, tempGame.height) : move.range.to)) {
                 const newRow = r - rowOffset * steps;
                 const newCol = c + colOffset * steps;
 
@@ -357,7 +357,7 @@ export const getLegalMoves = (game: Game): Move[] => {
           uniqueDirections.forEach(([colOffset, rowOffset]) => {
             let steps = 1;
 
-            while (steps <= (move.range.to ?? game.width)) {
+            while (steps <= (move.range.to === 'Infinity' ? game.width : move.range.to)) {
               const newRow = row - rowOffset * steps;
               const newCol = col + colOffset * steps;
 

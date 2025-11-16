@@ -461,9 +461,9 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                       step={1}
                                       label={(value) => value === slideInfStart ? "∞" : String(value)}
                                       labelPosition="bottom"
-                                      value={[move.range.from === Infinity ? slideInfStart : move.range.from, move.range.to === Infinity ? slideInfStart : move.range.to]}
+                                      value={[move.range.from, move.range.to === 'Infinity' ? slideInfStart : move.range.to]}
                                       onValueChange={(value) => {
-                                        const from = value[0] === slideInfStart ? Infinity : value[0];
+                                        const from = value[0];
                                         const to = value[1] === slideInfStart ? Infinity : value[1];
                                         updateMoveProperty(index, "range", { from, to });
                                       }}

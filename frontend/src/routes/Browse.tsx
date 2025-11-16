@@ -3,7 +3,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { VARIANT_PRESETS } from "@/lib/variantPresets";
 
-import { Variant } from "common";
+import { Variant, parse, stringify } from "common";
 
 import Chessboard from "@/components/Chessboard";
 import { PieceCard } from "@/components/PieceCard";
@@ -48,7 +48,7 @@ const Browse = () => {
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data: Variant = await response.json();
+            const data: Variant = parse(await response.text());
             setVariant(data);
           }
         } else {
@@ -56,7 +56,7 @@ const Browse = () => {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const data: Variant[] = await response.json();
+          const data: Variant[] = parse(await response.text());
           setVariants(data);
         }
       } catch (e: any) {
@@ -74,12 +74,13 @@ const Browse = () => {
 
   const createGame = async (variantToPlay: Variant, preferredSide: number) => {
     try {
+      const body = stringify({ variant: variantToPlay, preferredSide });
       const response = await fetch('http://localhost:3001/api/rooms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ variant: variantToPlay, preferredSide }),
+        body,
       });
 
       if (!response.ok) {

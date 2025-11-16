@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Game, historyToAlgebraics } from "common";
+import { Game, Variant, historyToAlgebraics, parse, stringify } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
 import { PieceCard } from "@/components/PieceCard";
+import { CopyableLink } from "@/components/ui/CopyableLink";
+import VariantConfigDialog from "@/components/VariantConfigDialog";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -20,25 +22,13 @@ const Play = () => {
   
   const [socket, setSocket] = useState<Socket | null>(null);
   const [game, setGame] = useState<Game | null>(null);
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(null);
   const [playerIndex, setPlayerIndex] = useState<number | null>(null);
-  const [message, setMessage] = useState<string>("Connecting to server...");
   const [plyIndex, setPlyIndex] = useState<number>(0);
+  const [isVariantConfigDialogOpen, setIsVariantConfigDialogOpen] = useState<boolean>(false);
 
   const plyIndexRef = useRef<HTMLParagraphElement>(null);
   const playerIndexRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (game?.gameEndResult) {
-      const { winners, reason } = game.gameEndResult;
-      if (winners.length > 1) {
-        setMessage(`Game over: ${reason}. Winners: ${winners.join(", ")}`);
-      } else if (winners.length === 1) {
-        setMessage(`Game over: ${reason}. Winner: ${winners[0]}`);
-      } else {
-        setMessage(`Game over: ${reason}.`);
-      }
-    }
-  }, [game]);
 
   useEffect(() => {
     if (plyIndexRef.current) {
@@ -55,6 +45,21 @@ const Play = () => {
       console.log('Play.tsx: roomId is null, skipping socket initialization.');
       return;
     }
+
+    const fetchRoomVariant = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/api/rooms/${roomId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = parse(await response.text());
+        setCurrentVariant(data.variant);
+      } catch (e: any) {
+        console.error("Failed to fetch room variant:", e);
+      }
+    };
+
+    fetchRoomVariant();
 
     // Prevents re-initializing the socket on subsequent re-renders for the same room.
     if (socketRef.current && socketRef.current.connected && socketRef.current.io.opts.query?.roomId === roomId) {
@@ -77,7 +82,6 @@ const Play = () => {
 
     newSocket.on('connect', () => {
       console.log('Play.tsx: Socket connected.');
-      setMessage("Connected. Joining room...");
       console.log(`Play.tsx: Emitting joinRoom for roomId: ${roomId}`);
       newSocket.emit('joinRoom', roomId);
     });
@@ -87,46 +91,39 @@ const Play = () => {
       const { playerIndex } = data;
       playerIndexRef.current = playerIndex;
       setPlayerIndex(playerIndex);
-      setMessage(playerIndex === 0 ? "You are White. Waiting for opponent..." : "You are Black. Waiting for game to start...");
     });
 
     newSocket.on('playerJoined', (data) => {
       console.log('Play.tsx: Received playerJoined:', data);
       const { playerIndex: joinedPlayerIndex } = data;
       console.log(`Play.tsx: Player ${joinedPlayerIndex} joined the room`);
-      if (joinedPlayerIndex !== playerIndexRef.current) {
-        setMessage("Opponent joined!");
-      }
     });
 
     newSocket.on('gameStart', (data) => {
       console.log('Play.tsx: Received gameStart:', data);
       const { game: serverGame } = data;
       console.log('Play.tsx: Game starting!', serverGame);
-      setGame(serverGame);
-      setMessage("Game started! It's White's turn.");
+      setGame(parse(stringify(serverGame)));
+      setCurrentVariant(parse(stringify(serverGame))); 
     });
 
     newSocket.on('gameUpdated', (updatedGame: Game) => {
       console.log('Play.tsx: Received gameUpdated:', updatedGame);
-      setGame(updatedGame);
+      setGame(parse(stringify(updatedGame)));
     });
 
     newSocket.on('playerLeft', (data) => {
       console.log('Play.tsx: Received playerLeft:', data);
       const { playerIndex } = data;
       console.log(`Play.tsx: Player ${playerIndex} left the room`);
-      setMessage("Opponent left. Game over.");
     });
 
     newSocket.on('error', (errorMessage: string) => {
       console.error('Play.tsx: Received error from server:', errorMessage);
-      setMessage(errorMessage);
     });
 
     newSocket.on('disconnect', () => {
       console.log('Play.tsx: Disconnected from Socket.IO server.');
-      setMessage("Disconnected from server.");
     });
 
     return () => {
@@ -136,7 +133,7 @@ const Play = () => {
         socketRef.current = null;
       }
     };
-  }, []);
+  }, [roomId]);
 
   const [openPieceDialogId, setOpenPieceDialogId] = useState<string | null>(null);
 
@@ -154,20 +151,21 @@ const Play = () => {
     }
   };
 
+  const variantToDisplay = game || currentVariant;
+
   return (
     <div className="w-full flex flex-row gap-6 px-4 md:px-8 py-6 h-[calc(100vh-62px)]">
       <Card className="w-1/4 p-4 flex flex-col gap-4">
-        <h2 className="text-lg font-semibold mb-2">Game Info</h2>
-        {game && (
+        {variantToDisplay && (
           <>
-            <p className="mb-2"><span className="font-semibold">Variant:</span> {game.name}</p>
+            <h2 className="text-lg font-semibold mb-2">{variantToDisplay.name}</h2>
+            <p>time</p>
 
-            <Separator />
-            <h3 className="text-lg font-semibold">Pieces</h3>
+            <Separator /> 
             <ScrollArea className="flex-grow">
               <div className="grid gap-2 grid-cols-1">
-                {game.pieces.map((piece) => {
-                  const isRoyal = game.royals.includes(piece.id);
+                {variantToDisplay.pieces.map((piece) => {
+                  const isRoyal = variantToDisplay.royals.includes(piece.id);
                   return (
                     <PieceCard
                       key={piece.id}
@@ -177,7 +175,7 @@ const Play = () => {
                       selectedPieceColor={0}
                       isRoyal={isRoyal}
                       setVariant={() => {}}
-                      variant={game} 
+                      variant={variantToDisplay} 
                       isEditable={false}
                       pieceConfig={piece}
                       setPieceConfig={() => {}}
@@ -195,18 +193,22 @@ const Play = () => {
                 })}
               </div>
             </ScrollArea>
+            <VariantConfigDialog
+              variant={variantToDisplay}
+              setVariant={() => {}}
+              isGameConfigureDialogOpen={isVariantConfigDialogOpen}
+              setIsGameConfigureDialogOpen={setIsVariantConfigDialogOpen}
+              isEditable={false}
+              trigger={<Button className="w-full">Variant Details</Button>}
+            />
           </>
         )}
-        {playerIndex !== null && <p className="mb-2"><span className="font-semibold">You are:</span> {playerIndex === 0 ? "White" : "Black"}</p>}
-        <p>{message}</p>
       </Card>
       <div className="w-1/2">
         {game ? (
           <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex && !game.gameEndResult} playerIndex={playerIndex} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-secondary rounded-md">
-            <p>Waiting for game to start...</p>
-          </div>
+          <CopyableLink />
         )}
       </div>
       <Card className="w-[350px] flex flex-col">

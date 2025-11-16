@@ -3,7 +3,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { useNavigate } from "react-router-dom";
 
 import { DEFAULT_VARIANT, EMPTY_PIECE_CONFIG } from "@/lib/constants";
-import { deletePiece, Piece, PieceErrors, Variant } from "common";
+import { deletePiece, Piece, PieceErrors, Variant, stringify } from "common";
 
 import Chessboard from "@/components/Chessboard";
 import PieceCraftDialog from "@/components/PieceCraftDialog";
@@ -36,12 +36,7 @@ const Create = () => {
   const saveVariant = async () => {
     setIsSavingVariant(true);
     try {
-      const variantString = JSON.stringify({ variant }, (key, value) => {
-        if (value === Infinity) {
-          return "Infinity";
-        }
-        return value;
-      });
+      const variantString = stringify({ variant });
 
       const response = await fetch('http://localhost:3001/api/variants', {
         method: 'POST',

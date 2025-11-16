@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import { parse, stringify } from 'common/json';
 
 // Function to generate a random 8-character alphanumeric ID (Lichess style)
 const generateRoomId = (): string => {
@@ -148,7 +149,7 @@ io.on('connection', (socket) => {
       // Initialize game state
       room.game = {
         ...room.variant,
-        currentBoard: JSON.parse(JSON.stringify(room.variant.initialBoard)), // Deep copy
+        currentBoard: parse(stringify(room.variant.initialBoard)), // Deep copy
         history: [],
         turn: 0,
       } as Game;
