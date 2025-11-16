@@ -3,9 +3,13 @@ import { Button } from "./button";
 import { Input } from "./input";
 import { Check, Copy } from "lucide-react";
 
-export function CopyableLink() {
+interface CopyableLinkProps {
+  shareUrl?: string;
+}
+
+export function CopyableLink({ shareUrl }: CopyableLinkProps) {
   const [isCopied, setIsCopied] = useState(false);
-  const link = window.location.href;
+  const link = shareUrl || window.location.href;
 
   const handleCopy = async () => {
     try {

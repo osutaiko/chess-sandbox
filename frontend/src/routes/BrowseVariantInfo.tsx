@@ -79,7 +79,8 @@ const BrowseVariantInfo = () => {
       }
 
       const { roomId } = await response.json();
-      navigate(`/play?roomId=${roomId}`);
+      navigate(`/play/${roomId}`);
+
     } catch (err: any) {
       console.error('Error creating game:', err);
       setError(err.message || "Failed to create game.");

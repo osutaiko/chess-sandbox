@@ -38,7 +38,7 @@ const router = createBrowserRouter([
         element: <BrowseVariantInfo />,
       },
       {
-        path: "/play",
+        path: "/play/:roomId",
         element: <Play />,
       },
     ],

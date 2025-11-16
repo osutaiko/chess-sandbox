@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Game, Variant, historyToAlgebraics, parse, stringify } from "common";
 import { io, Socket } from "socket.io-client";
 
@@ -16,9 +16,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 const Play = () => {
-  const [searchParams] = useSearchParams();
-  const roomId = searchParams.get('roomId');
-  console.log('Play.tsx: Component rendered. roomId:', roomId);
+  const { roomId } = useParams<{ roomId: string }>();
   
   const [socket, setSocket] = useState<Socket | null>(null);
   const [game, setGame] = useState<Game | null>(null);
@@ -39,10 +37,7 @@ const Play = () => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    console.log('Play.tsx: useEffect for socket setup triggered.');
-
     if (!roomId) {
-      console.log('Play.tsx: roomId is null, skipping socket initialization.');
       return;
     }
 
@@ -63,13 +58,11 @@ const Play = () => {
 
     // Prevents re-initializing the socket on subsequent re-renders for the same room.
     if (socketRef.current && socketRef.current.connected && socketRef.current.io.opts.query?.roomId === roomId) {
-      console.log('Play.tsx: Socket already initialized and connected for this roomId, skipping.');
       return;
     }
 
     // Disconnect any existing socket if the roomId has changed or not connected.
     if (socketRef.current && (socketRef.current.io.opts.query?.roomId !== roomId || !socketRef.current.connected)) {
-        console.log('Play.tsx: RoomId changed or socket not connected, disconnecting old socket.');
         socketRef.current.disconnect();
         socketRef.current = null;
     }
@@ -81,41 +74,31 @@ const Play = () => {
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
-      console.log('Play.tsx: Socket connected.');
-      console.log(`Play.tsx: Emitting joinRoom for roomId: ${roomId}`);
       newSocket.emit('joinRoom', roomId);
     });
 
     newSocket.on('playerInfo', (data) => {
-      console.log('Play.tsx: Received playerInfo:', data);
       const { playerIndex } = data;
       playerIndexRef.current = playerIndex;
       setPlayerIndex(playerIndex);
     });
 
     newSocket.on('playerJoined', (data) => {
-      console.log('Play.tsx: Received playerJoined:', data);
       const { playerIndex: joinedPlayerIndex } = data;
-      console.log(`Play.tsx: Player ${joinedPlayerIndex} joined the room`);
     });
 
     newSocket.on('gameStart', (data) => {
-      console.log('Play.tsx: Received gameStart:', data);
       const { game: serverGame } = data;
-      console.log('Play.tsx: Game starting!', serverGame);
       setGame(parse(stringify(serverGame)));
       setCurrentVariant(parse(stringify(serverGame))); 
     });
 
     newSocket.on('gameUpdated', (updatedGame: Game) => {
-      console.log('Play.tsx: Received gameUpdated:', updatedGame);
       setGame(parse(stringify(updatedGame)));
     });
 
     newSocket.on('playerLeft', (data) => {
-      console.log('Play.tsx: Received playerLeft:', data);
       const { playerIndex } = data;
-      console.log(`Play.tsx: Player ${playerIndex} left the room`);
     });
 
     newSocket.on('error', (errorMessage: string) => {
@@ -123,12 +106,10 @@ const Play = () => {
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Play.tsx: Disconnected from Socket.IO server.');
     });
 
     return () => {
       if (socketRef.current) {
-        console.log('Play.tsx: Disconnecting socket on cleanup.');
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -208,7 +189,7 @@ const Play = () => {
         {game ? (
           <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex && !game.gameEndResult} playerIndex={playerIndex} />
         ) : (
-          <CopyableLink />
+          <CopyableLink shareUrl={`${window.location.origin}/play/${roomId}`} />
         )}
       </div>
       <Card className="w-[350px] flex flex-col">
