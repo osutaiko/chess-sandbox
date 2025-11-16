@@ -29,27 +29,22 @@ const Square: React.FC<{
   const square = game.currentBoard[row][col];
   const pieceObj = square.pieceId ? game.pieces.find((p) => p.id === square.pieceId) : null;
   
-  const isSquareDark = isFlipped ? (row + col) % 2 === 1 : (game.height - row + col) % 2 === 0;
+  const isSquareDark = (row + col) % 2 === 0;
 
-  const rankLabel = isFlipped
-    ? (col === 0 ? row + 1 : null)
-    : (col === game.width - 1 ? game.height - row : null);
-  const fileLabel = isFlipped
-    ? (row === 0 ? String.fromCharCode(97 + (game.width - 1 - col)) : null)
-    : (row === game.height - 1 ? String.fromCharCode(97 + col) : null);
+  const rankLabelValue = game.height - row;
+  const showRankLabel = isFlipped ? col === 0 : col === game.width - 1;
+
+  const fileLabelValue = String.fromCharCode(97 + col);
+  const showFileLabel = isFlipped ? row === 0 : row === game.height - 1;
 
   const squareBgColor = () => {
+    if (isSelected) {
+      return "bg-primary";
+    }
     if (square.isValid) {
-      if (isSelected) {
-        return "bg-primary";
-      }
-      if (isSquareDark) {
-        return "bg-square-dark";
-      } else {
-        return "bg-square-light";
-      }
+      return isSquareDark ? "bg-square-dark" : "bg-square-light";
     } else {
-      return "bg-secondary";
+      return "bg-gray-400";
     }
   }
 
@@ -63,14 +58,14 @@ const Square: React.FC<{
       {pieceObj && square.color !== null && (
         <DraggablePiece piece={pieceObj} color={square.color} row={row} col={col} draggable={isMyTurn && game.turn === square.color} />
       )}
-      {rankLabel && (
-        <span className={`absolute top-0.5 right-1 text-xs font-semibold ${square.isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
-          {rankLabel}
+      {showRankLabel && (
+        <span className={`absolute top-0.5 right-0.5 text-xs font-semibold ${isSquareDark ? "text-square-light" : "text-square-dark"}`}>
+          {rankLabelValue}
         </span>
       )}
-      {fileLabel && (
-        <span className={`absolute bottom-0 left-1 text-xs font-semibold ${square.isValid ? (isSquareDark ? "text-square-light" : "text-square-dark") : "text-muted-foreground"}`}>
-          {fileLabel}
+      {showFileLabel && (
+        <span className={`absolute bottom-0.5 left-0.5 text-xs font-semibold ${isSquareDark ? "text-square-light" : "text-square-dark"}`}>
+          {fileLabelValue}
         </span>
       )}
       {isValidDestination && (
@@ -157,21 +152,20 @@ const PlayChessboard: React.FC<{
 
   const handleRightClick = (event: React.MouseEvent, row: number, col: number) => {
     event.preventDefault();
-    console.log(event, row, col);
   };
 
   return (
     <div
-      className="grid md:rounded-md overflow-hidden" // Removed rotate-180
+      className="grid md:rounded-md overflow-hidden"
       style={{
         gridTemplateColumns: `repeat(${game.width}, 1fr)`,
         gridTemplateRows: `repeat(${game.height}, 1fr)`,
       }}
     >
       {Array.from({ length: game.height }).map((_, rowIndex) => {
-        const displayRow = playerIndex === 1 ? game.height - 1 - rowIndex : rowIndex; // Display row for rendering
+        const displayRow = playerIndex === 1 ? game.height - 1 - rowIndex : rowIndex;
         return Array.from({ length: game.width }).map((_, colIndex) => {
-          const displayCol = playerIndex === 1 ? game.width - 1 - colIndex : colIndex; // Display col for rendering
+          const displayCol = playerIndex === 1 ? game.width - 1 - colIndex : colIndex;
           return (
             <Square
               key={`${displayRow}-${displayCol}`}
@@ -184,7 +178,7 @@ const PlayChessboard: React.FC<{
               handleRightClick={handleRightClick}
               isValidDestination={validDestinations.some((dest) => dest.row === displayRow && dest.col === displayCol)}
               isSelected={selectedSquare?.row === displayRow && selectedSquare?.col === displayCol}
-              isFlipped={playerIndex === 1} // Pass isFlipped prop
+              isFlipped={playerIndex === 1}
             />
           );
         });

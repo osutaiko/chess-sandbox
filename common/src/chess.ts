@@ -697,7 +697,18 @@ export const getGameEndResult = (game: Game): GameEndResult | null => {
 export const historyToAlgebraics = (game: Game) => {
   const algebraics: string[] = [];
   game.history.map((move: Move) => {
-    algebraics.push(String(getSquareName(game.width, game.height, move.to.row, move.to.col)));
+    const fromSquareName = getSquareName(game.width, game.height, move.from.row, move.from.col);
+    const toSquareName = getSquareName(game.width, game.height, move.to.row, move.to.col);
+    const pieceId = game.initialBoard[move.from.row][move.from.col].pieceId;
+    const piece = game.pieces.find(p => p.id === pieceId);
+
+    if (piece && piece.name.toLowerCase() === "pawn") {
+      algebraics.push(`${fromSquareName}-${toSquareName}`);
+    } else if (piece) {
+      algebraics.push(`${piece.id}${fromSquareName}-${toSquareName}`);
+    } else {
+      algebraics.push(`${fromSquareName}-${toSquareName}`);
+    }
   });
   return algebraics;
 };
