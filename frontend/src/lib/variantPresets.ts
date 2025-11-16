@@ -1,4 +1,5 @@
 import { Variant, VariantGridType } from "common/types";
+import { parse, stringify } from "common";
 import { PIECE_PRESETS } from "@/lib/piecePresets";
 
 export const VARIANT_PRESETS: Variant[] = [
@@ -34,7 +35,7 @@ export const VARIANT_PRESETS: Variant[] = [
       }
       return row;
     }),
-    pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)),
+    pieces: parse(stringify(PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q'].includes(p.id)))),
     royals: ['K'],
     isWinOnCheckmate: true,
     mustCheckmateAllRoyals: true,
@@ -75,8 +76,17 @@ export const VARIANT_PRESETS: Variant[] = [
       }
       return row;
     }),
-    pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q', 'H', 'E'].includes(p.id)),
-    royals: ['K'],
+            pieces: parse(stringify(PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'B', 'R', 'Q', 'H', 'E'].includes(p.id)))).map(piece => {
+              if (piece.id === 'K') {
+                piece.moves = piece.moves.map(move => {
+                  if (move.type === 'castle') {
+                    return { ...move, royalMoveDistance: 3 };
+                  }
+                  return move;
+                });
+              }
+              return piece;
+            }),    royals: ['K'],
     isWinOnCheckmate: true,
     mustCheckmateAllRoyals: true,
     isWinOnStalemate: false,
@@ -116,8 +126,19 @@ export const VARIANT_PRESETS: Variant[] = [
       }
       return row;
     }),
-    pieces: PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'R', 'Q'].includes(p.id)),
-    royals: ['K'],
+                pieces: parse(stringify(PIECE_PRESETS.filter(p => ['K', 'P', 'N', 'R', 'Q'].includes(p.id)))).map(piece => {
+                  if (piece.id === 'P') {
+                    piece.moves = piece.moves.filter(move =>
+                      !(move.type === 'slide' && move.offset?.[0] === 1 && move.offset?.[1] === 0 && move.range?.from === 2 && move.range?.to === 2)
+                    );
+                  }
+                  if (piece.id === 'K') {
+                    piece.moves = piece.moves.filter(move =>
+                      !(move.type === 'castle')
+                    );
+                  }
+                  return piece;
+                }),    royals: ['K'],
     isWinOnCheckmate: true,
     mustCheckmateAllRoyals: true,
     isWinOnStalemate: false,

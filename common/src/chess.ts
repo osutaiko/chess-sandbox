@@ -703,11 +703,11 @@ export const historyToAlgebraics = (game: Game) => {
     const piece = game.pieces.find(p => p.id === pieceId);
 
     if (piece && piece.name.toLowerCase() === "pawn") {
-      algebraics.push(`${fromSquareName}-${toSquareName}`);
+      algebraics.push(`${fromSquareName}${toSquareName}`);
     } else if (piece) {
-      algebraics.push(`${piece.id}${fromSquareName}-${toSquareName}`);
+      algebraics.push(`${piece.id}${fromSquareName}${toSquareName}`);
     } else {
-      algebraics.push(`${fromSquareName}-${toSquareName}`);
+      algebraics.push(`${fromSquareName}${toSquareName}`);
     }
   });
   return algebraics;
