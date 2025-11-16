@@ -572,7 +572,16 @@ export const getLegalMoves = (game: Game): Move[] => {
   return legalMoves;
 };
 
-export const playMove = (game: Game, move: Move, checkLegality = true): Game => {
+// Helper function to parse time control string (e.g., "3+2" -> {base: 3, increment: 2})
+const parseTimeControlString = (timeControl: string): { base: number; increment: number } => {
+  const parts = timeControl.split('+').map(Number);
+  const base = parts[0] || 0;
+  const increment = parts[1] || 0;
+  return { base, increment };
+};
+
+
+export const playMove = (game: Game, move: Move, checkLegality = true, currentPlayerRemainingTime?: number): Game => {
   const { from, to, targetPieceFrom, targetPieceTo, isCastle } = move;
   const pieceId = game.currentBoard[from.row][from.col].pieceId;
   const color = game.currentBoard[from.row][from.col].color;
@@ -641,6 +650,15 @@ export const playMove = (game: Game, move: Move, checkLegality = true): Game => 
     history: newHistory,
     turn: (game.turn + 1) % game.playerCount,
   };
+
+  // Handle time control
+  if (newGame.timeControl && newGame.remainingTime && currentPlayerRemainingTime !== undefined) {
+    const { increment } = parseTimeControlString(newGame.timeControl);
+    const updatedRemainingTime = [...newGame.remainingTime];
+
+    updatedRemainingTime[game.turn] = currentPlayerRemainingTime + (increment * 1000);
+    newGame.remainingTime = updatedRemainingTime;
+  }
 
   if (checkLegality) {
     newGame.gameEndResult = getGameEndResult(newGame);

@@ -83,7 +83,8 @@ const PlayChessboard: React.FC<{
   roomId?: string | null;
   isMyTurn: boolean;
   playerIndex: number | null;
-}> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex }) => {
+  onMoveMade: (move: Move) => void;
+}> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex, onMoveMade }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
@@ -109,7 +110,7 @@ const PlayChessboard: React.FC<{
       if (setGame) {
         setGame(newGame);
       }
-      socket?.emit('chessMove', { roomId, move });
+      onMoveMade(move);
   
       setSelectedSquare(null);
       setValidDestinations([]);
@@ -143,7 +144,7 @@ const PlayChessboard: React.FC<{
       if (setGame) {
         setGame(newGame);
       }
-      socket?.emit('chessMove', { roomId, move });
+      onMoveMade(move);
     }
 
     setSelectedSquare(null);

@@ -14,11 +14,20 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import images from "@/assets/images";
@@ -31,6 +40,8 @@ const BrowseVariantInfo = () => {
   const [variant, setVariant] = useState<Variant | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTimeControl, setSelectedTimeControl] = useState<string>("5+0"); // Default time control
+  const [selectedSide, setSelectedSide] = useState<number>(0);
 
   useEffect(() => {
     const fetchVariant = async () => {
@@ -62,10 +73,11 @@ const BrowseVariantInfo = () => {
 
 
   const [isGameConfigureDialogOpen, setIsGameConfigureDialogOpen] = useState<boolean>(false);
+  const [isLobbyDialogOpen, setIsLobbyDialogOpen] = useState(false);
 
   const createGame = async (variantToPlay: Variant, preferredSide: number) => {
     try {
-      const body = stringify({ variant: variantToPlay, preferredSide });
+      const body = stringify({ variant: variantToPlay, preferredSide, timeControl: selectedTimeControl });
       const response = await fetch('http://localhost:3001/api/rooms', {
         method: 'POST',
         headers: {
@@ -113,19 +125,38 @@ const BrowseVariantInfo = () => {
             setIsGameConfigureDialogOpen={setIsGameConfigureDialogOpen}
             isEditable={false}
           />
-          <Dialog>
+          <Dialog open={isLobbyDialogOpen} onOpenChange={setIsLobbyDialogOpen}>
             <DialogTrigger asChild>
               <Button>Play!</Button>
             </DialogTrigger>
             <DialogContent className="w-[300px]">
               <DialogHeader>
-                <DialogTitle>Choose Your Side</DialogTitle>
+                <DialogTitle>Create Lobby</DialogTitle>
               </DialogHeader>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="timeControl">Time Control</Label>
+                <Select id="timeControl" onValueChange={setSelectedTimeControl} defaultValue={selectedTimeControl}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Time Control" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3+0">3+0</SelectItem>
+                    <SelectItem value="3+2">3+2</SelectItem>
+                    <SelectItem value="5+0">5+0</SelectItem>
+                    <SelectItem value="5+3">5+3</SelectItem>
+                    <SelectItem value="10+0">10+0</SelectItem>
+                    <SelectItem value="10+5">10+5</SelectItem>
+                    <SelectItem value="15+10">15+10</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="side">You play as...</Label>
                 <div className="flex justify-center gap-1">
                   <Button 
-                    onClick={() => createGame(variant!, 0)}
-                    variant="secondary"
+                    onClick={() => setSelectedSide(0)} 
+                    variant={selectedSide === 0 ? "default" : "secondary"}
                     className="flex flex-col gap-1 min-w-[90px] h-[95px] py-2"
                   >
                     <img
@@ -136,8 +167,8 @@ const BrowseVariantInfo = () => {
                     <p>White</p>
                   </Button>
                   <Button 
-                    onClick={() => createGame(variant!, 1)}
-                    variant="secondary"
+                    onClick={() => setSelectedSide(1)} 
+                    variant={selectedSide === 1 ? "default" : "secondary"}
                     className="flex flex-col gap-1 min-w-[90px] h-[95px] py-2"
                   >
                     <img
@@ -148,8 +179,17 @@ const BrowseVariantInfo = () => {
                     <p>Black</p>
                   </Button>
                 </div>
-                {/* <Button onClick={() => createGame(variant!, -1)}>Random</Button> */}
               </div>
+              <DialogFooter>
+                <Button 
+                  onClick={() => {
+                    createGame(variant!, selectedSide);
+                    setIsLobbyDialogOpen(false);
+                  }}
+                >
+                  Confirm
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>

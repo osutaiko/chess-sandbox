@@ -97,6 +97,8 @@ export type Game = Variant & {
   history: Move[];
   turn: number;
   gameEndResult?: GameEndResult | null;
+  timeControl?: string;
+  remainingTime?: number[];
 };
 
 export type GameEndResult = {

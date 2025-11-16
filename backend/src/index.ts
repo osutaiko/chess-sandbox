@@ -16,6 +16,12 @@ const generateRoomId = (): string => {
 
 import { Game, Move, Variant, playMove } from 'common';
 
+// Parse time control string (e.g., "3+2" -> {base: 3, increment: 2})
+const parseTimeControl = (timeControl: string, playerCount: number): number[] => {
+  const [base, increment] = timeControl.split('+').map(Number);
+  return Array(playerCount).fill(base * 60 * 1000);
+};
+
 
 interface GameRoom {
   id: string;
@@ -23,6 +29,7 @@ interface GameRoom {
   variant: Variant;
   game?: Game;
   creatorPreferredSide?: number; // -1 for random, 0 for White, 1 for Black
+  timeControl: string; // Add this line
 }
 
 const app = express();
@@ -68,9 +75,9 @@ app.get('/api/variants', (req, res) => {
 });
 
 app.post('/api/rooms', (req, res) => {
-  const { variant, preferredSide } = req.body as { variant: Variant; preferredSide?: number };
-  if (!variant) {
-    return res.status(400).json({ message: "Variant data is required" });
+  const { variant, preferredSide, timeControl } = req.body as { variant: Variant; preferredSide?: number; timeControl: string };
+  if (!variant || !timeControl) {
+    return res.status(400).json({ message: "Variant and Time Control data are required" });
   }
   const roomId = generateRoomId();
   gameRooms[roomId] = {
@@ -79,8 +86,9 @@ app.post('/api/rooms', (req, res) => {
     variant: variant,
     // Store preferredSide for the room creator
     creatorPreferredSide: preferredSide !== undefined ? preferredSide : -1, // -1 for random
+    timeControl: timeControl, // Store timeControl
   };
-  console.log(`Room ${roomId} created with variant "${variant.name}". Player count: ${variant.playerCount}. Creator preferred side: ${gameRooms[roomId].creatorPreferredSide}`);
+  console.log(`Room ${roomId} created with variant "${variant.name}". Player count: ${variant.playerCount}. Creator preferred side: ${gameRooms[roomId].creatorPreferredSide}. Time Control: ${timeControl}`);
   res.status(201).json({ roomId });
 });
 
@@ -147,11 +155,14 @@ io.on('connection', (socket) => {
     if (numPlayersAfterJoin === room.variant.playerCount) {
       console.log(`[${roomId}] All players joined. Initializing game.`);
       // Initialize game state
+      const initialRemainingTime = parseTimeControl(room.timeControl, room.variant.playerCount);
       room.game = {
         ...room.variant,
         currentBoard: parse(stringify(room.variant.initialBoard)), // Deep copy
         history: [],
         turn: 0,
+        timeControl: room.timeControl,
+        remainingTime: initialRemainingTime,
       } as Game;
       io.to(roomId).emit('gameStart', { game: room.game, players: room.players });
       console.log(`[${roomId}] Game starting in room ${roomId}`);
@@ -160,10 +171,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('chessMove', ({ roomId, move }: { roomId: string, move: Move }) => {
+  socket.on('chessMove', ({ roomId, move, currentPlayerRemainingTime }: { roomId: string, move: Move, currentPlayerRemainingTime?: number }) => {
     const room = gameRooms[roomId];
     if (room && room.game) {
-      const newGame = playMove(room.game, move);
+      const newGame = playMove(room.game, move, true, currentPlayerRemainingTime);
       room.game = newGame;
       io.to(roomId).emit('gameUpdated', newGame);
     }

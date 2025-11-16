@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Game, Variant, historyToAlgebraics, parse, stringify } from "common";
+import { Game, Move, Variant, historyToAlgebraics, parse, stringify } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
 import { PieceCard } from "@/components/PieceCard";
 import { CopyableLink } from "@/components/ui/CopyableLink";
 import VariantConfigDialog from "@/components/VariantConfigDialog";
+import ChessClock from "@/components/ChessClock";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +15,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+
+// Helper function to parse time control string (e.g., "3+2" -> {base: 3, increment: 2})
+const parseTimeControlString = (timeControl: string): { base: number; increment: number } => {
+  const parts = timeControl.split('+').map(Number);
+  const base = parts[0] || 0;
+  const increment = parts[1] || 0;
+  return { base, increment };
+};
+
 
 const Play = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -24,6 +34,14 @@ const Play = () => {
   const [playerIndex, setPlayerIndex] = useState<number | null>(null);
   const [plyIndex, setPlyIndex] = useState<number>(0);
   const [isVariantConfigDialogOpen, setIsVariantConfigDialogOpen] = useState<boolean>(false);
+
+  const [whiteTime, setWhiteTime] = useState<number>(0);
+  const [blackTime, setBlackTime] = useState<number>(0);
+  const [clocksRunning, setClocksRunning] = useState<boolean>(false);
+
+  const [whiteCurrentActualTime, setWhiteCurrentActualTime] = useState<number>(0);
+  const [blackCurrentActualTime, setBlackCurrentActualTime] = useState<number>(0);
+
 
   const plyIndexRef = useRef<HTMLParagraphElement>(null);
   const playerIndexRef = useRef<number | null>(null);
@@ -89,12 +107,29 @@ const Play = () => {
 
     newSocket.on('gameStart', (data) => {
       const { game: serverGame } = data;
-      setGame(parse(stringify(serverGame)));
-      setCurrentVariant(parse(stringify(serverGame))); 
+      const parsedGame: Game = parse(stringify(serverGame));
+      setGame(parsedGame);
+      setCurrentVariant(parsedGame); // currentVariant also needs timeControl
+      if (parsedGame.remainingTime) {
+        setWhiteTime(parsedGame.remainingTime[0]);
+        setBlackTime(parsedGame.remainingTime[1]);
+        setWhiteCurrentActualTime(parsedGame.remainingTime[0]); // Initialize actual times
+        setBlackCurrentActualTime(parsedGame.remainingTime[1]); // Initialize actual times
+        setClocksRunning(true);
+      }
     });
 
     newSocket.on('gameUpdated', (updatedGame: Game) => {
-      setGame(parse(stringify(updatedGame)));
+      const parsedGame: Game = parse(stringify(updatedGame));
+      setGame(parsedGame);
+      if (parsedGame.remainingTime) {
+        setWhiteTime(parsedGame.remainingTime[0]);
+        setBlackTime(parsedGame.remainingTime[1]);
+        // Do NOT update actual times here, as they are managed by the ChessClock component
+      }
+      if (parsedGame.gameEndResult) {
+        setClocksRunning(false);
+      }
     });
 
     newSocket.on('playerLeft', (data) => {
@@ -133,6 +168,54 @@ const Play = () => {
   };
 
   const variantToDisplay = game || currentVariant;
+  const { increment: timeIncrement } = variantToDisplay?.timeControl ? parseTimeControlString(variantToDisplay.timeControl) : { base: 0, increment: 0 };
+
+
+  const onTimeUp = (color: 0 | 1) => {
+    if (!game || !socket) return;
+    setClocksRunning(false);
+    console.log(`Player ${color} ran out of time!`);
+  };
+
+  // Callbacks to update the actual current time from ChessClock
+  const handleWhiteTimeUpdate = (time: number) => {
+    setWhiteCurrentActualTime(time);
+  };
+
+  const handleBlackTimeUpdate = (time: number) => {
+    setBlackCurrentActualTime(time);
+  };
+
+  const handleChessMove = (move: Move) => {
+    if (!socket || !game || playerIndex === null) return;
+    const currentPlayerRemainingTime = playerIndex === 0 ? whiteCurrentActualTime : blackCurrentActualTime;
+
+    socket.emit('chessMove', { roomId, move, currentPlayerRemainingTime });
+  };
+
+  const BlackClock = (
+    <ChessClock
+      initialTime={blackTime}
+      isRunning={clocksRunning && game?.turn === 1 && !game?.gameEndResult}
+      onTimeUp={() => onTimeUp(1)}
+      onTimeUpdate={handleBlackTimeUpdate}
+      playerColor={1}
+      currentTurn={game?.turn ?? 0}
+      increment={timeIncrement}
+    />
+  );
+
+  const WhiteClock = (
+    <ChessClock
+      initialTime={whiteTime}
+      isRunning={clocksRunning && game?.turn === 0 && !game?.gameEndResult}
+      onTimeUp={() => onTimeUp(0)}
+      onTimeUpdate={handleWhiteTimeUpdate} // Pass the update callback
+      playerColor={0}
+      currentTurn={game?.turn ?? 0}
+      increment={timeIncrement}
+    />
+  );
 
   return (
     <div className="w-full flex flex-row gap-6 px-4 md:px-8 py-6 h-[calc(100vh-62px)]">
@@ -140,9 +223,8 @@ const Play = () => {
         {variantToDisplay && (
           <>
             <h2 className="text-lg font-semibold mb-2">{variantToDisplay.name}</h2>
-            <p>time</p>
+            <p>Time Control: {variantToDisplay.timeControl}</p>
 
-            <Separator /> 
             <ScrollArea className="flex-grow">
               <div className="grid gap-2 grid-cols-1">
                 {variantToDisplay.pieces.map((piece) => {
@@ -187,14 +269,14 @@ const Play = () => {
       </Card>
       <div className="w-1/2">
         {game ? (
-          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex && !game.gameEndResult} playerIndex={playerIndex} />
+          <PlayChessboard game={game} setGame={setGame} socket={socket} roomId={roomId} isMyTurn={game.turn === playerIndex && !game.gameEndResult} playerIndex={playerIndex} onMoveMade={handleChessMove} />
         ) : (
           <CopyableLink shareUrl={`${window.location.origin}/play/${roomId}`} />
         )}
       </div>
       <Card className="w-[350px] flex flex-col">
         <div className="p-4">
-          black clock
+          {playerIndex === 0 ? BlackClock : WhiteClock}
         </div>
         <Separator />
         <ScrollArea className="flex-grow py-2">
@@ -259,7 +341,7 @@ const Play = () => {
         </div>
         <Separator />
         <div className="p-4">
-          white clock
+          {playerIndex === 0 ? WhiteClock : BlackClock}
         </div>
       </Card>
     </div>
