@@ -13,7 +13,8 @@ import "./index.css";
 import Layout from "./components/Layout";
 import Home from "./routes/Home";
 import Create from "./routes/Create";
-import Browse from "./routes/Browse";
+import BrowseCatalog from "./routes/BrowseCatalog";
+import BrowseVariantInfo from "./routes/BrowseVariantInfo";
 import Play from "./routes/Play";
 
 const router = createBrowserRouter([
@@ -30,7 +31,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/browse",
-        element: <Browse />,
+        element: <BrowseCatalog />,
+      },
+      {
+        path: "/browse/:variantId",
+        element: <BrowseVariantInfo />,
       },
       {
         path: "/play",

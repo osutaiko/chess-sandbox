@@ -52,7 +52,7 @@ const Create = () => {
 
       const { variantId } = await response.json();
       console.log('Variant saved with ID:', variantId);
-      navigate(`/browse?variantId=${variantId}`);
+      navigate(`/browse/${variantId}`);
     } catch (error: any) {
       console.error('Error saving variant:', error);
     } finally {
