@@ -17,8 +17,8 @@ pids
 *.dat
 
 # Directory for compiled output
-dist
-build
+dist/
+build/
 .next
 .nuxt
 .vercel
@@ -27,6 +27,7 @@ build
 .cache
 .temp
 .tmp
+.vite/
 
 # Dependencies
 node_modules/
