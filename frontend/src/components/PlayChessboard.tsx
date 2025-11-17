@@ -85,14 +85,13 @@ const Square: React.FC<{
 
 const PlayChessboard: React.FC<{
   game: Game;
-  setGame?: (game: Game) => void;
   socket?: Socket | null;
   roomId?: string | null;
   isMyTurn: boolean;
   playerIndex: number | null;
   onMoveMade: (move: Move) => void;
   lastMove: Move | null; // Add lastMove to PlayChessboard props
-}> = ({ game, setGame, socket, roomId, isMyTurn, playerIndex, onMoveMade, lastMove }) => {
+}> = ({ game, socket, roomId, isMyTurn, playerIndex, onMoveMade, lastMove }) => {
   const [selectedSquare, setSelectedSquare] = useState<{ row: number; col: number } | null>(null);
   const [validDestinations, setValidDestinations] = useState<{ row: number; col: number }[]>([]);
 
@@ -113,11 +112,6 @@ const PlayChessboard: React.FC<{
 
       if (!move) return;
   
-      const newGame = playMove(game, move);
-  
-      if (setGame) {
-        setGame(newGame);
-      }
       onMoveMade(move);
   
       setSelectedSquare(null);
@@ -147,11 +141,6 @@ const PlayChessboard: React.FC<{
     );
 
     if (move) {
-      const newGame = playMove(game, move);
-
-      if (setGame) {
-        setGame(newGame);
-      }
       onMoveMade(move);
     }
 

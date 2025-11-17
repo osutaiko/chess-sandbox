@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Game, Move, Variant, getGameAtPly, historyToAlgebraics, parse, stringify } from "common";
+import { Game, Move, Variant, getGameAtPly, historyToAlgebraics, parse, stringify, playMove } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
@@ -213,8 +213,14 @@ const Play = () => {
 
   const handleChessMove = (move: Move) => {
     if (!socket || !game || playerIndex === null) return;
-    const currentPlayerRemainingTime = playerIndex === 0 ? whiteCurrentActualTime : blackCurrentActualTime;
+    
+    // Optimistically update the game state
+    const newGame = playMove(game, move, false);
+    setGame(newGame);
+    setPlyIndex(newGame.history.length);
 
+    // Send the move to the server
+    const currentPlayerRemainingTime = playerIndex === 0 ? whiteCurrentActualTime : blackCurrentActualTime;
     socket.emit('chessMove', { roomId, move, currentPlayerRemainingTime });
   };
 
@@ -296,10 +302,9 @@ const Play = () => {
         {displayedGame ? (
           <PlayChessboard
             game={displayedGame}
-            setGame={setGame}
             socket={socket}
             roomId={roomId}
-            isMyTurn={game ? game.turn === playerIndex && !game.gameEndResult && plyIndex === game.history.length : false}
+            isMyTurn={displayedGame ? displayedGame.turn === playerIndex && !game?.gameEndResult && plyIndex === game?.history.length : false}
             playerIndex={playerIndex}
             onMoveMade={handleChessMove}
             lastMove={game && plyIndex > 0 ? game.history[plyIndex - 1] : null}
