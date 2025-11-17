@@ -134,7 +134,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
       </DialogTrigger>
       <DialogContent className="max-w-full w-[95vw] md:w-[900px] h-[95vh] md:h-[90vh] gap-8">
         <DialogHeader>
-          <DialogTitle>{isCreateMode ? "Create New Piece" : `Edit Piece`}</DialogTitle>
+          <DialogTitle>{isEditable ? (isCreateMode ? "Create New Piece" : `Edit Piece`): "Piece Info"}</DialogTitle>
         </DialogHeader>
         <ScrollArea>
           <div className={`flex flex-col gap-8 ${isEditable ? "" : "pointer-events-none"}`}>
@@ -209,7 +209,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                               src={images[`pieces/${pieceConfig.sprite}-1`]}
                               className="w-full h-full"
                             />
-                            <SquarePen className="absolute right-1 bottom-1" />
+                            {isEditable && <SquarePen className="absolute right-1 bottom-1" />}
                           </> : 
                           <Plus />
                         }
@@ -281,18 +281,20 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
               <div className="flex flex-col gap-4">
                 <div className="flex flex-row justify-between items-center">
                   <h4>Moves</h4>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      const newMove = EMPTY_MOVE_PROPERTY("slide", "orthogonal");
-                      setPieceConfig({
-                        ...pieceConfig,
-                        moves: [...pieceConfig.moves, newMove],
-                      });
-                    }}
-                  >
-                    <Plus />
-                  </Button>
+                  {isEditable &&
+                    <Button
+                      size="icon"
+                      onClick={() => {
+                        const newMove = EMPTY_MOVE_PROPERTY("slide", "orthogonal");
+                        setPieceConfig({
+                          ...pieceConfig,
+                          moves: [...pieceConfig.moves, newMove],
+                        });
+                      }}
+                    >
+                      <Plus />
+                    </Button>
+                  }
                 </div>
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-none md:sticky top-0 h-min md:w-[300px]">
@@ -324,40 +326,44 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                 <Button
                                   size="icon"
                                   variant="secondary"
+                                  className="pointer-events-auto"
                                   onMouseEnter={() => setHighlightedMoveIndex(index)}
                                   onMouseLeave={() => setHighlightedMoveIndex(null)}
                                 >
                                   <ScanSearch />
                                 </Button>
                                 
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      size="icon"
-                                      variant="destructive"
-                                    >
-                                      <Trash2 />
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Deleting Move</DialogTitle>
-                                      <DialogDescription>
-                                        Are you sure you want to delete this move?
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <DialogFooter>
-                                      <DialogClose asChild>
-                                        <Button variant="destructive" onClick={() => {
-                                          const updatedMoves = pieceConfig.moves.filter((_: any, i: number) => i !== index);
-                                          setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                        }}>
-                                          Delete
-                                        </Button>
-                                      </DialogClose>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
+                                {isEditable && 
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="destructive"
+                                      >
+                                        <Trash2 />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>Deleting Move</DialogTitle>
+                                        <DialogDescription>
+                                          Are you sure you want to delete this move?
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <DialogFooter>
+                                        <DialogClose asChild>
+                                          <Button variant="destructive" onClick={() => {
+                                            const updatedMoves = pieceConfig.moves.filter((_: any, i: number) => i !== index);
+                                            setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                          }}>
+                                            Delete
+                                          </Button>
+                                        </DialogClose>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                }
+                                
                               </div>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-6 p-4 pt-0">
@@ -545,11 +551,13 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
             </div>
           </div>
         </ScrollArea>
-        <DialogFooter>
-          <Button onClick={() => handlePieceConfigSubmit(isCreateMode, pieceBeforeEditId)}>
-            Confirm
-          </Button>
-        </DialogFooter>
+        {isEditable &&
+          <DialogFooter>
+            <Button onClick={() => handlePieceConfigSubmit(isCreateMode, pieceBeforeEditId)}>
+              Confirm
+            </Button>
+          </DialogFooter>
+        }
       </DialogContent>
     </Dialog>
   );
