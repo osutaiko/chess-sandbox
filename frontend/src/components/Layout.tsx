@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const Layout = () => {
   return (
-    <div className="flex flex-col items-center min-h-screen select-none">
+    <div className="flex flex-col items-center min-h-screen">
       <header className="flex flex-row px-4 md:px-8 py-4 justify-between items-center w-full border-b bg-secondary/30">
         <Link to="/" className="flex flex-row items-center gap-5">
           <Castle />
