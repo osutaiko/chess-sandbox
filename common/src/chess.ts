@@ -712,6 +712,30 @@ export const getGameEndResult = (game: Game): GameEndResult | null => {
 };
 
 
+
+export const getGameAtPly = (game: Game, ply: number): Game => {
+  if (ply < 0 || ply > game.history.length) {
+    throw new Error("Invalid ply index");
+  }
+
+  // Create a base game state from the initial variant setup
+  let gameAtPly: Game = {
+    ...game,
+    currentBoard: JSON.parse(JSON.stringify(game.initialBoard)),
+    history: [],
+    turn: 0,
+    gameEndResult: null, 
+  };
+
+  // Apply moves one by one to reach the desired ply
+  for (let i = 0; i < ply; i++) {
+    const move = game.history[i];
+    gameAtPly = playMove(gameAtPly, move, false); 
+  }
+
+  return gameAtPly;
+};
+
 export const historyToAlgebraics = (game: Game) => {
   const algebraics: string[] = [];
   game.history.map((move: Move) => {

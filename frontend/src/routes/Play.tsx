@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Game, Move, Variant, historyToAlgebraics, parse, stringify } from "common";
+import { Game, Move, Variant, getGameAtPly, historyToAlgebraics, parse, stringify } from "common";
 import { io, Socket } from "socket.io-client";
 
 import PlayChessboard from "@/components/PlayChessboard";
@@ -30,6 +30,7 @@ const Play = () => {
   
   const [socket, setSocket] = useState<Socket | null>(null);
   const [game, setGame] = useState<Game | null>(null);
+  const [displayedGame, setDisplayedGame] = useState<Game | null>(null);
   const [currentVariant, setCurrentVariant] = useState<Variant | null>(null);
   const [playerIndex, setPlayerIndex] = useState<number | null>(null);
   const [plyIndex, setPlyIndex] = useState<number>(0);
@@ -51,6 +52,13 @@ const Play = () => {
       plyIndexRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }, [plyIndex]);
+
+  useEffect(() => {
+    if (game) {
+      setDisplayedGame(getGameAtPly(game, plyIndex));
+    }
+  }, [game, plyIndex]);
+
 
   const socketRef = useRef<Socket | null>(null);
 
@@ -122,6 +130,7 @@ const Play = () => {
     newSocket.on('gameUpdated', (updatedGame: Game) => {
       const parsedGame: Game = parse(stringify(updatedGame));
       setGame(parsedGame);
+      setPlyIndex(parsedGame.history.length);
       if (parsedGame.remainingTime) {
         setWhiteTime(parsedGame.remainingTime[0]);
         setBlackTime(parsedGame.remainingTime[1]);
@@ -166,6 +175,22 @@ const Play = () => {
       setPlyIndex(maxPly);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        handlePlyNavigation("left");
+      } else if (event.key === "ArrowRight") {
+        handlePlyNavigation("right");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [game, plyIndex]); // Depend on game and plyIndex to ensure handlePlyNavigation has fresh values
+
 
   const variantToDisplay = game || currentVariant;
   const { increment: timeIncrement } = variantToDisplay?.timeControl ? parseTimeControlString(variantToDisplay.timeControl) : { base: 0, increment: 0 };
@@ -268,16 +293,16 @@ const Play = () => {
         )}
       </Card>
       <div className="w-1/2">
-        {game ? (
+        {displayedGame ? (
           <PlayChessboard
-            game={game}
+            game={displayedGame}
             setGame={setGame}
             socket={socket}
             roomId={roomId}
-            isMyTurn={game.turn === playerIndex && !game.gameEndResult}
+            isMyTurn={game ? game.turn === playerIndex && !game.gameEndResult && plyIndex === game.history.length : false}
             playerIndex={playerIndex}
             onMoveMade={handleChessMove}
-            lastMove={game && game.history.length > 0 ? game.history[game.history.length - 1] : null}
+            lastMove={game && plyIndex > 0 ? game.history[plyIndex - 1] : null}
           />
         ) : (
           <CopyableLink shareUrl={`${window.location.origin}/play/${roomId}`} />
