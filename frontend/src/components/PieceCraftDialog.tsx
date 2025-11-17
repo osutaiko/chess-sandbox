@@ -137,7 +137,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
           <DialogTitle>{isCreateMode ? "Create New Piece" : `Edit Piece`}</DialogTitle>
         </DialogHeader>
         <ScrollArea>
-          <div className="flex flex-col gap-8">
+          <div className={`flex flex-col gap-8 ${isEditable ? "" : "pointer-events-none"}`}>
             {isCreateMode && 
               <div className="flex flex-col gap-4">
                 <h4>Presets</h4>
@@ -149,7 +149,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                         variant="secondary"
                         className="flex flex-col flex-none gap-1 w-[85px] h-[95px] py-2"
                         onClick={() => setPieceConfig(piece)}
-                        disabled={!isEditable}
                       >
                         <img
                           src={images[`pieces/${piece.sprite}-0`]}
@@ -162,7 +161,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                   })}
                   <Popover modal={true}>
                     <PopoverTrigger asChild>
-                      <Button variant="secondary" className="h-[95px]" disabled={!isEditable}>
+                      <Button variant="secondary" className="h-[95px]">
                         <Ellipsis />
                       </Button>
                     </PopoverTrigger>
@@ -176,7 +175,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                 variant="secondary"
                                 className="flex flex-col gap-1 w-[85px] h-[95px] py-2"
                                 onClick={() => setPieceConfig({ ...pieceConfig, ...piece })}
-                                disabled={!isEditable}
                               >
                                 <img
                                   src={images[`pieces/${piece.sprite}-0`]}
@@ -200,7 +198,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                 <Label className="flex flex-col gap-2 w-min">
                   <Popover modal={true}>
                     <PopoverTrigger asChild>
-                      <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3" disabled={!isEditable}>
+                      <Button variant="secondary" className="relative w-[200px] h-[100px] gap-3">
                         {pieceConfig.sprite ? 
                           <>
                             <img
@@ -227,7 +225,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                 variant="secondary"
                                 className="p-1 h-full gap-2"
                                 onClick={() => setPieceConfig({ ...pieceConfig, sprite })}
-                                disabled={!isEditable}
                               >
                                 <img
                                   src={images[`pieces/${sprite}-0`]}
@@ -256,7 +253,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                       name="id"
                       value={pieceConfig.id}
                       onChange={handlePieceInputChange}
-                      disabled={!isEditable}
                     />
                     {pieceConfigErrors.id && <p className="text-destructive">{pieceConfigErrors.id}</p>}
                   </Label>
@@ -268,7 +264,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                       placeholder="New Piece"
                       value={pieceConfig.name}
                       onChange={handlePieceInputChange}
-                      disabled={!isEditable}
                     />
                     {pieceConfigErrors.name && <p className="text-destructive">{pieceConfigErrors.name}</p>}
                   </Label>
@@ -280,7 +275,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                   name="description"
                   value={pieceConfig.description}
                   onChange={handlePieceInputChange}
-                  disabled={!isEditable}
                 />
                 {pieceConfigErrors.description && <p className="text-destructive">{pieceConfigErrors.description}</p>}
               </Label>
@@ -296,7 +290,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                         moves: [...pieceConfig.moves, newMove],
                       });
                     }}
-                    disabled={!isEditable}
                   >
                     <Plus />
                   </Button>
@@ -317,7 +310,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                   ...EMPTY_MOVE_PROPERTY(value, "orthogonal", updatedMoves[index]),
                                 };
                                 setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                              }} disabled={!isEditable}>
+                              }}>
                                 <SelectTrigger className="w-[90px] bg-primary border-none font-bold">
                                   <SelectValue />
                                 </SelectTrigger>
@@ -333,7 +326,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                   variant="secondary"
                                   onMouseEnter={() => setHighlightedMoveIndex(index)}
                                   onMouseLeave={() => setHighlightedMoveIndex(null)}
-                                  disabled={!isEditable}
                                 >
                                   <ScanSearch />
                                 </Button>
@@ -343,7 +335,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                     <Button
                                       size="icon"
                                       variant="destructive"
-                                      disabled={!isEditable}
                                     >
                                       <Trash2 />
                                     </Button>
@@ -360,7 +351,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                         <Button variant="destructive" onClick={() => {
                                           const updatedMoves = pieceConfig.moves.filter((_: any, i: number) => i !== index);
                                           setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                        }} disabled={!isEditable}>
+                                        }}>
                                           Delete
                                         </Button>
                                       </DialogClose>
@@ -380,15 +371,15 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                   return (
                                     <>
                                       {move.type === "slide" && 
-                                                                          <RadioGroup
-                                                                            value={decodedOffset}
-                                                                            onValueChange={(value) => {
-                                                                              const updatedMoves = [...pieceConfig.moves];
-                                                                              updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
-                                                                              setPieceConfig({ ...pieceConfig, moves: updatedMoves });
-                                                                            }}
-                                                                            disabled={!isEditable}
-                                                                          >                                          <div className="flex items-center gap-2">
+                                        <RadioGroup
+                                          value={decodedOffset}
+                                          onValueChange={(value) => {
+                                            const updatedMoves = [...pieceConfig.moves];
+                                            updatedMoves[index] = EMPTY_MOVE_PROPERTY("slide", value);
+                                            setPieceConfig({ ...pieceConfig, moves: updatedMoves });
+                                          }}
+                                        >
+                                          <div className="flex items-center gap-2">
                                             <RadioGroupItem value="orthogonal" id="orthogonal" />
                                             <Label htmlFor="orthogonal">Orthogonal</Label>
                                           </div>
@@ -405,48 +396,50 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                       <div className="flex flex-col gap-2">
                                         <Label>Offset:</Label>
                                         <div className="flex flex-row gap-1">
-                                                                              <Input
-                                                                                type="number"
-                                                                                name="offset-0"
-                                                                                value={move.offset[0]}
-                                                                                disabled={!isEditable || (move.type === "slide" && decodedOffset !== "other")}
-                                                                                min={1}
-                                                                                max={4}
-                                                                                onChange={(e) => {
-                                                                                  const newValue = parseInt(e.target.value, 10);
-                                                                                  updateMoveProperty(index, "offset", [newValue, move.offset[1]]);
-                                                                                }}
-                                                                                className="w-[60px]"
-                                                                              />
-                                                                              <Input
-                                                                                type="number"
-                                                                                name="offset-1"
-                                                                                value={move.offset[1]}
-                                                                                disabled={!isEditable || (move.type === "slide" && decodedOffset !== "other")}
-                                                                                min={0}
-                                                                                max={move.offset[0]}
-                                                                                onChange={(e) => {
-                                                                                  const newValue = parseInt(e.target.value, 10);
-                                                                                  updateMoveProperty(index, "offset", [move.offset[0], newValue]);
-                                                                                }}
-                                                                                className="w-[60px]"
-                                                                              />                                        </div>
+                                          <Input
+                                            type="number"
+                                            name="offset-0"
+                                            value={move.offset[0]}
+                                            disabled={!isEditable || (move.type === "slide" && decodedOffset !== "other")}
+                                            min={1}
+                                            max={4}
+                                            onChange={(e) => {
+                                              const newValue = parseInt(e.target.value, 10);
+                                              updateMoveProperty(index, "offset", [newValue, move.offset[1]]);
+                                            }}
+                                            className="w-[60px]"
+                                          />
+                                          <Input
+                                            type="number"
+                                            name="offset-1"
+                                            value={move.offset[1]}
+                                            disabled={!isEditable || (move.type === "slide" && decodedOffset !== "other")}
+                                            min={0}
+                                            max={move.offset[0]}
+                                            onChange={(e) => {
+                                              const newValue = parseInt(e.target.value, 10);
+                                              updateMoveProperty(index, "offset", [move.offset[0], newValue]);
+                                            }}
+                                            className="w-[60px]"
+                                          />  
+                                        </div>
                                       </div>
                                       <div className="flex flex-col gap-2">
-                                                                          <div className="flex items-center gap-2">
-                                                                            <Checkbox id="forward" checked={move.canForward} onCheckedChange={(checked) => updateMoveProperty(index, "canForward", checked)} disabled={!isEditable} />
-                                                                            <Label htmlFor="forward">Forward</Label>
-                                                                          </div>
-                                                                          <div className="flex items-center gap-2">
-                                                                            <Checkbox id="backward" checked={move.canBackward} onCheckedChange={(checked) => updateMoveProperty(index, "canBackward", checked)} disabled={!isEditable} />
-                                                                            <Label htmlFor="backward">Backward</Label>
-                                                                          </div>
-                                                                          {decodedOffset === "orthogonal" && (
-                                                                            <div className="flex items-center gap-2">
-                                                                              <Checkbox id="sideways" checked={move.canSideways} onCheckedChange={(checked) => updateMoveProperty(index, "canSideways", checked)} disabled={!isEditable} />
-                                                                              <Label htmlFor="sideways">Sideways</Label>
-                                                                            </div>
-                                                                          )}                                      </div>
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox id="forward" checked={move.canForward} onCheckedChange={(checked) => updateMoveProperty(index, "canForward", checked)} />
+                                          <Label htmlFor="forward">Forward</Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox id="backward" checked={move.canBackward} onCheckedChange={(checked) => updateMoveProperty(index, "canBackward", checked)} />
+                                          <Label htmlFor="backward">Backward</Label>
+                                        </div>
+                                        {decodedOffset === "orthogonal" && (
+                                          <div className="flex items-center gap-2">
+                                            <Checkbox id="sideways" checked={move.canSideways} onCheckedChange={(checked) => updateMoveProperty(index, "canSideways", checked)} />
+                                            <Label htmlFor="sideways">Sideways</Label>
+                                          </div>
+                                        )}
+                                      </div>
                                     </>
                                   );
                                 })()}
@@ -467,7 +460,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                         const to = value[1] === slideInfStart ? Infinity : value[1];
                                         updateMoveProperty(index, "range", { from, to });
                                       }}
-                                      disabled={!isEditable}
                                     />
                                   </div>
                                 )}
@@ -482,7 +474,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                         updateMoveProperty(index, "canNonCapture", checked);
                                       }
                                     }}
-                                    disabled={!isEditable}
                                   />
                                   <Label htmlFor="canNonCapture">Allow non-capturing moves</Label>
                                 </div>
@@ -495,7 +486,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                         updateMoveProperty(index, "canCapture", checked);
                                       }
                                     }}
-                                    disabled={!isEditable}
                                   />
                                   <Label htmlFor="canCapture">Allow capturing moves</Label>
                                 </div>
@@ -504,7 +494,6 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
                                     id="isInitialOnly"
                                     checked={move.isInitialOnly}
                                     onCheckedChange={(checked) => {updateMoveProperty(index, "isInitialOnly", checked)}}
-                                    disabled={!isEditable}
                                   />
                                   <Label htmlFor="isInitialOnly">Allow only on initial move</Label>
                                 </div>
@@ -557,7 +546,7 @@ const PieceCraftDialog: React.FC<PieceCraftDialogProps> = ({
           </div>
         </ScrollArea>
         <DialogFooter>
-          <Button onClick={() => handlePieceConfigSubmit(isCreateMode, pieceBeforeEditId)} disabled={!isEditable}>
+          <Button onClick={() => handlePieceConfigSubmit(isCreateMode, pieceBeforeEditId)}>
             Confirm
           </Button>
         </DialogFooter>

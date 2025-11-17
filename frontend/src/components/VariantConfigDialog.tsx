@@ -109,7 +109,7 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
           <DialogTitle>Variant Configuration</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[70vh]">
-          <div className="flex flex-col gap-6">
+          <div className={`flex flex-col gap-6 ${isEditable ? "" : "pointer-events-none"}`}>
             <Label className="flex flex-col gap-2">
               <h4>Variant Name</h4>
               <Input
@@ -118,7 +118,6 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                 placeholder="New Variant"
                 value={gameConfig.name}
                 onChange={handleGameInputChange}
-                disabled={!isEditable}
               />
               {gameConfigErrors.name && <p className="text-destructive">{gameConfigErrors.name}</p>}
             </Label>
@@ -128,7 +127,6 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                 name="description"
                 value={gameConfig.description}
                 onChange={handleGameInputChange}
-                disabled={!isEditable}
               />
               {gameConfigErrors.description && <p className="text-destructive">{gameConfigErrors.description}</p>}
             </Label>
@@ -142,7 +140,6 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                   min={1}
                   max={25}
                   onChange={handleGameInputChange}
-                  disabled={!isEditable}
                 />
                 {gameConfigErrors.width && <p className="text-destructive">{gameConfigErrors.width}</p>}
               </Label>
@@ -155,7 +152,6 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                   max={25}
                   value={gameConfig.height}
                   onChange={handleGameInputChange}
-                  disabled={!isEditable}
                 />
                 {gameConfigErrors.height && <p className="text-destructive">{gameConfigErrors.height}</p>}
               </Label>
@@ -170,23 +166,21 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                       name="isWinOnCheckmate"
                       checked={gameConfig.isWinOnCheckmate}
                       onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnCheckmate", checked)}
-                      disabled={!isEditable}
                     />
-                    <Label htmlFor="isWinOnCheckmate" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>Checkmate the opponent</Label>
+                    <Label htmlFor="isWinOnCheckmate">Checkmate the opponent</Label>
                   </div>
                   <RadioGroup
                     value={String(gameConfig.mustCheckmateAllRoyals)}
                     onValueChange={(value) => handleGameCheckedChange("mustCheckmateAllRoyals", value === "true")}
                     className="ml-6 mb-2"
-                    disabled={!isEditable}
                   >
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="false" id="false" disabled={!isEditable} />
-                      <Label htmlFor="false" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>... One of the royals</Label>
+                      <RadioGroupItem value="false" id="false" />
+                      <Label htmlFor="false">... One of the royals</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="true" id="true" disabled={!isEditable} />
-                      <Label htmlFor="true" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>... the final remaining royal</Label>
+                      <RadioGroupItem value="true" id="true" />
+                      <Label htmlFor="true">... the final remaining royal</Label>
                     </div>
                   </RadioGroup>
                 </>
@@ -197,9 +191,8 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                   name="isWinOnStalemate"
                   checked={gameConfig.isWinOnStalemate}
                   onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", checked)}
-                  disabled={!isEditable}
                 />
-                <Label htmlFor="isWinOnStalemate" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>Stalemate the opponent</Label>
+                <Label htmlFor="isWinOnStalemate">Stalemate the opponent</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -207,9 +200,8 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                   name="isWinOnOpponentWipe"
                   checked={gameConfig.isWinOnOpponentWipe}
                   onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnOpponentWipe", checked)}
-                  disabled={!isEditable}
                 />
-                <Label htmlFor="isWinOnOpponentWipe" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>Capture all opponent's pieces</Label>
+                <Label htmlFor="isWinOnOpponentWipe">Capture all opponent's pieces</Label>
               </div>
             </div>
             <div className="flex flex-col gap-2">
@@ -220,41 +212,37 @@ const VariantConfigDialog: React.FC<VariantConfigDialogProps> = ({
                   name="isDrawOnStalemate"
                   checked={!gameConfig.isWinOnStalemate}
                   onCheckedChange={(checked: boolean) => handleGameCheckedChange("isWinOnStalemate", !checked)}
-                  disabled={!isEditable}
                 />
-                <Label htmlFor="isDrawOnStalemate" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>Stalemate the opponent</Label>
+                <Label htmlFor="isDrawOnStalemate">Stalemate the opponent</Label>
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Checkbox checked={true} disabled={true} />
-                  <Label className="!cursor-default !opacity-100">N-move rule</Label>
+                  <Label>N-move rule</Label>
                 </div>
                 <div className="flex flex-col gap-2 ml-6">
-                  <Label htmlFor="nMoveRuleCount" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>... on move:</Label>
+                  <Label htmlFor="nMoveRuleCount">... on move:</Label>
                   <Input
                     type="number"
                     name="nMoveRuleCount"
                     value={gameConfig.nMoveRuleCount}
                     onChange={handleGameInputChange}
                     className="w-[100px]"
-                    disabled={!isEditable}
                   />
                   {gameConfigErrors.nMoveRuleCount && <p className="text-destructive">{gameConfigErrors.nMoveRuleCount}</p>}
-                  <Label htmlFor="nMoveRulePieces" className={isEditable ? "" : "cursor-not-allowed opacity-70"}>... resets after one of the following moves:</Label>
+                  <Label htmlFor="nMoveRulePieces">... resets after one of the following moves:</Label>
                   <ToggleGroup
                     type="multiple" 
                     variant="outline" 
                     value={gameConfig.nMoveRulePieces}
                     onValueChange={handleToggleGroupChange}
                     className="grid grid-cols-[repeat(auto-fill,minmax(36px,1fr))] gap-1 justify-items-start"
-                    disabled={!isEditable}
                   >
                     {gameConfig.pieces.map((piece) => (
                       <ToggleGroupItem
                         key={piece.id}
                         value={piece.id}
                         className="w-full h-[36px] flex items-center justify-center"
-                        disabled={!isEditable}
                       >
                         {piece.id}
                       </ToggleGroupItem>
