@@ -180,14 +180,39 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('resign', ({ roomId }: { roomId: string }) => {
+    const room = gameRooms[roomId];
+    if (room && room.game && room.players[socket.id] !== undefined) {
+      const resigningPlayerIndex = room.players[socket.id];
+      const winnerIndex = 1 - resigningPlayerIndex;
+
+      room.game.gameEndResult = {
+        winners: [winnerIndex],
+        reason: 'Resignation',
+      };
+
+      io.to(roomId).emit('gameUpdated', room.game);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('user disconnected:', socket.id);
     for (const roomId in gameRooms) {
       const room = gameRooms[roomId];
       if (room.players[socket.id] !== undefined) {
-        const playerIndex = room.players[socket.id];
+        const disconnectingPlayerIndex = room.players[socket.id];
         delete room.players[socket.id];
-        io.to(roomId).emit('playerLeft', { socketId: socket.id, playerIndex });
+
+        if (room.game && !room.game.gameEndResult) {
+          const winnerIndex = 1 - disconnectingPlayerIndex;
+          room.game.gameEndResult = {
+            winners: [winnerIndex],
+            reason: 'Abandonment',
+          };
+          io.to(roomId).emit('gameUpdated', room.game);
+        }
+
+        io.to(roomId).emit('playerLeft', { socketId: socket.id, playerIndex: disconnectingPlayerIndex });
         console.log(`User ${socket.id} left room ${roomId}`);
         
         // If everyone left, delete it

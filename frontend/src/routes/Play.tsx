@@ -8,6 +8,7 @@ import { PieceCard } from "@/components/PieceCard";
 import { CopyableLink } from "@/components/ui/CopyableLink";
 import VariantConfigDialog from "@/components/VariantConfigDialog";
 import ChessClock from "@/components/ChessClock";
+import GameEndDialog from "@/components/GameEndDialog";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -35,6 +36,7 @@ const Play = () => {
   const [playerIndex, setPlayerIndex] = useState<number | null>(null);
   const [plyIndex, setPlyIndex] = useState<number>(0);
   const [isVariantConfigDialogOpen, setIsVariantConfigDialogOpen] = useState<boolean>(false);
+  const [isGameEndDialogOpen, setIsGameEndDialogOpen] = useState<boolean>(false);
 
   const [whiteTime, setWhiteTime] = useState<number>(0);
   const [blackTime, setBlackTime] = useState<number>(0);
@@ -56,6 +58,9 @@ const Play = () => {
   useEffect(() => {
     if (game) {
       setDisplayedGame(getGameAtPly(game, plyIndex));
+      if (game.gameEndResult) {
+        setIsGameEndDialogOpen(true);
+      }
     }
   }, [game, plyIndex]);
 
@@ -222,6 +227,12 @@ const Play = () => {
     // Send the move to the server
     const currentPlayerRemainingTime = playerIndex === 0 ? whiteCurrentActualTime : blackCurrentActualTime;
     socket.emit('chessMove', { roomId, move, currentPlayerRemainingTime });
+  }
+  
+  const handleResign = () => {
+    if (socket && game && !game.gameEndResult) {
+      socket.emit('resign', { roomId });
+    }
   };
 
   const BlackClock = (
@@ -250,6 +261,12 @@ const Play = () => {
 
   return (
     <div className="w-full flex flex-row gap-6 px-4 md:px-8 py-6 h-[calc(100vh-62px)]">
+      <GameEndDialog
+        isOpen={isGameEndDialogOpen}
+        onClose={() => setIsGameEndDialogOpen(false)}
+        gameEndResult={game?.gameEndResult ?? null}
+        playerIndex={playerIndex}
+      />
       <Card className="w-1/4 p-4 flex flex-col gap-4">
         {variantToDisplay && (
           <>
@@ -373,6 +390,7 @@ const Play = () => {
             <Button variant="secondary" size="icon" onClick={() => handlePlyNavigation("start")}><ChevronsLeft size={20} /></Button>
             <Button variant="secondary" size="icon" onClick={() => handlePlyNavigation("left")}><ChevronLeft size={20} /></Button>
           </div>
+          <Button variant="destructive" onClick={handleResign} disabled={!!game?.gameEndResult}>Resign</Button>
           <div className="flex flex-row gap-1">
             <Button variant="secondary" size="icon" onClick={() => handlePlyNavigation("right")}><ChevronRight size={20} /></Button>
             <Button variant="secondary" size="icon" onClick={() => handlePlyNavigation("end")}><ChevronsRight size={20} /></Button>
